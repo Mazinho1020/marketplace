@@ -114,6 +114,17 @@ class ConfigHistory extends BaseModel
         return $this->belongsTo(\App\Models\User::class, 'usuario_id');
     }
 
+    // Alias para facilitar uso no controller
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'usuario_id');
+    }
+
+    public function site(): BelongsTo
+    {
+        return $this->belongsTo(ConfigSite::class, 'site_id');
+    }
+
     // Scopes
     public function scopeForEmpresa($query, $empresaId)
     {

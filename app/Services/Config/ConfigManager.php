@@ -2,44 +2,31 @@
 
 namespace App\Services\Config;
 
-use App\Models\Config\{
-    ConfigDefinition,
-    ConfigEnvironment,
-    ConfigGroup,
-    ConfigHistory,
-    ConfigSite,
-    ConfigValue
-};
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 /**
- * Serviço principal para gerenciamento de configurações
+ * Gerenciador de Configurações Multi-Empresa (Versão Simplificada)
  * 
- * Implementa o padrão de configurações hierárquicas:
- * 1. Configurações específicas para site e ambiente
- * 2. Configurações específicas para site (todos ambientes)
- * 3. Configurações específicas para ambiente (todos sites)
- * 4. Configurações globais (todos sites e ambientes)
+ * Sistema de configuração que:
+ * - Carrega configurações base do Laravel
+ * - NUNCA consulta base online no modo offline
+ * - Funciona mesmo sem as tabelas de configuração
  */
 class ConfigManager
 {
     private static ?self $instance = null;
     private ?int $currentEmpresaId = null;
-    private ?int $currentSiteId = null;
-    private ?int $currentEnvironmentId = null;
     private array $cache = [];
-    private bool $cacheEnabled = true;
-    private int $cacheExpiry = 300; // 5 minutos
-
-    // Constante para empresa desenvolvedora
-    private const DEVELOPER_COMPANY_ID = 1; // ID da empresa desenvolvedora
+    private bool $isOnlineMode = false;
 
     private function __construct()
     {
         $this->detectCurrentContext();
+        $this->detectOnlineMode();
     }
 
     /**
@@ -59,43 +46,193 @@ class ConfigManager
     private function detectCurrentContext(): void
     {
         // Detectar empresa do usuário logado
-        if (Auth::check() && Auth::user()->empresa_id) {
+        if (Auth::check() && method_exists(Auth::user(), 'empresa_id')) {
             $this->currentEmpresaId = Auth::user()->empresa_id;
         }
+    }
 
-        // Detectar ambiente baseado no domínio
-        $serverName = request()->getHost();
-        $isLocal = in_array($serverName, ['localhost', '127.0.0.1', '::1']);
-
-        $environment = ConfigEnvironment::where('empresa_id', $this->currentEmpresaId)
-            ->where('codigo', $isLocal ? 'offline' : 'online')
-            ->first();
-
-        if ($environment) {
-            $this->currentEnvironmentId = $environment->id;
-        }
-
-        // Detectar site baseado na URL
-        $path = request()->path();
-        $site = ConfigSite::where('empresa_id', $this->currentEmpresaId)
-            ->where(function ($query) use ($path) {
-                $query->where('codigo', 'sistema'); // padrão
-                if (str_contains($path, 'pdv')) {
-                    $query->orWhere('codigo', 'pdv');
-                }
-                if (str_contains($path, 'fidelidade')) {
-                    $query->orWhere('codigo', 'fidelidade');
-                }
-                if (str_contains($path, 'delivery')) {
-                    $query->orWhere('codigo', 'delivery');
-                }
-            })
-            ->first();
-
-        if ($site) {
-            $this->currentSiteId = $site->id;
+    /**
+     * Detecta se está em modo online baseado no banco
+     */
+    private function detectOnlineMode(): void
+    {
+        try {
+            $databaseName = DB::connection()->getDatabaseName();
+            
+            // Se o nome da base contém finanp06_, está online
+            if (str_contains($databaseName, 'finanp06_')) {
+                $this->isOnlineMode = true;
+                Log::warning('ConfigManager: Modo ONLINE detectado - Base: ' . $databaseName);
+                return;
+            }
+            
+            $this->isOnlineMode = false;
+            Log::info('ConfigManager: Modo OFFLINE detectado - Base: ' . $databaseName);
+            
+        } catch (Exception $e) {
+            // Em caso de erro, assumir offline por segurança
+            $this->isOnlineMode = false;
+            Log::error('ConfigManager: Erro ao detectar modo, assumindo offline', [
+                'error' => $e->getMessage()
+            ]);
         }
     }
+
+    /**
+     * Obtém uma configuração
+     */
+    public function get(string $key, $default = null)
+    {
+        // Se estiver online, não carregar configurações dinâmicas
+        if ($this->isOnlineMode) {
+            return config($key, $default);
+        }
+
+        // Verificar cache local primeiro
+        if (isset($this->cache[$key])) {
+            return $this->cache[$key];
+        }
+
+        // Tentar carregar do banco se offline e tabelas existirem
+        if ($this->hasConfigTables()) {
+            $value = $this->loadFromDatabase($key);
+            if ($value !== null) {
+                $this->cache[$key] = $value;
+                return $value;
+            }
+        }
+
+        // Fallback para configuração padrão do Laravel
+        return config($key, $default);
+    }
+
+    /**
+     * Define uma configuração (apenas em memória se online)
+     */
+    public function set(string $key, $value): bool
+    {
+        $this->cache[$key] = $value;
+        
+        // Se estiver online, não salvar no banco
+        if ($this->isOnlineMode) {
+            Log::info('ConfigManager: Set bloqueado (modo online)', ['key' => $key]);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Verifica se está em modo online
+     */
+    public function isOnlineMode(): bool
+    {
+        return $this->isOnlineMode;
+    }
+
+    /**
+     * Obtém o ID da empresa atual
+     */
+    public function getCurrentEmpresaId(): ?int
+    {
+        return $this->currentEmpresaId;
+    }
+
+    /**
+     * Define a empresa atual
+     */
+    public function setCurrentEmpresaId(?int $empresaId): self
+    {
+        $this->currentEmpresaId = $empresaId;
+        $this->cache = []; // Limpar cache
+        return $this;
+    }
+
+    /**
+     * Verifica se as tabelas de configuração existem
+     */
+    public function hasConfigTables(): bool
+    {
+        try {
+            return DB::getSchemaBuilder()->hasTable('config_definitions');
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Carrega configuração específica do banco
+     */
+    private function loadFromDatabase(string $key)
+    {
+        if ($this->isOnlineMode || !$this->currentEmpresaId) {
+            return null;
+        }
+
+        try {
+            $result = DB::table('config_definitions as cd')
+                ->join('config_values as cv', 'cd.id', '=', 'cv.config_id')
+                ->where('cv.empresa_id', $this->currentEmpresaId)
+                ->where('cd.chave', $key)
+                ->first(['cv.valor', 'cd.tipo']);
+
+            if ($result) {
+                return $this->castValue($result->valor, $result->tipo);
+            }
+        } catch (Exception $e) {
+            Log::error('ConfigManager: Erro ao carregar do banco', [
+                'key' => $key,
+                'error' => $e->getMessage()
+            ]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Converte valor para tipo correto
+     */
+    private function castValue($value, $type)
+    {
+        return match($type) {
+            'boolean' => (bool) $value,
+            'integer' => (int) $value,
+            'float' => (float) $value,
+            'array', 'json' => json_decode($value, true) ?: [],
+            default => $value
+        };
+    }
+
+    /**
+     * Carrega configurações do banco se estiver offline
+     */
+    public function loadFromDatabase(): bool
+    {
+        if ($this->isOnlineMode) {
+            Log::info('ConfigManager: Carregamento pulado - modo online');
+            return false;
+        }
+
+        if (!$this->hasConfigTables()) {
+            Log::info('ConfigManager: Tabelas não encontradas');
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Obtém ambiente atual (simulado)
+     */
+    public function getCurrentEnvironment(): ?array
+    {
+        return [
+            'nome' => $this->isOnlineMode ? 'Online' : 'Offline',
+            'codigo' => $this->isOnlineMode ? 'online' : 'offline',
+            'is_producao' => $this->isOnlineMode
+        ];
+    }
+}
 
     /**
      * Verifica se o contexto atual é da empresa desenvolvedora
@@ -156,6 +293,14 @@ class ConfigManager
 
         // Buscar configurações do cliente
         $clientPrefix = "cliente_{$clientEmpresaId}_";
+
+        // Helper para JSON que pode já estar decodificado
+        $modulesData = $this->get("{$clientPrefix}modules", '[]');
+        $modules = is_string($modulesData) ? json_decode($modulesData, true) : $modulesData;
+        if (!is_array($modules)) {
+            $modules = [];
+        }
+
         $clientConfig = [
             'id' => $clientEmpresaId,
             'nome' => $this->get("{$clientPrefix}nome", "Cliente {$clientEmpresaId}"),
@@ -164,7 +309,7 @@ class ConfigManager
             'max_usuarios' => (int)$this->get("{$clientPrefix}usuarios_max", 5),
             'data_expiracao' => $this->get("{$clientPrefix}data_expiracao", date('Y-m-d', strtotime('+1 year'))),
             'trial_days' => (int)$this->get("{$clientPrefix}trial_days", 0),
-            'modules' => json_decode($this->get("{$clientPrefix}modules", '[]'), true)
+            'modules' => $modules
         ];
 
         // Calcular dias restantes da licença
@@ -497,6 +642,137 @@ class ConfigManager
         if (!$enabled) {
             $this->clearCache();
         }
+    }
+
+    /**
+     * Verifica se está em modo online (conectado à base finanp06_*)
+     * 
+     * @return bool
+     */
+    public function isOnlineMode(): bool
+    {
+        try {
+            $databaseName = DB::connection()->getDatabaseName();
+            
+            // Se o nome da base contém finanp06_, está online
+            if (str_contains($databaseName, 'finanp06_')) {
+                return true;
+            }
+            
+            // Verificar se consegue acessar uma tabela característica da base online
+            if (DB::getSchemaBuilder()->hasTable('planos_licenca')) {
+                return true;
+            }
+            
+            return false;
+        } catch (Exception $e) {
+            // Em caso de erro, assumir offline por segurança
+            return false;
+        }
+    }
+
+    /**
+     * Obtém o ID da empresa atual
+     * 
+     * @return int|null
+     */
+    public function getCurrentEmpresaId(): ?int
+    {
+        return $this->currentEmpresaId;
+    }
+
+    /**
+     * Define a empresa atual
+     * 
+     * @param int|null $empresaId
+     * @return self
+     */
+    public function setCurrentEmpresaId(?int $empresaId): self
+    {
+        $this->currentEmpresaId = $empresaId;
+        $this->clearCache();
+        return $this;
+    }
+
+    /**
+     * Verifica se as tabelas de configuração existem
+     * 
+     * @return bool
+     */
+    public function hasConfigTables(): bool
+    {
+        try {
+            return DB::getSchemaBuilder()->hasTable('config_definitions');
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Carrega configurações do banco se estiver offline
+     * 
+     * @return bool
+     */
+    public function loadFromDatabase(): bool
+    {
+        // NUNCA carregar do banco se estivermos online
+        if ($this->isOnlineMode()) {
+            Log::info('ConfigManager: Pulando carregamento - modo online detectado');
+            return false;
+        }
+
+        // Verificar se as tabelas existem
+        if (!$this->hasConfigTables()) {
+            Log::info('ConfigManager: Tabelas de configuração não encontradas');
+            return false;
+        }
+
+        try {
+            // Carregar configurações básicas do banco
+            $this->loadBasicConfigs();
+            return true;
+        } catch (Exception $e) {
+            Log::error('ConfigManager: Erro ao carregar configurações do banco', [
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Carrega configurações básicas do banco
+     */
+    private function loadBasicConfigs(): void
+    {
+        if (!$this->currentEmpresaId) {
+            return;
+        }
+
+        // Carregar todas as configurações da empresa atual
+        $configs = DB::table('config_definitions as cd')
+            ->join('config_values as cv', 'cd.id', '=', 'cv.config_id')
+            ->where('cv.empresa_id', $this->currentEmpresaId)
+            ->select('cd.chave', 'cv.valor', 'cd.tipo')
+            ->get();
+
+        foreach ($configs as $config) {
+            $value = $this->castConfigValue($config->valor, $config->tipo);
+            $this->cache[$this->getCacheKey($config->chave)] = $value;
+        }
+    }
+
+    /**
+     * Converte valor de configuração para o tipo correto
+     */
+    private function castConfigValue($value, $type): mixed
+    {
+        return match($type) {
+            'boolean' => (bool) $value,
+            'integer' => (int) $value,
+            'float' => (float) $value,
+            'array', 'json' => json_decode($value, true) ?: [],
+            default => $value
+        };
     }
 }
 

@@ -1,43 +1,182 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="pt-BR" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <title>@yield('title', 'Marketplace Sistema')</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Sistema de Marketplace" name="description" />
+    <meta content="Marketplace" name="author" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{{ asset('Theme1/images/favicon.ico') }}">
 
-    <title>@yield('title', 'Marketplace') - {{ config('app.name', 'Laravel') }}</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Layout config Js -->
+    <script src="{{ asset('Theme1/js/layout.js') }}"></script>
+    
+    <!-- Bootstrap Css -->
+    <link href="{{ asset('Theme1/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+    <!-- Icons Css -->
+    <link href="{{ asset('Theme1/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
+    <!-- Custom Css-->
+    <link href="{{ asset('Theme1/css/custom.min.css') }}" rel="stylesheet" type="text/css" />
+    
+    <!-- Additional CSS -->
+    @stack('css')
+    
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --bs-primary: #405189;
+            --bs-primary-rgb: 64, 81, 137;
+            --bs-secondary: #74788d;
+            --bs-success: #06d6a0;
+            --bs-info: #0ab39c;
+            --bs-warning: #f7b84b;
+            --bs-danger: #f06548;
+            --bs-light: #f8f9fa;
+            --bs-dark: #212529;
+        }
+        
+        .navbar-brand-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            min-height: calc(100vh - 60px);
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .page-title-box {
+            background: #fff;
+            padding: 20px 24px;
+            margin: -20px -20px 20px -20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+        }
+        
+        .auth-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .card {
+            box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+            border: 1px solid #e9ecef;
+        }
+        
+        .btn-primary {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: #364574;
+            border-color: #364574;
+        }
+    </style>
+    
+    @stack('styles')
 </head>
 
-<body class="bg-light">
-    <div id="app">
-        <!-- Navigation -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    <i class="fas fa-store me-2"></i>
-                    Marketplace
-                </a>
+<body data-sidebar="dark">
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+    <!-- Begin page -->
+    <div id="layout-wrapper">
 
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
+        @unless(request()->routeIs('login', 'register', 'password.*'))
+            @include('layouts.header')
+            @include('layouts.sidebar')
+        @endunless
+
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        @if(request()->routeIs('login', 'register', 'password.*'))
+            <!-- Auth pages without sidebar -->
+            @yield('content')
+        @else
+            <div class="main-content">
+                <div class="page-content">
+                    <div class="container-fluid">
+                        
+                        <!-- Page Title -->
+                        @hasSection('page-title')
+                            <div class="page-title-box">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h6 class="page-title">@yield('page-title')</h6>
+                                        @hasSection('breadcrumb')
+                                            <ol class="breadcrumb m-0">
+                                                @yield('breadcrumb')
+                                            </ol>
+                                        @endif
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="float-end d-none d-md-block">
+                                            @yield('page-actions')
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Alerts -->
+                        @if (session('success'))
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="ri-check-line me-2"></i>{{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        @endif
+
+                        @if (session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="ri-error-warning-line me-2"></i>{{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        @endif
+
+                        @if (session('warning'))
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                <i class="ri-alert-line me-2"></i>{{ session('warning') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        @endif
+
+                        @if (session('info'))
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                <i class="ri-information-line me-2"></i>{{ session('info') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        @endif
+
+                        <!-- Main Content -->
+                        @yield('content')
+
+                    </div>
+                </div>
+                
+                @include('layouts.footer')
+            </div>
+        @endif
+        <!-- end main content-->
+
+    </div>
+    <!-- END layout-wrapper -->
+
+    <!-- Right Sidebar -->
+    @stack('modals')
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url('/') }}">
                                 <i class="fas fa-home me-1"></i>

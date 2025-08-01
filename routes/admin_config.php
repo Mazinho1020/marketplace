@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ConfigController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'empresa'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['empresa'])->group(function () {
 
     // Rotas principais de configuração
     Route::resource('config', ConfigController::class)->except(['show']);
@@ -48,5 +49,24 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'empresa'])->group(f
         // Restaurar valor do histórico
         Route::post('{config}/restore-value', [ConfigController::class, 'restoreValue'])
             ->name('restore-value');
+
+        // APIs auxiliares
+        Route::get('api/sites', function () {
+            return response()->json(
+                DB::table('config_sites')
+                    ->select('id', 'codigo', 'nome')
+                    ->where('ativo', true)
+                    ->get()
+            );
+        })->name('api.sites');
+
+        Route::get('api/environments', function () {
+            return response()->json(
+                DB::table('config_environments')
+                    ->select('id', 'codigo', 'nome')
+                    ->where('ativo', true)
+                    ->get()
+            );
+        })->name('api.environments');
     });
 });

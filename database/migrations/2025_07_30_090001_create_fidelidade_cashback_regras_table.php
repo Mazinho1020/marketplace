@@ -13,20 +13,23 @@ return new class extends Migration
     {
         Schema::create('fidelidade_cashback_regras', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('empresa_id')->constrained('businesses')->onDelete('cascade');
-            $table->enum('tipo_regra', ['categoria', 'produto', 'dia_semana', 'horario', 'primeira_compra']);
-            $table->integer('referencia_id')->nullable();
-            $table->integer('dia_semana')->nullable();
-            $table->time('horario_inicio')->nullable();
-            $table->time('horario_fim')->nullable();
-            $table->decimal('percentual_cashback', 5, 2);
-            $table->decimal('valor_maximo_cashback', 10, 2)->nullable();
-            $table->boolean('ativo')->default(true);
+            $table->unsignedBigInteger('programa_id')->nullable();
+            $table->string('nome');
+            $table->text('descricao')->nullable();
+            $table->enum('tipo_cashback', ['percentual', 'fixo', 'escalonado'])->default('percentual');
+            $table->decimal('valor_cashback', 10, 2);
+            $table->decimal('valor_minimo', 10, 2)->nullable();
+            $table->decimal('valor_maximo', 10, 2)->nullable();
+            $table->decimal('limite_mensal', 10, 2)->nullable();
+            $table->date('data_inicio')->nullable();
+            $table->date('data_fim')->nullable();
+            $table->enum('status', ['ativo', 'inativo', 'pausado'])->default('ativo');
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['empresa_id']);
-            $table->index(['tipo_regra']);
+            $table->index(['programa_id']);
+            $table->index(['status']);
+            $table->index(['data_inicio', 'data_fim']);
         });
     }
 

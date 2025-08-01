@@ -44,7 +44,7 @@ class StoreConfigRequest extends FormRequest
             'avancado' => 'boolean',
             'ordem' => 'integer|min:0',
             'dica' => 'nullable|string|max:500',
-            'site_id' => 'nullable|exists:config_sites,id',
+            // 'site_id' => 'nullable|exists:config_sites,id', // Removido - config_sites não mais usado
             'ambiente_id' => 'nullable|exists:config_environments,id',
         ];
     }

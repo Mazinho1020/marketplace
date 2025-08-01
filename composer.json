@@ -38,7 +38,7 @@
             "App\\Repositories\\Fidelidade\\": "app/Repositories/Fidelidade/"
         },
         "files": [
-            "app/Services/Config/config_helpers.php"
+            "app/Helpers/ConfigHelper.php"
         ]
     },
     "autoload-dev": {

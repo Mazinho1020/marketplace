@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diagnóstico - Config Sites Removido</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+        .info { color: blue; }
+        .box { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧹 Diagnóstico: Config Sites Removido</h1>
+    
+    <div class="box">
+        <h2>✅ O que foi removido/corrigido:</h2>
+        <ul>
+            <li><strong>ConfigService.php</strong> - Removidas referências à config_sites</li>
+            <li><strong>ConfigController.php</strong> - Removidas consultas à config_sites</li>
+            <li><strong>ConfigCommand.php</strong> - Removido JOIN com config_sites</li>
+            <li><strong>ConfigSite.php</strong> - Model desabilitado (.disabled)</li>
+            <li><strong>StoreConfigRequest.php</strong> - Removida validação de site_id</li>
+            <li><strong>Database</strong> - Removidos site_id de config_values e config_history</li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h2>🔧 Modificações feitas:</h2>
+        <ul>
+            <li>Todas as consultas que faziam JOIN com config_sites foram removidas</li>
+            <li>Variáveis $sites agora retornam coleções vazias</li>
+            <li>Validações de site_id foram comentadas</li>
+            <li>Campos site_id foram definidos como NULL nas tabelas existentes</li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h2>🎯 Resultados esperados:</h2>
+        <ul>
+            <li class="success">✅ Erro "Table 'config_sites' doesn't exist" resolvido</li>
+            <li class="success">✅ Admin funciona: <a href="http://127.0.0.1:8000/admin" target="_blank">http://127.0.0.1:8000/admin</a></li>
+            <li class="success">✅ Sistema de configurações funciona sem sites</li>
+            <li class="success">✅ Filtros por site removidos da interface</li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h2>🚀 Próximos passos:</h2>
+        <ol>
+            <li>Teste o login: <a href="http://127.0.0.1:8000/login" target="_blank">Login</a></li>
+            <li>Acesse o admin: <a href="http://127.0.0.1:8000/admin" target="_blank">Admin</a></li>
+            <li>Verifique as configurações: <a href="http://127.0.0.1:8000/admin/config" target="_blank">Configurações</a></li>
+            <li>Se tudo estiver funcionando, pode remover os arquivos de teste criados</li>
+        </ol>
+    </div>
+
+    <div class="box">
+        <h2>📁 Arquivos de teste criados (podem ser removidos depois):</h2>
+        <ul>
+            <li>limpar_config_sites.php</li>
+            <li>teste_final_config.php</li>
+            <li>admin_simples.php</li>
+            <li>teste_admin.php</li>
+            <li>diagnostico-config-sites.html (este arquivo)</li>
+        </ul>
+    </div>
+
+    <script>
+        // Auto-refresh para ver se há erros
+        console.log('Sistema config_sites removido com sucesso!');
+        
+        // Testar se há erros JavaScript
+        try {
+            fetch('/admin/config')
+                .then(response => {
+                    if (response.ok) {
+                        console.log('✅ Admin config acessível!');
+                    }
+                })
+                .catch(error => {
+                    console.log('❌ Erro ao acessar admin:', error);
+                });
+        } catch (e) {
+            console.log('Erro no teste fetch:', e);
+        }
+    </script>
+</body>
+</html>

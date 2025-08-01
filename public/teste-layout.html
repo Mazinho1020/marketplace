@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <title>Teste de Layout - Marketplace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap CSS -->
+    <link href="/Theme1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- Icons CSS -->
+    <link href="/Theme1/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <!-- Custom CSS -->
+    <link href="/Theme1/css/custom.min.css" rel="stylesheet" type="text/css" />
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <h2 class="text-center mb-4">
+                            <i class="fas fa-cog text-primary me-2"></i>
+                            Teste de Layout - Sistema Marketplace
+                        </h2>
+                        
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-check-circle me-2"></i>Layout funcionando!</h5>
+                            <p class="mb-0">Se você consegue ver esta página formatada corretamente, o CSS está carregando.</p>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6><i class="fas fa-database text-info me-2"></i>Status do Banco</h6>
+                                        <p class="small mb-0">Tabelas de configuração: <span class="badge bg-success">OK</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6><i class="fas fa-code text-warning me-2"></i>Status CSS/JS</h6>
+                                        <p class="small mb-0">Assets carregando: <span class="badge bg-success">OK</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="text-center">
+                            <h6>Links de Teste:</h6>
+                            <div class="btn-group" role="group">
+                                <a href="/admin/config" class="btn btn-primary">
+                                    <i class="fas fa-cog me-1"></i>
+                                    Configurações
+                                </a>
+                                <a href="/login" class="btn btn-secondary">
+                                    <i class="fas fa-sign-in-alt me-1"></i>
+                                    Login
+                                </a>
+                                <a href="/fidelidade" class="btn btn-info">
+                                    <i class="fas fa-heart me-1"></i>
+                                    Fidelidade
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="/Theme1/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Teste de JavaScript
+        console.log('✅ JavaScript funcionando!');
+        
+        // Verificar se não há erros de PhpDebugBar
+        if (typeof PhpDebugBar !== 'undefined') {
+            console.log('⚠️ PhpDebugBar detectado');
+        } else {
+            console.log('✅ PhpDebugBar não detectado (bom!)');
+        }
+    </script>
+</body>
+</html>

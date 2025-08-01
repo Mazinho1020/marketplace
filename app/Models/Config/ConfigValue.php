@@ -106,12 +106,13 @@ class ConfigValue extends BaseModel
         return $this->belongsTo(ConfigSite::class, 'site_id');
     }
 
-    public function environment(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(ConfigEnvironment::class, 'ambiente_id');
+        return $this->belongsTo(\App\Models\User::class, 'usuario_id');
     }
 
-    public function user(): BelongsTo
+    // Alias para facilitar uso no controller
+    public function usuario(): BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'usuario_id');
     }

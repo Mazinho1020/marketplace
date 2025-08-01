@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('programas_fidelidade', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('business_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('business_id')->nullable();
             $table->string('nome');
             $table->text('descricao')->nullable();
             $table->decimal('pontos_por_real', 8, 2)->default(1.00);
             $table->decimal('valor_ponto', 8, 4)->default(0.01);
-            $table->boolean('ativo')->default(true);
+            $table->enum('status', ['ativo', 'inativo', 'pausado'])->default('ativo');
             $table->date('data_inicio')->nullable();
             $table->date('data_fim')->nullable();
             $table->json('regras')->nullable();
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index(['business_id', 'ativo']);
+            $table->index(['business_id', 'status']);
             $table->index(['data_inicio', 'data_fim']);
         });
     }

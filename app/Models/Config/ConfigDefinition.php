@@ -140,9 +140,38 @@ class ConfigDefinition extends BaseModel
         return $this->belongsTo(ConfigGroup::class, 'grupo_id');
     }
 
+    // Alias para facilitar uso no controller
+    public function grupo(): BelongsTo
+    {
+        return $this->belongsTo(ConfigGroup::class, 'grupo_id');
+    }
+
+    // Alias para compatibilidade
+    public function configGroup(): BelongsTo
+    {
+        return $this->belongsTo(ConfigGroup::class, 'grupo_id');
+    }
+
     public function values(): HasMany
     {
         return $this->hasMany(ConfigValue::class, 'config_id');
+    }
+
+    // Alias para facilitar uso no controller
+    public function valores(): HasMany
+    {
+        return $this->hasMany(ConfigValue::class, 'config_id');
+    }
+
+    public function history(): HasMany
+    {
+        return $this->hasMany(ConfigHistory::class, 'config_id');
+    }
+
+    // Alias para facilitar uso no controller  
+    public function historico(): HasMany
+    {
+        return $this->hasMany(ConfigHistory::class, 'config_id');
     }
 
     // Scopes
@@ -327,6 +356,14 @@ class ConfigDefinition extends BaseModel
             self::TYPE_JSON => is_string($value) ? json_decode($value, true) : $value,
             default => $value,
         };
+    }
+
+    /**
+     * Alias para castValue - formatar valor para o tipo correto
+     */
+    public function formatarValor($value)
+    {
+        return $this->castValue($value);
     }
 
     /**

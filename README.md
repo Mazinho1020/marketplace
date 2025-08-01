@@ -10,8 +10,7 @@ Este marketplace foi desenvolvido utilizando Laravel, um dos frameworks PHP mais
 
 -   🏪 **Multi-vendor**: Suporte para múltiplos vendedores
 -   🛍️ **Carrinho de Compras**: Sistema completo de carrinho e checkout
--   💳 **Pagamentos**: Integração com gateways de pagamento
--   👤 **Gestão de Usuários**: Sistema de autenticação e perfis
+-   **Gestão de Usuários**: Sistema de autenticação e perfis
 -   📊 **Dashboard Administrativo**: Painel completo para administradores
 -   🔍 **Busca Avançada**: Sistema de filtros e busca de produtos
 -   📱 **Responsivo**: Interface adaptável para todos os dispositivos

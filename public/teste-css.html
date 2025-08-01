@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de CSS - Módulo Fidelidade</title>
+    
+    <!-- Testando os arquivos CSS que estavam com problema -->
+    <link href="http://localhost:8000/Theme1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="http://localhost:8000/Theme1/css/custom.min.css" rel="stylesheet" type="text/css" />
+    <link href="http://localhost:8000/Theme1/css/app.min.css" rel="stylesheet" type="text/css" />
+    <link href="http://localhost:8000/Theme1/css/icons.min.css" rel="stylesheet" type="text/css" />
+    
+    <style>
+        body { padding: 20px; font-family: Arial, sans-serif; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .css-test { margin: 10px 0; }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Carregamento de CSS</h1>
+    <p>Esta página testa se os arquivos CSS estão sendo carregados corretamente.</p>
+    
+    <div class="test-section">
+        <h2>📁 Arquivos CSS Testados:</h2>
+        
+        <div class="css-test">
+            <strong>Bootstrap CSS:</strong> 
+            <span id="bootstrap-status">Carregando...</span>
+        </div>
+        
+        <div class="css-test">
+            <strong>Custom CSS:</strong> 
+            <span id="custom-status">Carregando...</span>
+        </div>
+        
+        <div class="css-test">
+            <strong>App CSS:</strong> 
+            <span id="app-status">Carregando...</span>
+        </div>
+        
+        <div class="css-test">
+            <strong>Icons CSS:</strong> 
+            <span id="icons-status">Carregando...</span>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎨 Teste de Estilos Bootstrap:</h2>
+        
+        <div class="alert alert-success" role="alert">
+            Este é um alerta de sucesso do Bootstrap
+        </div>
+        
+        <button class="btn btn-primary">Botão Primário</button>
+        <button class="btn btn-secondary">Botão Secundário</button>
+        
+        <div class="card mt-3" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">Card do Bootstrap</h5>
+                <p class="card-text">Este card testa se o Bootstrap está funcionando.</p>
+                <a href="#" class="btn btn-primary">Botão do Card</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔧 Informações de Debug:</h2>
+        
+        <div class="css-test">
+            <strong>URL Base:</strong> http://localhost:8000/
+        </div>
+        
+        <div class="css-test">
+            <strong>Diretório CSS:</strong> Theme1/css/
+        </div>
+        
+        <div class="css-test">
+            <strong>Data/Hora do Teste:</strong> <span id="timestamp"></span>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📋 Links Diretos para Teste:</h2>
+        
+        <ul>
+            <li><a href="http://localhost:8000/Theme1/css/bootstrap.min.css" target="_blank">Bootstrap CSS</a></li>
+            <li><a href="http://localhost:8000/Theme1/css/custom.min.css" target="_blank">Custom CSS</a></li>
+            <li><a href="http://localhost:8000/Theme1/css/app.min.css" target="_blank">App CSS</a></li>
+            <li><a href="http://localhost:8000/Theme1/css/icons.min.css" target="_blank">Icons CSS</a></li>
+            <li><a href="http://localhost:8000/fidelidade" target="_blank">Módulo Fidelidade</a></li>
+        </ul>
+    </div>
+
+    <script>
+        // Testar carregamento dos arquivos CSS
+        function testCSSFile(url, statusElementId) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = url;
+            
+            link.onload = function() {
+                document.getElementById(statusElementId).innerHTML = '<span class="success">✅ Carregado com sucesso</span>';
+            };
+            
+            link.onerror = function() {
+                document.getElementById(statusElementId).innerHTML = '<span class="error">❌ Erro ao carregar</span>';
+            };
+            
+            // Timeout de 5 segundos
+            setTimeout(() => {
+                if (document.getElementById(statusElementId).textContent === 'Carregando...') {
+                    document.getElementById(statusElementId).innerHTML = '<span class="warning">⚠️ Timeout (5s)</span>';
+                }
+            }, 5000);
+        }
+        
+        // Testar todos os arquivos CSS
+        testCSSFile('http://localhost:8000/Theme1/css/bootstrap.min.css', 'bootstrap-status');
+        testCSSFile('http://localhost:8000/Theme1/css/custom.min.css', 'custom-status');
+        testCSSFile('http://localhost:8000/Theme1/css/app.min.css', 'app-status');
+        testCSSFile('http://localhost:8000/Theme1/css/icons.min.css', 'icons-status');
+        
+        // Mostrar timestamp
+        document.getElementById('timestamp').textContent = new Date().toLocaleString('pt-BR');
+    </script>
+</body>
+</html>

@@ -3,101 +3,177 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Config\ConfigDefinition;
+use App\Models\Config\ConfigGroup;
+use App\Models\Config\ConfigValue;
+use App\Models\Config\ConfigSite;
+use App\Models\Config\ConfigHistory;
+use App\Services\ConfigService;
+use App\Helpers\ConfigHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ConfigController extends Controller
 {
+    protected $configService;
+    protected $empresaId;
+
+    public function __construct()
+    {
+        // Configuração será feita em cada método conforme necessário
+        $this->empresaId = session('empresa_id', 1); // Default empresa ID
+    }
+
+    /**
+     * Initialize ConfigService with current context
+     */
+    protected function initConfigService($siteId = null)
+    {
+        $siteId = $siteId ?? session('site_id');
+
+        return new ConfigService(
+            $this->empresaId,
+            $siteId,
+            Auth::user()->id ?? null
+        );
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = DB::table('config_definitions as cd')
-            ->leftJoin('config_groups as cg', 'cd.grupo_id', '=', 'cg.id')
-            ->leftJoin('config_values as cv', 'cd.id', '=', 'cv.config_id')
-            ->select([
-                'cd.*',
-                'cg.nome as grupo_nome',
-                'cg.icone_class as grupo_icone',
-                'cv.valor',
-                'cv.site_id',
-                'cv.ambiente_id'
-            ]);
-
-        // Filtros
-        $searchFilter = $request->get('search', '');
-        $groupFilter = $request->get('group', '');
-        $siteFilter = $request->get('site', '');
-        $environmentFilter = $request->get('environment', '');
-        $typeFilter = $request->get('type', '');
-
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($searchFilter) {
-                $q->where('cd.nome', 'like', "%{$searchFilter}%")
-                    ->orWhere('cd.chave', 'like', "%{$searchFilter}%")
-                    ->orWhere('cd.descricao', 'like', "%{$searchFilter}%");
-            });
-        }
-
-        if ($request->filled('group')) {
-            $query->where('cd.grupo_id', $groupFilter);
-        }
-
-        if ($request->filled('site')) {
-            $query->where('cv.site_id', $siteFilter);
-        }
-
-        if ($request->filled('environment')) {
-            $query->where('cv.ambiente_id', $environmentFilter);
-        }
-
-        if ($request->filled('type')) {
-            $query->where('cd.tipo', $typeFilter);
-        }
-
-        $configs = $query->orderBy('cg.ordem', 'asc')
-            ->orderBy('cd.ordem', 'asc')
-            ->paginate(15);
-
-        // Buscar grupos para filtro (admin vê todas as empresas)
-        $groups = DB::table('config_groups')
+        // Buscar grupos ativos
+        $grupos = ConfigGroup::where('empresa_id', $this->empresaId)
             ->where('ativo', true)
             ->orderBy('ordem')
+            ->with(['definicoes' => function ($query) {
+                $query->where('ativo', true)->orderBy('ordem');
+            }])
             ->get();
 
-        // Buscar sites e ambientes para filtro (admin vê todas as empresas)
-        $sites = DB::table('config_sites')
+        // Buscar sites para filtros
+        $sites = ConfigSite::where('empresa_id', $this->empresaId)
             ->where('ativo', true)
+            ->orderBy('nome')
             ->get();
 
-        $environments = DB::table('config_environments')
-            ->where('ativo', true)
-            ->get();
+        // Filtros
+        $filtros = [
+            'search' => $request->get('search', ''),
+            'group' => $request->get('group', ''),
+            'site' => $request->get('site', ''),
+            'environment' => $request->get('environment', ''),
+            'type' => $request->get('type', ''),
+        ];
 
-        return view('admin.config.index', compact('configs', 'groups', 'sites', 'environments', 'searchFilter', 'groupFilter', 'siteFilter', 'environmentFilter', 'typeFilter'));
+        // Aplicar filtros se necessário
+        if ($request->hasAny(['search', 'group', 'site', 'environment', 'type'])) {
+            $grupos = $this->aplicarFiltros($grupos, $filtros);
+        }
+
+        // Buscar todas as configurações atuais para exibição nos formulários
+        $configService = $this->initConfigService();
+        $configs = [];
+        $configsByGroup = [];
+
+        // Carregar valores atuais para todas as definições
+        foreach ($grupos as $grupo) {
+            $groupConfigs = [];
+            foreach ($grupo->definicoes as $definicao) {
+                $valorAtual = $configService->get($definicao->chave);
+                $configs[$definicao->chave] = $valorAtual;
+
+                // Criar estrutura para o grupo
+                $groupConfigs[] = (object) [
+                    'id' => $definicao->id,
+                    'chave' => $definicao->chave,
+                    'nome' => $definicao->nome,
+                    'tipo' => $definicao->tipo,
+                    'valor' => $valorAtual,
+                    'descricao' => $definicao->descricao,
+                    'valor_padrao' => $definicao->valor_padrao,
+                    'obrigatorio' => $definicao->obrigatorio,
+                    'avancado' => $definicao->avancado,
+                    'opcoes' => $definicao->opcoes,
+                    'editavel' => $definicao->editavel ?? true,
+                    'dica' => $definicao->dica,
+                    'grupo_nome' => $grupo->nome,
+                    'grupo_icone' => $grupo->icone_class ?? 'fas fa-cog'
+                ];
+            }
+
+            if (!empty($groupConfigs)) {
+                $configsByGroup[$grupo->nome] = $groupConfigs;
+            }
+        }
+
+        return view('admin.config.index', compact('grupos', 'sites', 'filtros', 'configs', 'configsByGroup'))
+            ->with([
+                'groupFilter' => $filtros['group'],
+                'siteFilter' => $filtros['site'],
+                'searchFilter' => $filtros['search'],
+                'typeFilter' => $filtros['type']
+            ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        // Admin vê todas as empresas
-        $groups = DB::table('config_groups')
-            ->where('ativo', true)
-            ->orderBy('ordem')
-            ->get();
+        try {
+            $empresaId = $this->empresaId ?? 1;
 
-        $sites = DB::table('config_sites')
-            ->where('ativo', true)
-            ->get();
+            $grupos = ConfigGroup::where('empresa_id', $empresaId)
+                ->where('ativo', true)
+                ->orderBy('nome')
+                ->get();
 
-        $ambientes = DB::table('config_environments')
-            ->where('ativo', true)
-            ->get();
+            $sites = ConfigSite::where('empresa_id', $empresaId)
+                ->where('ativo', true)
+                ->orderBy('nome')
+                ->get();
 
-        return view('admin.config.create', compact('groups', 'sites', 'ambientes'));
+            $tipos = [
+                'string' => 'Texto',
+                'text' => 'Texto Longo',
+                'integer' => 'Número Inteiro',
+                'float' => 'Número Decimal',
+                'boolean' => 'Verdadeiro/Falso',
+                'json' => 'JSON',
+                'array' => 'Array',
+                'email' => 'Email',
+                'url' => 'URL',
+                'date' => 'Data',
+                'datetime' => 'Data e Hora',
+                'password' => 'Senha'
+            ];
+
+            try {
+                return view('admin.config.create', compact('grupos', 'sites', 'tipos'));
+            } catch (\Exception $e) {
+                // Fallback para view simplificada se layout admin falhar
+                return view('admin.config.create_simple', compact('grupos', 'sites', 'tipos'));
+            }
+        } catch (\Exception $e) {
+            // Log do erro e fallback total
+            Log::error('Erro no ConfigController@create: ' . $e->getMessage());
+
+            // Dados mínimos para fallback
+            $grupos = collect([]);
+            $sites = collect([]);
+            $tipos = [
+                'string' => 'Texto',
+                'boolean' => 'Verdadeiro/Falso',
+                'integer' => 'Número',
+                'email' => 'Email'
+            ];
+
+            return view('admin.config.create_simple', compact('grupos', 'sites', 'tipos'));
+        }
     }
 
     /**
@@ -105,43 +181,54 @@ class ConfigController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'chave' => 'required|string|max:100',
-            'nome' => 'required|string|max:100',
-            'tipo' => 'required|in:string,integer,float,boolean,array,json,url,email,password',
-            'grupo_id' => 'nullable|exists:config_groups,id',
-            'empresa_id' => 'required|integer' // Admin deve especificar a empresa
+        $validator = Validator::make($request->all(), [
+            'grupo_id' => 'required|exists:config_groups,id',
+            'nome' => 'required|string|max:255',
+            'chave' => 'required|string|max:255|unique:config_definitions,chave,NULL,id,empresa_id,' . $this->empresaId,
+            'tipo' => 'required|in:string,text,integer,float,boolean,json,array,email,url,date,datetime,password',
+            'valor_padrao' => 'nullable|string',
+            'descricao' => 'nullable|string',
+            'obrigatorio' => 'boolean',
+            'visivel' => 'boolean',
+            'editavel' => 'boolean',
+            'ordem' => 'integer|min:0',
+            'opcoes' => 'nullable|string',
+            'valor_inicial' => 'nullable|string',
+            'site_id' => 'nullable|exists:config_sites,id'
         ]);
 
-        try {
-            DB::beginTransaction();
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
+        DB::beginTransaction();
+        try {
             // Criar definição
-            $configId = DB::table('config_definitions')->insertGetId([
-                'empresa_id' => $request->empresa_id, // Usar empresa_id do formulário
-                'chave' => $request->chave,
-                'nome' => $request->nome,
-                'descricao' => $request->descricao,
-                'tipo' => $request->tipo,
+            $definicao = ConfigDefinition::create([
+                'empresa_id' => $this->empresaId,
                 'grupo_id' => $request->grupo_id,
+                'nome' => $request->nome,
+                'chave' => $request->chave,
+                'tipo' => $request->tipo,
                 'valor_padrao' => $request->valor_padrao,
+                'descricao' => $request->descricao,
                 'obrigatorio' => $request->boolean('obrigatorio'),
-                'ordem' => $request->ordem ?? 0,
-                'created_at' => now(),
-                'updated_at' => now()
+                'visivel' => $request->boolean('visivel', true),
+                'editavel' => $request->boolean('editavel', true),
+                'ordem' => $request->integer('ordem', 0),
+                'opcoes' => $request->opcoes,
+                'ativo' => true
             ]);
 
-            // Criar valor se fornecido
-            if ($request->filled('valor')) {
-                DB::table('config_values')->insert([
-                    'empresa_id' => $request->empresa_id, // Usar empresa_id do formulário
-                    'config_id' => $configId,
-                    'site_id' => $request->site_id,
-                    'ambiente_id' => $request->ambiente_id,
-                    'valor' => $request->valor,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
+            // Criar valor inicial se fornecido
+            if ($request->filled('valor_inicial')) {
+                $configService = $this->initConfigService($request->site_id);
+                $configService->set(
+                    $request->chave,
+                    $request->valor_inicial
+                );
             }
 
             DB::commit();
@@ -150,281 +237,383 @@ class ConfigController extends Controller
                 ->with('success', 'Configuração criada com sucesso!');
         } catch (\Exception $e) {
             DB::rollback();
-            return back()->withInput()
-                ->with('error', 'Erro ao criar configuração: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Erro ao criar configuração: ' . $e->getMessage())
+                ->withInput();
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(ConfigDefinition $config)
     {
-        return redirect()->route('admin.config.edit', $id);
+        $config->load(['grupo', 'valores.site', 'historico.usuario']);
+
+        return view('admin.config.show', compact('config'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(ConfigDefinition $config)
     {
-        // Admin vê todas as empresas - remove filtro de empresa_id
-        $config = DB::table('config_definitions')
-            ->where('id', $id)
-            ->first();
-
-        if (!$config) {
-            abort(404);
-        }
-
-        // Admin vê todas as empresas
-        $groups = DB::table('config_groups')
+        $grupos = ConfigGroup::where('empresa_id', $this->empresaId)
             ->where('ativo', true)
-            ->orderBy('ordem')
+            ->orderBy('nome')
             ->get();
 
-        $sites = DB::table('config_sites')
+        $sites = ConfigSite::where('empresa_id', $this->empresaId)
             ->where('ativo', true)
+            ->orderBy('nome')
             ->get();
 
-        $ambientes = DB::table('config_environments')
-            ->where('ativo', true)
-            ->get();
+        $tipos = [
+            'string' => 'Texto',
+            'text' => 'Texto Longo',
+            'integer' => 'Número Inteiro',
+            'float' => 'Número Decimal',
+            'boolean' => 'Verdadeiro/Falso',
+            'json' => 'JSON',
+            'array' => 'Array',
+            'email' => 'Email',
+            'url' => 'URL',
+            'date' => 'Data',
+            'datetime' => 'Data e Hora',
+            'password' => 'Senha'
+        ];
 
-        $valor = DB::table('config_values')
-            ->where('config_id', $id)
-            ->first();
+        // Buscar valores atuais para diferentes contextos  
+        $valores = ConfigValue::where('config_id', $config->id)
+            ->where('empresa_id', $this->empresaId)
+            ->with(['site'])
+            ->get()
+            ->keyBy(function ($valor) {
+                return ($valor->site_id ?: '0') . '_0';
+            });
 
-        return view('admin.config.edit', compact('config', 'groups', 'sites', 'ambientes', 'valor'));
+        return view('admin.config.edit', compact('config', 'grupos', 'sites', 'tipos', 'valores'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, ConfigDefinition $config)
     {
-        $request->validate([
-            'chave' => 'required|string|max:100',
-            'nome' => 'required|string|max:100',
-            'tipo' => 'required|in:string,integer,float,boolean,array,json,url,email,password',
-            'grupo_id' => 'nullable|exists:config_groups,id'
+        $validator = Validator::make($request->all(), [
+            'grupo_id' => 'required|exists:config_groups,id',
+            'nome' => 'required|string|max:255',
+            'chave' => 'required|string|max:255|unique:config_definitions,chave,' . $config->id . ',id,empresa_id,' . $this->empresaId,
+            'tipo' => 'required|in:string,text,integer,float,boolean,json,array,email,url,date,datetime,password',
+            'valor_padrao' => 'nullable|string',
+            'descricao' => 'nullable|string',
+            'obrigatorio' => 'boolean',
+            'visivel' => 'boolean',
+            'editavel' => 'boolean',
+            'ordem' => 'integer|min:0',
+            'opcoes' => 'nullable|string',
+            'ativo' => 'boolean'
         ]);
 
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
         try {
-            DB::beginTransaction();
-
-            // Admin pode atualizar qualquer configuração - remove filtro empresa_id
-            DB::table('config_definitions')
-                ->where('id', $id)
-                ->update([
-                    'chave' => $request->chave,
-                    'nome' => $request->nome,
-                    'descricao' => $request->descricao,
-                    'tipo' => $request->tipo,
-                    'grupo_id' => $request->grupo_id,
-                    'valor_padrao' => $request->valor_padrao,
-                    'obrigatorio' => $request->boolean('obrigatorio'),
-                    'ordem' => $request->ordem ?? 0,
-                    'updated_at' => now()
-                ]);
-
-            // Atualizar ou criar valor
-            if ($request->filled('valor')) {
-                // Buscar empresa_id da configuração original
-                $config = DB::table('config_definitions')->where('id', $id)->first();
-
-                DB::table('config_values')
-                    ->updateOrInsert(
-                        [
-                            'config_id' => $id,
-                            'site_id' => $request->site_id,
-                            'ambiente_id' => $request->ambiente_id
-                        ],
-                        [
-                            'empresa_id' => $config->empresa_id, // Usar empresa_id da configuração
-                            'valor' => $request->valor,
-                            'updated_at' => now()
-                        ]
-                    );
-            }
-
-            DB::commit();
+            $config->update([
+                'grupo_id' => $request->grupo_id,
+                'nome' => $request->nome,
+                'chave' => $request->chave,
+                'tipo' => $request->tipo,
+                'valor_padrao' => $request->valor_padrao,
+                'descricao' => $request->descricao,
+                'obrigatorio' => $request->boolean('obrigatorio'),
+                'visivel' => $request->boolean('visivel'),
+                'editavel' => $request->boolean('editavel'),
+                'ordem' => $request->integer('ordem'),
+                'opcoes' => $request->opcoes,
+                'ativo' => $request->boolean('ativo')
+            ]);
 
             return redirect()->route('admin.config.index')
                 ->with('success', 'Configuração atualizada com sucesso!');
         } catch (\Exception $e) {
-            DB::rollback();
-            return back()->withInput()
-                ->with('error', 'Erro ao atualizar configuração: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Erro ao atualizar configuração: ' . $e->getMessage())
+                ->withInput();
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(ConfigDefinition $config)
     {
         try {
-            DB::beginTransaction();
-
-            // Remover valores
-            DB::table('config_values')
-                ->where('config_id', $id)
-                ->delete();
-
-            // Admin pode remover qualquer configuração - remove filtro empresa_id
-            DB::table('config_definitions')
-                ->where('id', $id)
-                ->delete();
-
-            DB::commit();
+            $config->delete();
 
             return redirect()->route('admin.config.index')
                 ->with('success', 'Configuração removida com sucesso!');
         } catch (\Exception $e) {
-            DB::rollback();
-            return back()->with('error', 'Erro ao remover configuração: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Erro ao remover configuração: ' . $e->getMessage());
         }
     }
 
     /**
-     * Mostra histórico de alterações
+     * Update value for a specific configuration by key
      */
-    public function history(string $id)
+    public function setValue(Request $request)
     {
-        // Admin vê histórico de qualquer empresa
-        $config = DB::table('config_definitions')
-            ->where('id', $id)
-            ->first();
-
-        if (!$config) {
-            abort(404);
-        }
-
-        // Admin vê todos os sites
-        $sites = DB::table('config_sites')
-            ->where('ativo', true)
-            ->get();
-
-        $environments = DB::table('config_environments')
-            ->where('ativo', true)
-            ->get();
-
-        $history = DB::table('config_history as ch')
-            ->leftJoin('config_sites as cs', 'ch.site_id', '=', 'cs.id')
-            ->leftJoin('config_environments as ce', 'ch.ambiente_id', '=', 'ce.id')
-            ->select(
-                'ch.*',
-                'cs.nome as site_nome',
-                'cs.codigo as site_codigo',
-                'ce.nome as ambiente_nome',
-                'ce.codigo as ambiente_codigo'
-            )
-            ->where('ch.config_id', $id)
-            ->orderBy('ch.created_at', 'desc')
-            ->paginate(20);
-
-        return view('admin.config.history', compact('config', 'sites', 'environments', 'history'));
-    }
-
-    /**
-     * Retorna detalhes de um registro específico do histórico
-     */
-    public function historyDetail(string $configId, string $historyId)
-    {
-        $config = DB::table('config_definitions')
-            ->where('id', $configId)
-            ->first();
-
-        if (!$config) {
-            abort(404);
-        }
-
-        $historyEntry = DB::table('config_history')
-            ->where('id', $historyId)
-            ->where('config_id', $configId)
-            ->first();
-
-        if (!$historyEntry) {
-            abort(404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'history' => $historyEntry,
-            'config' => $config
-        ]);
-    }
-
-    /**
-     * Restaura um valor do histórico
-     */
-    public function restoreValue(Request $request, string $configId)
-    {
-        $request->validate([
-            'history_id' => 'required|integer|exists:config_history,id'
+        $validator = Validator::make($request->all(), [
+            'chave' => 'required|string',
+            'valor' => 'nullable|string',
+            'site_id' => 'nullable|exists:config_sites,id'
         ]);
 
-        $config = DB::table('config_definitions')
-            ->where('id', $configId)
-            ->first();
-
-        if (!$config) {
-            abort(404);
-        }
-
-        $historyEntry = DB::table('config_history')
-            ->where('id', $request->history_id)
-            ->where('config_id', $configId)
-            ->first();
-
-        if (!$historyEntry) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Registro de histórico não encontrado'
-            ], 404);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
         try {
-            DB::beginTransaction();
+            // Buscar a definição da configuração
+            $config = ConfigDefinition::where('empresa_id', $this->empresaId)
+                ->where('chave', $request->chave)
+                ->first();
 
-            // Atualizar ou inserir o valor atual
-            DB::table('config_values')->updateOrInsert(
-                [
-                    'config_id' => $configId,
-                    'empresa_id' => $config->empresa_id
-                ],
-                [
-                    'valor' => $historyEntry->valor_novo,
-                    'updated_at' => now()
-                ]
-            );
+            if (!$config) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Configuração não encontrada.'
+                ], 404);
+            }
 
-            // Registrar a restauração no histórico
-            DB::table('config_history')->insert([
-                'config_id' => $configId,
-                'empresa_id' => $config->empresa_id,
-                'acao' => 'restored',
-                'valor_anterior' => $historyEntry->valor_anterior,
-                'valor_novo' => $historyEntry->valor_novo,
-                'usuario_id' => 1, // auth()->id() quando implementar autenticação
-                'usuario_nome' => 'Sistema',
-                'observacoes' => "Valor restaurado do histórico #{$request->history_id}",
-                'created_at' => now()
-            ]);
+            // Configurar contexto do serviço
+            $configService = $this->initConfigService($request->site_id);
 
-            DB::commit();
+            $configService->set($request->chave, $request->valor);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Valor restaurado com sucesso!'
+                'message' => 'Valor atualizado com sucesso!'
             ]);
         } catch (\Exception $e) {
-            DB::rollback();
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao restaurar valor: ' . $e->getMessage()
+                'message' => 'Erro ao atualizar valor: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Update value for a specific configuration
+     */
+    public function updateValue(Request $request, ConfigDefinition $config)
+    {
+        $validator = Validator::make($request->all(), [
+            'valor' => 'nullable|string',
+            'site_id' => 'nullable|exists:config_sites,id'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        try {
+            // Configurar contexto do serviço
+            $configService = $this->initConfigService($request->site_id);
+
+            $configService->set($config->chave, $request->valor);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Valor atualizado com sucesso!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao atualizar valor: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get current value for a configuration
+     */
+    public function getValue(Request $request, ConfigDefinition $config)
+    {
+        try {
+            $configService = $this->initConfigService($request->site_id);
+            $valor = $configService->get($config->chave);
+
+            return response()->json([
+                'success' => true,
+                'valor' => $valor
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao obter valor: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Clear configuration cache
+     */
+    public function clearCache(Request $request)
+    {
+        try {
+            ConfigHelper::clearCache();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Cache de configurações limpo com sucesso!'
+                ]);
+            }
+
+            return redirect()->back()
+                ->with('success', 'Cache de configurações limpo com sucesso!');
+        } catch (\Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erro ao limpar cache: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Erro ao limpar cache: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export configurations
+     */
+    public function export(Request $request)
+    {
+        try {
+            $configs = ConfigDefinition::where('empresa_id', $this->empresaId)
+                ->with(['grupo', 'valores'])
+                ->get();
+
+            $configService = $this->initConfigService();
+            $export = [];
+            foreach ($configs as $config) {
+                $export[] = [
+                    'grupo' => $config->grupo->codigo ?? null,
+                    'chave' => $config->chave,
+                    'valor' => $configService->get($config->chave),
+                    'tipo' => $config->tipo,
+                    'nome' => $config->nome,
+                    'descricao' => $config->descricao
+                ];
+            }
+
+            return response()->json($export)
+                ->header('Content-Disposition', 'attachment; filename="configuracoes.json"');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Erro ao exportar configurações: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Import configurations
+     */
+    public function import(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'arquivo' => 'required|file|mimes:json'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator);
+        }
+
+        try {
+            $conteudo = file_get_contents($request->file('arquivo')->getRealPath());
+            $configs = json_decode($conteudo, true);
+
+            if (!is_array($configs)) {
+                throw new \Exception('Formato de arquivo inválido');
+            }
+
+            DB::beginTransaction();
+            $configService = $this->initConfigService();
+
+            foreach ($configs as $configData) {
+                if (!isset($configData['chave']) || !isset($configData['valor'])) {
+                    continue;
+                }
+
+                $configService->set($configData['chave'], $configData['valor']);
+            }
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('success', 'Configurações importadas com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()
+                ->with('error', 'Erro ao importar configurações: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * View configuration history
+     */
+    public function history(ConfigDefinition $config)
+    {
+        $historico = ConfigHistory::where('config_id', $config->id)
+            ->where('empresa_id', $this->empresaId)
+            ->with(['usuario', 'site'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('admin.config.history', compact('config', 'historico'));
+    }
+
+    /**
+     * Apply filters to groups
+     */
+    protected function aplicarFiltros($grupos, $filtros)
+    {
+        return $grupos->filter(function ($grupo) use ($filtros) {
+            // Filtrar por grupo
+            if ($filtros['group'] && $grupo->codigo !== $filtros['group']) {
+                return false;
+            }
+
+            // Filtrar definições dentro do grupo
+            $grupo->definicoes = $grupo->definicoes->filter(function ($definicao) use ($filtros) {
+                // Filtro de busca
+                if ($filtros['search']) {
+                    $search = strtolower($filtros['search']);
+                    if (
+                        strpos(strtolower($definicao->nome), $search) === false &&
+                        strpos(strtolower($definicao->chave), $search) === false &&
+                        strpos(strtolower($definicao->descricao ?? ''), $search) === false
+                    ) {
+                        return false;
+                    }
+                }
+
+                // Filtro de tipo
+                if ($filtros['type'] && $definicao->tipo !== $filtros['type']) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            // Retornar apenas grupos que têm definições após filtros
+            return $grupo->definicoes->count() > 0;
+        });
     }
 }

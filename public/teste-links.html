@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Links - MeuFinanceiro</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .link-test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9; }
+        .success { border-color: #28a745; background: #d4edda; color: #155724; }
+        .error { border-color: #dc3545; background: #f8d7da; color: #721c24; }
+        .warning { border-color: #ffc107; background: #fff3cd; color: #856404; }
+        .btn { padding: 8px 15px; margin: 5px; text-decoration: none; border-radius: 5px; display: inline-block; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Teste de Links do Dashboard</h1>
+        <p>Esta página testa todos os links do sistema de login simplificado.</p>
+        
+        <h2>📋 Links Principais do Dashboard:</h2>
+        
+        <div class="link-test">
+            <strong>🏠 Dashboard Principal:</strong><br>
+            <a href="/admin/dashboard" class="btn btn-primary" target="_blank">/admin/dashboard</a>
+            <small>- Deve estar acessível para usuários com nível 60+</small>
+        </div>
+        
+        <div class="link-test">
+            <strong>👥 Gerenciar Usuários:</strong><br>
+            <a href="/admin/usuarios" class="btn btn-primary" target="_blank">/admin/usuarios</a>
+            <small>- Requer nível 80+ (Gerente ou Admin)</small>
+        </div>
+        
+        <div class="link-test">
+            <strong>⚙️ Configurações:</strong><br>
+            <a href="/admin/config" class="btn btn-primary" target="_blank">/admin/config</a>
+            <small>- Requer nível 80+ (Gerente ou Admin)</small>
+        </div>
+        
+        <div class="link-test">
+            <strong>👤 Meu Perfil:</strong><br>
+            <a href="/admin/perfil" class="btn btn-primary" target="_blank">/admin/perfil</a>
+            <small>- Acessível para qualquer usuário logado</small>
+        </div>
+        
+        <div class="link-test">
+            <strong>📊 Relatórios:</strong><br>
+            <a href="/admin/relatorios" class="btn btn-primary" target="_blank">/admin/relatorios</a>
+            <small>- Requer nível 60+ (Supervisor ou superior)</small>
+        </div>
+        
+        <div class="link-test">
+            <strong>💚 Sistema Fidelidade:</strong><br>
+            <a href="/fidelidade" class="btn btn-success" target="_blank">/fidelidade</a>
+            <small>- Link para o sistema de fidelidade existente</small>
+        </div>
+        
+        <div class="link-test">
+            <strong>🚫 Página de Acesso Negado:</strong><br>
+            <a href="/admin/access-denied" class="btn btn-primary" target="_blank">/admin/access-denied</a>
+            <small>- Para usuários sem permissão suficiente</small>
+        </div>
+        
+        <h2>🔐 Sistema de Autenticação:</h2>
+        
+        <div class="link-test">
+            <strong>🔑 Login:</strong><br>
+            <a href="/login" class="btn btn-success" target="_blank">/login</a>
+            <small>- Página de login do sistema</small>
+        </div>
+        
+        <div class="link-test">
+            <strong>🚪 Logout:</strong><br>
+            <a href="/logout" class="btn btn-primary" target="_blank">/logout</a>
+            <small>- Sair do sistema</small>
+        </div>
+        
+        <h2>🧪 Ferramentas de Teste:</h2>
+        
+        <div class="link-test">
+            <strong>👥 Criar Usuários de Teste:</strong><br>
+            <a href="/criar-usuarios-teste.php" class="btn btn-success" target="_blank">/criar-usuarios-teste.php</a>
+            <small>- Ferramenta para criar usuários de teste</small>
+        </div>
+        
+        <h2>📝 Instruções de Teste:</h2>
+        
+        <div class="link-test warning">
+            <strong>⚠️ Como Testar:</strong><br>
+            1. Primeiro, faça login com <code>admin@teste.com</code> / <code>123456</code><br>
+            2. Teste todos os links acima - admin pode acessar tudo<br>
+            3. Faça logout e entre com <code>supervisor@teste.com</code> / <code>123456</code><br>
+            4. Teste novamente - supervisor pode acessar dashboard e relatórios, mas não usuários/config<br>
+            5. Teste com <code>operador@teste.com</code> - deve ver "Acesso Negado" para dashboard
+        </div>
+        
+        <div class="link-test success">
+            <strong>✅ Status do Sistema:</strong><br>
+            • Sistema de Login Simplificado: <strong>ATIVO</strong><br>
+            • Controle de Acesso por Níveis: <strong>FUNCIONANDO</strong><br>
+            • Views de Placeholder: <strong>CRIADAS</strong><br>
+            • Rotas Configuradas: <strong>OK</strong>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/admin/dashboard" class="btn btn-primary">🏠 Voltar ao Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

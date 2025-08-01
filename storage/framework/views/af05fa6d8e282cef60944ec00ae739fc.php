@@ -1,43 +1,186 @@
 <!DOCTYPE html>
-<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
+<html lang="pt-BR" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <title><?php echo $__env->yieldContent('title', 'Marketplace Sistema'); ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Sistema de Marketplace" name="description" />
+    <meta content="Marketplace" name="author" />
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="<?php echo e(asset('Theme1/images/favicon.ico')); ?>">
 
-    <title><?php echo $__env->yieldContent('title', 'Marketplace'); ?> - <?php echo e(config('app.name', 'Laravel')); ?></title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Scripts -->
-    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+    <!-- Layout config Js -->
+    <script src="<?php echo e(asset('Theme1/js/layout.js')); ?>"></script>
+    
+    <!-- Bootstrap Css -->
+    <link href="<?php echo e(asset('Theme1/css/bootstrap.min.css')); ?>" rel="stylesheet" type="text/css" />
+    <!-- Icons Css -->
+    <link href="<?php echo e(asset('Theme1/css/icons.min.css')); ?>" rel="stylesheet" type="text/css" />
+    <!-- Custom Css-->
+    <link href="<?php echo e(asset('Theme1/css/custom.min.css')); ?>" rel="stylesheet" type="text/css" />
+    
+    <!-- Additional CSS -->
+    <?php echo $__env->yieldPushContent('css'); ?>
+    
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --bs-primary: #405189;
+            --bs-primary-rgb: 64, 81, 137;
+            --bs-secondary: #74788d;
+            --bs-success: #06d6a0;
+            --bs-info: #0ab39c;
+            --bs-warning: #f7b84b;
+            --bs-danger: #f06548;
+            --bs-light: #f8f9fa;
+            --bs-dark: #212529;
+        }
+        
+        .navbar-brand-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            min-height: calc(100vh - 60px);
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .page-title-box {
+            background: #fff;
+            padding: 20px 24px;
+            margin: -20px -20px 20px -20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+        }
+        
+        .auth-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .card {
+            box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+            border: 1px solid #e9ecef;
+        }
+        
+        .btn-primary {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: #364574;
+            border-color: #364574;
+        }
+    </style>
+    
+    <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 
-<body class="bg-light">
-    <div id="app">
-        <!-- Navigation -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container">
-                <a class="navbar-brand" href="<?php echo e(url('/')); ?>">
-                    <i class="fas fa-store me-2"></i>
-                    Marketplace
-                </a>
+<body data-sidebar="dark">
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+    <!-- Begin page -->
+    <div id="layout-wrapper">
 
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
+        <?php if (! (request()->routeIs('login', 'register', 'password.*'))): ?>
+            <?php echo $__env->make('layouts.header', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+            <?php echo $__env->make('layouts.sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php endif; ?>
+
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <?php if(request()->routeIs('login', 'register', 'password.*')): ?>
+            <!-- Auth pages without sidebar -->
+            <?php echo $__env->yieldContent('content'); ?>
+        <?php else: ?>
+            <div class="main-content">
+                <div class="page-content">
+                    <div class="container-fluid">
+                        
+                        <!-- Page Title -->
+                        <?php if (! empty(trim($__env->yieldContent('page-title')))): ?>
+                            <div class="page-title-box">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h6 class="page-title"><?php echo $__env->yieldContent('page-title'); ?></h6>
+                                        <?php if (! empty(trim($__env->yieldContent('breadcrumb')))): ?>
+                                            <ol class="breadcrumb m-0">
+                                                <?php echo $__env->yieldContent('breadcrumb'); ?>
+                                            </ol>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="float-end d-none d-md-block">
+                                            <?php echo $__env->yieldContent('page-actions'); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Alerts -->
+                        <?php if(session('success')): ?>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="ri-check-line me-2"></i><?php echo e(session('success')); ?>
+
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if(session('error')): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="ri-error-warning-line me-2"></i><?php echo e(session('error')); ?>
+
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if(session('warning')): ?>
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                <i class="ri-alert-line me-2"></i><?php echo e(session('warning')); ?>
+
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if(session('info')): ?>
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                <i class="ri-information-line me-2"></i><?php echo e(session('info')); ?>
+
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Main Content -->
+                        <?php echo $__env->yieldContent('content'); ?>
+
+                    </div>
+                </div>
+                
+                <?php echo $__env->make('layouts.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+            </div>
+        <?php endif; ?>
+        <!-- end main content-->
+
+    </div>
+    <!-- END layout-wrapper -->
+
+    <!-- Right Sidebar -->
+    <?php echo $__env->yieldPushContent('modals'); ?>
                         <li class="nav-item">
                             <a class="nav-link" href="<?php echo e(url('/')); ?>">
                                 <i class="fas fa-home me-1"></i>
