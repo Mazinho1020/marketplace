@@ -352,7 +352,7 @@
         </div>
     </div>
 
-    <script src="/Theme1/js/bootstrap.bundle.min.js"></script>
+    <script src="/Theme1/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             carregarEstatisticas();

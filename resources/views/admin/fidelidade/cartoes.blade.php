@@ -183,7 +183,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="text-muted mb-1">Cartões Ativos</h6>
-                            <h4 class="mb-0" id="cartoes-ativos">0</h4>
+                            <h4 class="mb-0">{{ $stats['carteiras_ativas'] }}</h4>
                         </div>
                         <div class="align-self-center">
                             <i class="mdi mdi-credit-card-check text-success" style="font-size: 2rem;"></i>
@@ -195,8 +195,8 @@
                 <div class="stats-card warning">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h6 class="text-muted mb-1">Cartões Bloqueados</h6>
-                            <h4 class="mb-0" id="cartoes-bloqueados">0</h4>
+                            <h6 class="text-muted mb-1">Cartões Inativos</h6>
+                            <h4 class="mb-0">{{ $stats['carteiras_inativas'] }}</h4>
                         </div>
                         <div class="align-self-center">
                             <i class="mdi mdi-credit-card-off text-warning" style="font-size: 2rem;"></i>
@@ -208,8 +208,8 @@
                 <div class="stats-card danger">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h6 class="text-muted mb-1">Cartões Expirados</h6>
-                            <h4 class="mb-0" id="cartoes-expirados">0</h4>
+                            <h6 class="text-muted mb-1">Total Carteiras</h6>
+                            <h4 class="mb-0">{{ $stats['total_carteiras'] }}</h4>
                         </div>
                         <div class="align-self-center">
                             <i class="mdi mdi-credit-card-remove text-danger" style="font-size: 2rem;"></i>
@@ -221,8 +221,8 @@
                 <div class="stats-card info">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h6 class="text-muted mb-1">Novos (30 dias)</h6>
-                            <h4 class="mb-0" id="novos-cartoes">0</h4>
+                            <h6 class="text-muted mb-1">Total Transações</h6>
+                            <h4 class="mb-0">{{ $stats['total_transacoes'] }}</h4>
                         </div>
                         <div class="align-self-center">
                             <i class="mdi mdi-credit-card-plus text-info" style="font-size: 2rem;"></i>
@@ -284,15 +284,56 @@
                             <th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-cartoes">
+                    <tbody>
+                        @forelse($cartoes as $cartao)
                         <tr>
-                            <td colspan="9" class="text-center py-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
+                            <td><input type="checkbox" class="form-check-input"></td>
+                            <td>
+                                <div class="card-mini">
+                                    <i class="mdi mdi-credit-card me-1"></i>
+                                    CARD{{ str_pad($cartao->id, 4, '0', STR_PAD_LEFT) }}
                                 </div>
-                                <p class="mt-2 text-muted">Carregando cartões...</p>
+                            </td>
+                            <td><strong>Cliente {{ $cartao->cliente_id }}</strong></td>
+                            <td><span class="badge bg-light text-dark">{{ $cartao->empresa_nome ?? 'Geral' }}</span></td>
+                            <td>{{ \Carbon\Carbon::parse($cartao->criado_em)->format('d/m/Y') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($cartao->atualizado_em)->format('d/m/Y') }}</td>
+                            <td>
+                                @if($cartao->status == 'ativa')
+                                    <span class="badge bg-success badge-status">Ativo</span>
+                                @elseif($cartao->status == 'inativa')
+                                    <span class="badge bg-warning badge-status">Inativo</span>
+                                @else
+                                    <span class="badge bg-secondary badge-status">{{ ucfirst($cartao->status) }}</span>
+                                @endif
+                            </td>
+                            <td><small class="text-muted">Saldo: R$ {{ number_format($cartao->saldo_total_disponivel, 2, ',', '.') }}</small></td>
+                            <td>
+                                <button class="btn btn-action btn-outline-primary" title="Detalhes">
+                                    <i class="mdi mdi-eye"></i>
+                                </button>
+                                <button class="btn btn-action btn-outline-warning" title="Bloquear">
+                                    <i class="mdi mdi-lock"></i>
+                                </button>
+                                <button class="btn btn-action btn-outline-success" title="Renovar">
+                                    <i class="mdi mdi-refresh"></i>
+                                </button>
+                                <button class="btn btn-action btn-outline-danger" title="Cancelar">
+                                    <i class="mdi mdi-delete"></i>
+                                </button>
                             </td>
                         </tr>
+                        @empty
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="mdi mdi-credit-card-outline text-muted" style="font-size: 3rem;"></i>
+                                <p class="mt-2 text-muted">Nenhum cartão encontrado</p>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNovoCartao">
+                                    <i class="mdi mdi-plus"></i> Emitir Primeiro Cartão
+                                </button>
+                            </td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -372,120 +413,8 @@
         </div>
     </div>
 
-    <script src="/Theme1/js/bootstrap.bundle.min.js"></script>
+    <script src="/Theme1/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            carregarEstatisticas();
-            carregarCartoes();
-        });
-
-        function carregarEstatisticas() {
-            document.getElementById('cartoes-ativos').textContent = '1,156';
-            document.getElementById('cartoes-bloqueados').textContent = '23';
-            document.getElementById('cartoes-expirados').textContent = '45';
-            document.getElementById('novos-cartoes').textContent = '67';
-        }
-
-        function carregarCartoes() {
-            const cartoes = [
-                {
-                    id: 1,
-                    numero: '4532 **** **** 1234',
-                    cliente: 'Maria Silva Santos',
-                    programa: 'Programa VIP',
-                    emissao: '15/07/2024',
-                    expiracao: '15/07/2027',
-                    status: 'ativo',
-                    uso: 'Último uso: Hoje'
-                },
-                {
-                    id: 2,
-                    numero: '4532 **** **** 5678',
-                    cliente: 'João Carlos Oliveira',
-                    programa: 'Programa Padrão',
-                    emissao: '20/07/2024',
-                    expiracao: '20/07/2027',
-                    status: 'ativo',
-                    uso: 'Último uso: 2 dias'
-                },
-                {
-                    id: 3,
-                    numero: '4532 **** **** 9012',
-                    cliente: 'Ana Paula Costa',
-                    programa: 'Programa VIP',
-                    emissao: '10/06/2024',
-                    expiracao: '10/06/2025',
-                    status: 'bloqueado',
-                    uso: 'Bloqueado há 5 dias'
-                },
-                {
-                    id: 4,
-                    numero: '4532 **** **** 3456',
-                    cliente: 'Pedro Henrique Lima',
-                    programa: 'Programa Padrão',
-                    emissao: '05/01/2022',
-                    expiracao: '05/01/2025',
-                    status: 'expirado',
-                    uso: 'Expirado há 3 meses'
-                }
-            ];
-
-            let html = '';
-            cartoes.forEach(cartao => {
-                let statusBadge = '';
-                let statusClass = '';
-                
-                switch(cartao.status) {
-                    case 'ativo':
-                        statusBadge = '<span class="badge bg-success badge-status">Ativo</span>';
-                        break;
-                    case 'bloqueado':
-                        statusBadge = '<span class="badge bg-warning badge-status">Bloqueado</span>';
-                        break;
-                    case 'expirado':
-                        statusBadge = '<span class="badge bg-danger badge-status">Expirado</span>';
-                        break;
-                }
-
-                html += `
-                    <tr>
-                        <td><input type="checkbox" class="form-check-input"></td>
-                        <td>
-                            <div class="card-mini">
-                                <i class="mdi mdi-credit-card me-1"></i>
-                                ${cartao.numero}
-                            </div>
-                        </td>
-                        <td><strong>${cartao.cliente}</strong></td>
-                        <td><span class="badge bg-light text-dark">${cartao.programa}</span></td>
-                        <td>${cartao.emissao}</td>
-                        <td>${cartao.expiracao}</td>
-                        <td>${statusBadge}</td>
-                        <td><small class="text-muted">${cartao.uso}</small></td>
-                        <td>
-                            <button class="btn btn-action btn-outline-primary" title="Detalhes">
-                                <i class="mdi mdi-eye"></i>
-                            </button>
-                            <button class="btn btn-action btn-outline-warning" title="Bloquear">
-                                <i class="mdi mdi-lock"></i>
-                            </button>
-                            <button class="btn btn-action btn-outline-success" title="Renovar">
-                                <i class="mdi mdi-refresh"></i>
-                            </button>
-                            <button class="btn btn-action btn-outline-danger" title="Cancelar">
-                                <i class="mdi mdi-delete"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            document.getElementById('tabela-cartoes').innerHTML = html;
-            document.getElementById('total-records').textContent = cartoes.length;
-            document.getElementById('showing-from').textContent = '1';
-            document.getElementById('showing-to').textContent = cartoes.length;
-        }
-
         function salvarCartao() {
             alert('Funcionalidade em desenvolvimento - dados serão salvos via AJAX');
         }

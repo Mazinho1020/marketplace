@@ -388,26 +388,29 @@ Route::middleware('auth.simple')->group(function () {
         return view('admin.relatorios')->with('message', 'Relatórios - Em desenvolvimento');
     })->middleware('auth.simple:60')->name('admin.relatorios');
 
-    // Sistema de Fidelidade Admin
-    Route::get('/admin/fidelidade', [App\Http\Controllers\FidelidadeController::class, 'dashboard'])->middleware('auth.simple:60')->name('admin.fidelidade');
+    // ============================================================================
+    // ADMIN FIDELIDADE - Apenas visualização e relatórios (READ-ONLY)
+    // ============================================================================
+    Route::prefix('admin/fidelidade')->name('admin.fidelidade.')->middleware('auth.simple:60')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'dashboard'])->name('dashboard');
+        Route::get('/clientes', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'clientes'])->name('clientes');
+        Route::get('/transacoes', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'transacoes'])->name('transacoes');
+        Route::get('/cupons', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'cupons'])->name('cupons');
+        Route::get('/cashback', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'cashback'])->name('cashback');
+        Route::get('/relatorios', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'relatorios'])->name('relatorios');
+    });
 
-    // Páginas específicas do Admin Fidelidade
-    Route::get('/admin/fidelidade/programas', [App\Http\Controllers\FidelidadeController::class, 'programas'])->middleware('auth.simple:60')->name('admin.fidelidade.programas');
+    // ============================================================================
+    // MANTER COMPATIBILIDADE TEMPORÁRIA (será removido após migração completa)
+    // ============================================================================
+    // Páginas antigas - redirecionamento temporário
+    Route::get('/admin/fidelidade/programas', function () {
+        return redirect()->route('admin.fidelidade.cashback');
+    })->middleware('auth.simple:60')->name('admin.fidelidade.programas');
 
-    Route::get('/admin/fidelidade/clientes', [App\Http\Controllers\FidelidadeController::class, 'clientes'])->middleware('auth.simple:60')->name('admin.fidelidade.clientes');
-
-    Route::get('/admin/fidelidade/cartoes', [App\Http\Controllers\FidelidadeController::class, 'cartoes'])->middleware('auth.simple:60')->name('admin.fidelidade.cartoes');
-
-    Route::get('/admin/fidelidade/transacoes', [App\Http\Controllers\FidelidadeController::class, 'transacoes'])->middleware('auth.simple:60')->name('admin.fidelidade.transacoes');
-
-    Route::get('/admin/fidelidade/cashback', [App\Http\Controllers\FidelidadeController::class, 'cashback'])->middleware('auth.simple:60')->name('admin.fidelidade.cashback');
-
-    Route::get('/admin/fidelidade/cupons', [App\Http\Controllers\FidelidadeController::class, 'cupons'])->middleware('auth.simple:60')->name('admin.fidelidade.cupons');
-
-    // CRUD operations para Admin Fidelidade
-    Route::post('/admin/fidelidade/store', [App\Http\Controllers\FidelidadeController::class, 'store'])->middleware('auth.simple:60')->name('admin.fidelidade.store');
-    Route::put('/admin/fidelidade/update/{id}', [App\Http\Controllers\FidelidadeController::class, 'update'])->middleware('auth.simple:60')->name('admin.fidelidade.update');
-    Route::delete('/admin/fidelidade/delete/{tipo}/{id}', [App\Http\Controllers\FidelidadeController::class, 'destroy'])->middleware('auth.simple:60')->name('admin.fidelidade.delete');
+    Route::get('/admin/fidelidade/cartoes', function () {
+        return redirect()->route('admin.fidelidade.clientes');
+    })->middleware('auth.simple:60')->name('admin.fidelidade.cartoes');
     Route::patch('/admin/fidelidade/toggle/{tipo}/{id}', [App\Http\Controllers\FidelidadeController::class, 'toggleStatus'])->middleware('auth.simple:60')->name('admin.fidelidade.toggle');
 
     Route::get('/comerciante/dashboard', [DashboardController::class, 'comercianteDashboard'])->name('comerciante.dashboard');
@@ -618,3 +621,19 @@ Route::prefix('config')->name('config.')->group(function () {
 
 // Incluir rotas do módulo de fidelidade
 // require __DIR__ . '/fidelidade/web.php';
+
+// ROTA DE TESTE DEBUGBAR
+Route::get('/test-debugbar', function () {
+    // Forçar o carregamento do Debugbar
+    if (app()->bound('debugbar')) {
+        app('debugbar')->info('Debugbar está funcionando!');
+        app('debugbar')->warning('Este é um teste do Debugbar');
+        app('debugbar')->error('Mensagem de erro de teste');
+    }
+
+    return '<h1>Teste Debugbar</h1>
+            <p>Status do Debugbar: ' . (app()->bound('debugbar') ? 'Carregado' : 'Não carregado') . '</p>
+            <p>APP_DEBUG: ' . (config('app.debug') ? 'true' : 'false') . '</p>
+            <p>DEBUGBAR_ENABLED: ' . (config('debugbar.enabled') ? 'true' : 'false') . '</p>
+            <p>Veja a barra de debug no final da página se estiver funcionando.</p>';
+});

@@ -7,8 +7,6 @@ use App\Models\Fidelidade\FidelidadeCashbackTransacao;
 use App\Models\Fidelidade\FidelidadeCredito;
 use App\Models\Fidelidade\FidelidadeCupom;
 use App\Models\Fidelidade\FidelidadeConquista;
-use App\Models\User;
-use App\Models\Business;
 use Illuminate\Support\Facades\DB;
 
 class FidelidadeService
@@ -16,12 +14,11 @@ class FidelidadeService
     /**
      * Obter ou criar carteira do cliente
      */
-    public function obterCarteira($clienteId, $businessId)
+    public function obterCarteira($clienteId)
     {
         return FidelidadeCarteira::firstOrCreate(
             [
-                'cliente_id' => $clienteId,
-                'business_id' => $businessId
+                'cliente_id' => $clienteId
             ],
             [
                 'saldo_creditos' => 0,
@@ -35,13 +32,9 @@ class FidelidadeService
     /**
      * Obter estatísticas gerais do programa de fidelidade
      */
-    public function obterEstatisticas($businessId = null)
+    public function obterEstatisticas()
     {
         $query = FidelidadeCarteira::query();
-
-        if ($businessId) {
-            $query->where('business_id', $businessId);
-        }
 
         $totalCarteiras = $query->count();
         $totalCreditos = $query->sum('saldo_creditos');
@@ -63,67 +56,82 @@ class FidelidadeService
     /**
      * Obter transações recentes de cashback
      */
-    public function obterTransacoesRecentes($businessId = null, $limit = 10)
+    public function obterTransacoesRecentes($limit = 10)
     {
-        $query = FidelidadeCashbackTransacao::with(['cliente', 'business'])
-            ->orderBy('created_at', 'desc');
-
-        if ($businessId) {
-            $query->where('business_id', $businessId);
-        }
-
-        return $query->limit($limit)->get();
+        return FidelidadeCashbackTransacao::orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
     }
 
     /**
      * Obter carteiras por nível
      */
-    public function obterCarteirasPorNivel($businessId = null)
+    public function obterCarteirasPorNivel()
     {
-        $query = FidelidadeCarteira::select('nivel', DB::raw('count(*) as total'))
-            ->groupBy('nivel');
-
-        if ($businessId) {
-            $query->where('business_id', $businessId);
-        }
-
-        return $query->get()->pluck('total', 'nivel')->toArray();
+        return FidelidadeCarteira::select('nivel', DB::raw('count(*) as total'))
+            ->groupBy('nivel')
+            ->get();
     }
 
     /**
-     * Calcular cashback para uma transação
+     * Calcular cashback para uma compra
      */
-    public function calcularCashback($valor, $businessId, $clienteId)
+    public function calcularCashback($valor, $clienteId)
     {
-        // Lógica básica - pode ser expandida
-        $percentual = 0.02; // 2% padrão
-
-        return $valor * $percentual;
+        // Implementar lógica de cálculo de cashback
+        // Por exemplo: 2% sobre o valor da compra
+        return $valor * 0.02;
     }
 
     /**
-     * Processar cashback
+     * Processar cashback de uma transação
      */
-    public function processarCashback($clienteId, $businessId, $valor, $transacaoId = null)
+    public function processarCashback($clienteId, $valor, $transacaoId = null)
     {
-        $carteira = $this->obterCarteira($clienteId, $businessId);
-        $valorCashback = $this->calcularCashback($valor, $businessId, $clienteId);
+        $carteira = $this->obterCarteira($clienteId);
+        $valorCashback = $this->calcularCashback($valor, $clienteId);
 
         // Criar transação de cashback
         $transacao = FidelidadeCashbackTransacao::create([
             'cliente_id' => $clienteId,
-            'business_id' => $businessId,
-            'carteira_id' => $carteira->id,
-            'transacao_id' => $transacaoId,
-            'valor_compra' => $valor,
             'valor_cashback' => $valorCashback,
-            'percentual' => ($valorCashback / $valor) * 100,
-            'status' => 'processado'
+            'valor_pedido_original' => $valor,
+            'tipo' => 'credito',
+            'status' => 'disponivel',
+            'data_transacao' => now(),
+            'transacao_id' => $transacaoId
         ]);
 
-        // Atualizar carteira
+        // Atualizar saldo da carteira
         $carteira->increment('total_cashback', $valorCashback);
         $carteira->increment('saldo_creditos', $valorCashback);
+
+        return $transacao;
+    }
+
+    /**
+     * Resgatar cashback
+     */
+    public function resgatarCashback($clienteId, $valor)
+    {
+        $carteira = $this->obterCarteira($clienteId);
+
+        if ($carteira->saldo_creditos < $valor) {
+            throw new \Exception('Saldo insuficiente para resgate');
+        }
+
+        // Criar transação de débito
+        $transacao = FidelidadeCashbackTransacao::create([
+            'cliente_id' => $clienteId,
+            'valor_cashback' => -$valor,
+            'tipo' => 'debito',
+            'status' => 'usado',
+            'data_transacao' => now(),
+            'observacoes' => 'Resgate de cashback'
+        ]);
+
+        // Atualizar saldo da carteira
+        $carteira->decrement('saldo_creditos', $valor);
 
         return $transacao;
     }

@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,14 +14,14 @@ return new class extends Migration
     {
         Schema::create('fidelidade_cliente_conquistas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cliente_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('conquista_id')->constrained('fidelidade_conquistas')->onDelete('cascade');
-            $table->datetime('data_desbloqueio')->useCurrent();
+            $table->unsignedBigInteger('cliente_id');
+            $table->unsignedBigInteger('conquista_id');
+            $table->datetime('data_desbloqueio')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->boolean('recompensa_resgatada')->default(false);
-            $table->timestamps();
-            $table->softDeletes();
 
             $table->unique(['cliente_id', 'conquista_id'], 'uk_cliente_conquista');
+            $table->index(['cliente_id']);
+            $table->index(['conquista_id']);
         });
     }
 

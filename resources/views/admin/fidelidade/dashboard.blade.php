@@ -313,7 +313,7 @@
         </div>
     </div>
 
-    <script src="/Theme1/js/bootstrap.bundle.min.js"></script>
+    <script src="/Theme1/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>
         // Carregar dados das tabelas via AJAX
         document.addEventListener('DOMContentLoaded', function() {

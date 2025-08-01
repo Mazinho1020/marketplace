@@ -9,76 +9,80 @@
     <style>
         body {
             background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
         }
         .navbar-custom {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            padding: 1rem 0;
-            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .navbar-custom .navbar-brand {
-            color: white;
-            font-weight: 600;
-            font-size: 1.5rem;
+            color: white !important;
+            font-weight: bold;
         }
         .navbar-custom .nav-link {
-            color: rgba(255,255,255,0.9);
-            font-weight: 500;
-            margin: 0 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.9) !important;
+            transition: color 0.3s ease;
         }
         .navbar-custom .nav-link:hover {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            transform: translateY(-2px);
+            color: white !important;
         }
         .navbar-custom .nav-link.active {
-            background: rgba(255,255,255,0.3);
-            color: white;
-        }
-        .page-header {
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            color: white !important;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
         }
         .stats-card {
             background: white;
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border-left: 4px solid;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 4px solid #667eea;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
         }
-        .stats-card.success { border-left-color: #28a745; }
-        .stats-card.warning { border-left-color: #ffc107; }
-        .stats-card.danger { border-left-color: #dc3545; }
-        .stats-card.info { border-left-color: #17a2b8; }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .stats-card.success {
+            border-left-color: #28a745;
+        }
+        .stats-card.warning {
+            border-left-color: #ffc107;
+        }
+        .stats-card.danger {
+            border-left-color: #dc3545;
+        }
         .table-container {
             background: white;
             border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-top: 2rem;
         }
-        .btn-action {
-            padding: 0.25rem 0.5rem;
-            margin: 0 0.125rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-        }
-        .badge-status {
-            font-size: 0.75rem;
-            padding: 0.375rem 0.75rem;
-        }
-        .percentage-badge {
-            background: linear-gradient(135deg, #28a745, #20c997);
+        .cashback-badge {
+            background: linear-gradient(135deg, #fd7e14 0%, #e67e22 100%);
             color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-weight: 600;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .rule-card {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        .rule-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .pagination-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
         }
     </style>
 </head>
@@ -86,8 +90,8 @@
     <!-- Navbar Superior do Admin Fidelidade -->
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
-            <a class="navbar-brand" href="/admin/fidelidade">
-                <i class="mdi mdi-heart"></i> Admin Fidelidade
+            <a class="navbar-brand" href="{{ route('admin.fidelidade.index') }}">
+                <i class="mdi mdi-chart-line"></i> Admin Fidelidade
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarFidelidade">
@@ -97,38 +101,33 @@
             <div class="collapse navbar-collapse" id="navbarFidelidade">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/fidelidade">
+                        <a class="nav-link" href="{{ route('admin.fidelidade.index') }}">
                             <i class="mdi mdi-view-dashboard"></i> Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/fidelidade/programas">
-                            <i class="mdi mdi-gift"></i> Programas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/fidelidade/clientes">
+                        <a class="nav-link" href="{{ route('admin.fidelidade.clientes') }}">
                             <i class="mdi mdi-account-group"></i> Clientes
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/fidelidade/cartoes">
-                            <i class="mdi mdi-credit-card"></i> Cartões
+                        <a class="nav-link" href="{{ route('admin.fidelidade.transacoes') }}">
+                            <i class="mdi mdi-swap-horizontal"></i> Transações
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/fidelidade/transacoes">
-                            <i class="mdi mdi-cash-multiple"></i> Transações
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/admin/fidelidade/cashback">
-                            <i class="mdi mdi-currency-usd"></i> Cashback
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/fidelidade/cupons">
+                        <a class="nav-link" href="{{ route('admin.fidelidade.cupons') }}">
                             <i class="mdi mdi-ticket-percent"></i> Cupons
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ route('admin.fidelidade.cashback') }}">
+                            <i class="mdi mdi-cash-multiple"></i> Cashback
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.fidelidade.relatorios') }}">
+                            <i class="mdi mdi-chart-box"></i> Relatórios
                         </a>
                     </li>
                 </ul>
@@ -144,44 +143,47 @@
         </div>
     </nav>
 
-    <div class="container">
-        <!-- Cabeçalho da Página -->
-        <div class="page-header">
-            <div class="row align-items-center">
-                <div class="col">
-                    <h2 class="mb-1">
-                        <i class="mdi mdi-currency-usd me-2"></i>Regras de Cashback
-                    </h2>
-                    <p class="text-muted mb-0">Configure e gerencie as regras de cashback dos programas</p>
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNovaRegra">
-                        <i class="mdi mdi-plus"></i> Nova Regra
-                    </button>
-                    <button class="btn btn-outline-info">
-                        <i class="mdi mdi-calculator"></i> Simulador
-                    </button>
-                    <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="mdi mdi-cog"></i> Ações
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#"><i class="mdi mdi-export me-1"></i> Exportar</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="mdi mdi-import me-1"></i> Importar</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#"><i class="mdi mdi-history me-1"></i> Histórico</a></li>
-                    </ul>
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0">
+                            <i class="mdi mdi-cash-multiple text-primary"></i> Regras de Cashback
+                        </h2>
+                        <p class="text-muted mb-0">Configurações e regras do sistema de cashback</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNovaRegra">
+                            <i class="mdi mdi-plus"></i> Nova Regra
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Estatísticas Rápidas -->
+        <!-- Estatísticas -->
         <div class="row mb-4">
-            <div class="col-md-3">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Total de Regras</h6>
+                            <h4 class="mb-0">{{ $stats['total_regras'] ?? 0 }}</h4>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="mdi mdi-cog text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
                 <div class="stats-card success">
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="text-muted mb-1">Regras Ativas</h6>
-                            <h4 class="mb-0" id="regras-ativas">0</h4>
+                            <h4 class="mb-0">{{ $stats['regras_ativas'] ?? 0 }}</h4>
                         </div>
                         <div class="align-self-center">
                             <i class="mdi mdi-check-circle text-success" style="font-size: 2rem;"></i>
@@ -189,131 +191,165 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="stats-card info">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-1">Cashback Distribuído</h6>
-                            <h4 class="mb-0" id="cashback-distribuido">R$ 0</h4>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="mdi mdi-cash-multiple text-info" style="font-size: 2rem;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
+            <div class="col-lg-3 col-md-6 mb-3">
                 <div class="stats-card warning">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h6 class="text-muted mb-1">% Médio Cashback</h6>
-                            <h4 class="mb-0" id="media-cashback">0%</h4>
+                            <h6 class="text-muted mb-1">Cashback Pago</h6>
+                            <h4 class="mb-0">R$ {{ number_format($stats['cashback_pago'] ?? 0, 2, ',', '.') }}</h4>
                         </div>
                         <div class="align-self-center">
-                            <i class="mdi mdi-percent text-warning" style="font-size: 2rem;"></i>
+                            <i class="mdi mdi-cash text-warning" style="font-size: 2rem;"></i>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-lg-3 col-md-6 mb-3">
                 <div class="stats-card danger">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h6 class="text-muted mb-1">Este Mês</h6>
-                            <h4 class="mb-0" id="cashback-mes">R$ 0</h4>
+                            <h6 class="text-muted mb-1">Economia Total</h6>
+                            <h4 class="mb-0">R$ {{ number_format($stats['economia_total'] ?? 0, 2, ',', '.') }}</h4>
                         </div>
                         <div class="align-self-center">
-                            <i class="mdi mdi-calendar-month text-danger" style="font-size: 2rem;"></i>
+                            <i class="mdi mdi-currency-usd text-danger" style="font-size: 2rem;"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Filtros e Busca -->
+        <!-- Filtros -->
         <div class="table-container">
             <div class="row mb-3">
                 <div class="col-md-4">
                     <div class="input-group">
                         <span class="input-group-text"><i class="mdi mdi-magnify"></i></span>
-                        <input type="text" class="form-control" placeholder="Buscar regras..." id="buscar">
+                        <input type="text" class="form-control" placeholder="Buscar regra...">
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-select" id="filtro-status">
+                <div class="col-md-3">
+                    <select class="form-select">
                         <option value="">Todos os Status</option>
                         <option value="ativo">Ativo</option>
                         <option value="inativo">Inativo</option>
-                        <option value="pausado">Pausado</option>
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" id="filtro-programa">
-                        <option value="">Todos os Programas</option>
-                        <option value="1">Programa Padrão</option>
-                        <option value="2">Programa VIP</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select" id="filtro-tipo">
+                    <select class="form-select">
                         <option value="">Todos os Tipos</option>
                         <option value="percentual">Percentual</option>
                         <option value="fixo">Valor Fixo</option>
-                        <option value="escalonado">Escalonado</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select">
+                        <option value="nome">Ordenar por Nome</option>
+                        <option value="valor">Ordenar por Valor</option>
+                        <option value="data">Ordenar por Data</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Tabela de Regras -->
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>
-                                <input type="checkbox" class="form-check-input" id="select-all">
-                            </th>
-                            <th>ID</th>
-                            <th>Nome da Regra</th>
-                            <th>Programa</th>
-                            <th>Tipo</th>
-                            <th>Valor/Percentual</th>
-                            <th>Faixa de Valores</th>
-                            <th>Status</th>
-                            <th>Vigência</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabela-regras">
-                        <tr>
-                            <td colspan="10" class="text-center py-4">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
+            <!-- Lista de Regras -->
+            <div class="row">
+                @forelse($regras as $regra)
+                <div class="col-md-6 mb-3">
+                    <div class="rule-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="mb-1">{{ $regra->nome ?? 'Regra de Cashback' }}</h5>
+                                <p class="text-muted small mb-0">{{ $regra->descricao ?? 'Regra padrão do sistema' }}</p>
+                            </div>
+                            <div>
+                                @if(($regra->status ?? 'ativo') == 'ativo')
+                                    <span class="badge bg-success">Ativo</span>
+                                @else
+                                    <span class="badge bg-warning">Inativo</span>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <div class="cashback-badge">
+                                        {{ $regra->valor_cashback ?? 5 }}{{ ($regra->tipo_cashback ?? 'percentual') == 'percentual' ? '%' : '' }}
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        @if(($regra->tipo_cashback ?? 'percentual') == 'percentual')
+                                            Percentual
+                                        @else
+                                            Valor Fixo
+                                        @endif
+                                    </small>
                                 </div>
-                                <p class="mt-2 text-muted">Carregando regras...</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center p-2 bg-light rounded">
+                                    <strong class="text-primary">{{ $regra->empresa_nome ?? 'Geral' }}</strong>
+                                    <small class="text-muted d-block mt-1">Empresa</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">Valor Mínimo:</small>
+                                <br><strong>R$ {{ number_format($regra->valor_minimo ?? 0, 2, ',', '.') }}</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Valor Máximo:</small>
+                                <br><strong>R$ {{ number_format($regra->valor_maximo ?? 999999, 2, ',', '.') }}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Criado em {{ \Carbon\Carbon::parse($regra->criado_em ?? now())->format('d/m/Y') }}
+                            </small>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                                    <i class="mdi mdi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="mdi mdi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" title="Desativar">
+                                    <i class="mdi mdi-close"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="mdi mdi-cash-multiple text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3 text-muted">Nenhuma regra de cashback encontrada</h4>
+                        <p class="text-muted">Configure as primeiras regras para o sistema de cashback</p>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNovaRegra">
+                            <i class="mdi mdi-plus"></i> Criar Primeira Regra
+                        </button>
+                    </div>
+                </div>
+                @endforelse
             </div>
 
             <!-- Paginação -->
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <div class="text-muted">
-                    Mostrando <span id="showing-from">0</span> a <span id="showing-to">0</span> de <span id="total-records">0</span> registros
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="pagination-info">
+                        <small class="text-muted">
+                            Mostrando <span>{{ $regras->firstItem() ?? 0 }}</span> a <span>{{ $regras->lastItem() ?? 0 }}</span> de <span>{{ $regras->total() ?? 0 }}</span> registros
+                        </small>
+                    </div>
                 </div>
-                <nav>
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Anterior</a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Próximo</a>
-                        </li>
-                    </ul>
-                </nav>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end">
+                        {{ $regras->links() }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -329,165 +365,19 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="form-nova-regra">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Nome da Regra *</label>
-                                <input type="text" class="form-control" name="nome" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Programa *</label>
-                                <select class="form-select" name="programa_id" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="1">Programa Padrão</option>
-                                    <option value="2">Programa VIP</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tipo de Cashback *</label>
-                                <select class="form-select" name="tipo_cashback" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="percentual">Percentual (%)</option>
-                                    <option value="fixo">Valor Fixo (R$)</option>
-                                    <option value="escalonado">Escalonado</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Valor/Percentual *</label>
-                                <input type="number" class="form-control" name="valor_cashback" step="0.01" min="0" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Valor Mínimo de Compra</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">R$</span>
-                                    <input type="number" class="form-control" name="valor_minimo" step="0.01" min="0">
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Valor Máximo de Compra</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">R$</span>
-                                    <input type="number" class="form-control" name="valor_maximo" step="0.01" min="0">
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Data Início *</label>
-                                <input type="date" class="form-control" name="data_inicio" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Data Fim</label>
-                                <input type="date" class="form-control" name="data_fim">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Limite Mensal</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">R$</span>
-                                    <input type="number" class="form-control" name="limite_mensal" step="0.01" min="0">
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Status *</label>
-                                <select class="form-select" name="status" required>
-                                    <option value="ativo">Ativo</option>
-                                    <option value="inativo">Inativo</option>
-                                </select>
-                            </div>
-                            <div class="col-12 mb-3">
-                                <label class="form-label">Descrição</label>
-                                <textarea class="form-control" name="descricao" rows="3"></textarea>
-                            </div>
-                        </div>
-                    </form>
+                    <div class="alert alert-info">
+                        <i class="mdi mdi-information"></i>
+                        Esta é uma página administrativa apenas para visualização. 
+                        Para configurar regras de cashback, utilize o sistema operacional completo.
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success" onclick="salvarRegra()">
-                        <i class="mdi mdi-check"></i> Salvar Regra
-                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="/Theme1/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            carregarEstatisticas();
-            carregarRegras();
-        });
-
-        function carregarEstatisticas() {
-            document.getElementById('regras-ativas').textContent = '{{ $stats["regras_ativas"] }}';
-            document.getElementById('cashback-distribuido').textContent = 'R$ {{ number_format($stats["cashback_distribuido"], 2, ",", ".") }}';
-            document.getElementById('media-cashback').textContent = '3.5%';
-            document.getElementById('cashback-mes').textContent = 'R$ {{ number_format($stats["cashback_distribuido"] * 0.2, 2, ",", ".") }}';
-        }
-
-        function carregarRegras() {
-            const regras = @json($regras);
-
-            let html = '';
-            regras.forEach(regra => {
-                let statusBadge = '';
-                switch(regra.status) {
-                    case 'ativo':
-                        statusBadge = '<span class="badge bg-success badge-status">Ativo</span>';
-                        break;
-                    case 'inativo':
-                        statusBadge = '<span class="badge bg-danger badge-status">Inativo</span>';
-                        break;
-                    case 'pausado':
-                        statusBadge = '<span class="badge bg-warning badge-status">Pausado</span>';
-                        break;
-                }
-
-                const tipoIcon = {
-                    'percentual': 'mdi-percent',
-                    'fixo': 'mdi-currency-usd',
-                    'escalonado': 'mdi-trending-up'
-                };
-
-                html += `
-                    <tr>
-                        <td><input type="checkbox" class="form-check-input"></td>
-                        <td><strong>#${regra.id}</strong></td>
-                        <td><strong>${regra.nome}</strong></td>
-                        <td><span class="badge bg-light text-dark">${regra.programa}</span></td>
-                        <td>
-                            <i class="mdi ${tipoIcon[regra.tipo]} me-1"></i>
-                            ${regra.tipo.charAt(0).toUpperCase() + regra.tipo.slice(1)}
-                        </td>
-                        <td><span class="percentage-badge">${regra.valor}</span></td>
-                        <td><small>${regra.faixa}</small></td>
-                        <td>${statusBadge}</td>
-                        <td><small>${regra.vigencia}</small></td>
-                        <td>
-                            <button class="btn btn-action btn-outline-info" title="Teste">
-                                <i class="mdi mdi-calculator"></i>
-                            </button>
-                            <button class="btn btn-action btn-outline-primary" title="Visualizar">
-                                <i class="mdi mdi-eye"></i>
-                            </button>
-                            <button class="btn btn-action btn-outline-warning" title="Editar">
-                                <i class="mdi mdi-pencil"></i>
-                            </button>
-                            <button class="btn btn-action btn-outline-secondary" title="Pausar">
-                                <i class="mdi mdi-pause"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            document.getElementById('tabela-regras').innerHTML = html;
-            document.getElementById('total-records').textContent = regras.length;
-            document.getElementById('showing-from').textContent = regras.length > 0 ? '1' : '0';
-            document.getElementById('showing-to').textContent = regras.length;
-        }
-
-        function salvarRegra() {
-            alert('Funcionalidade em desenvolvimento - dados serão salvos via AJAX');
-        }
-    </script>
+    <script src="/Theme1/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

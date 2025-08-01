@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,25 +14,24 @@ return new class extends Migration
     {
         Schema::create('fidelidade_cupons', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('empresa_id')->constrained('businesses')->onDelete('cascade');
+            $table->unsignedBigInteger('empresa_id')->default(1);
             $table->string('codigo', 50);
             $table->string('nome', 100);
-            $table->text('descricao')->nullable();
-            $table->enum('tipo', ['desconto_sacola', 'desconto_entrega', 'desconto_item', 'beneficio_extra']);
+            $table->string('descricao', 255)->nullable();
+            $table->string('tipo', 30)->default('desconto_sacola');
             $table->decimal('valor_desconto', 10, 2)->nullable();
             $table->decimal('percentual_desconto', 5, 2)->nullable();
-            $table->decimal('valor_minimo_pedido', 10, 2)->default(0.00);
+            $table->decimal('valor_minimo_pedido', 10, 2)->nullable();
             $table->integer('quantidade_maxima_uso')->nullable();
             $table->integer('quantidade_usada')->default(0);
             $table->integer('uso_por_cliente')->default(1);
             $table->datetime('data_inicio')->nullable();
             $table->datetime('data_fim')->nullable();
-            $table->enum('status', ['ativo', 'pausado', 'expirado', 'esgotado'])->default('ativo');
-            $table->timestamps();
-            $table->softDeletes();
+            $table->string('status', 20)->default('ativo');
+            $table->datetime('criado_em')->default(DB::raw('CURRENT_TIMESTAMP'));
 
-            $table->unique(['codigo', 'empresa_id'], 'uk_codigo_empresa');
             $table->index(['empresa_id']);
+            $table->index(['codigo']);
             $table->index(['status']);
             $table->index(['data_inicio', 'data_fim']);
         });

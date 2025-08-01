@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,22 +14,22 @@ return new class extends Migration
     {
         Schema::create('fidelidade_creditos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('empresa_id')->constrained('businesses')->onDelete('cascade');
-            $table->foreignId('cliente_id')->constrained('users')->onDelete('cascade');
-            $table->enum('tipo', ['comprado', 'cortesia', 'devolucao', 'premio', 'indicacao']);
+            $table->unsignedBigInteger('cliente_id');
+            $table->string('tipo', 30)->default('comprado');
             $table->decimal('valor_original', 10, 2);
             $table->decimal('valor_atual', 10, 2);
             $table->string('codigo_ativacao', 50)->nullable();
             $table->date('data_expiracao')->nullable();
             $table->integer('pedido_origem_id')->nullable();
             $table->text('observacoes')->nullable();
-            $table->enum('status', ['ativo', 'usado', 'expirado', 'cancelado'])->default('ativo');
-            $table->timestamps();
-            $table->softDeletes();
+            $table->string('status', 20)->default('ativo');
+            $table->datetime('criado_em')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->datetime('atualizado_em')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
 
             $table->index(['cliente_id']);
             $table->index(['codigo_ativacao']);
             $table->index(['status']);
+            $table->index(['data_expiracao']);
         });
     }
 
