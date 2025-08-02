@@ -11,33 +11,11 @@
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .navbar-custom {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            padding: 1rem 0;
-            margin-bottom: 2rem;
-        }
-        .navbar-custom .navbar-brand {
-            color: white;
-            font-weight: 600;
-            font-size: 1.5rem;
-        }
-        .navbar-custom .nav-link {
-            color: rgba(255,255,255,0.9);
-            font-weight: 500;
-            margin: 0 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        .navbar-custom .nav-link:hover {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            transform: translateY(-2px);
-        }
-        .navbar-custom .nav-link.active {
-            background: rgba(255,255,255,0.3);
-            color: white;
-        }
+        
+        
+        
+        
+        
         .page-header {
             background: white;
             border-radius: 15px;
@@ -85,9 +63,15 @@
     </style>
 </head>
 <body>
-    <!-- Navbar Superior do Admin Fidelidade -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
-        <div class="container">
+    </head>
+<body>
+    {{-- Include do Menu Principal --}}
+    @include('admin.partials.menuConfig')
+    
+    {{-- Include do Menu Secundário Fidelidade --}}
+    @include('admin.partials.menuFidelidade')
+
+    <div class="container-fluid mt-4">
             <a class="navbar-brand" href="/admin/fidelidade">
                 <i class="mdi mdi-heart"></i> Admin Fidelidade
             </a>

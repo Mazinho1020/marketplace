@@ -170,7 +170,7 @@
                 <div class="stats-card success">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h6 class="text-muted mb-1">Programas Ativos</h6>
+                            <h6 class="text-muted mb-1">Programas Ativosddd</h6>
                             <h4 class="mb-0" id="total-ativos">0</h4>
                         </div>
                         <div class="align-self-center">

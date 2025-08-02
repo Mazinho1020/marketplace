@@ -1,384 +1,237 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cupons Fidelidade - Admin</title>
-    <link rel="stylesheet" href="/Theme1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/Theme1/css/icons.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Arial', sans-serif;
-        }
-        .navbar-custom {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .navbar-custom .navbar-brand {
-            color: white !important;
-            font-weight: bold;
-        }
-        .navbar-custom .nav-link {
-            color: rgba(255,255,255,0.9) !important;
-            transition: color 0.3s ease;
-        }
-        .navbar-custom .nav-link:hover {
-            color: white !important;
-        }
-        .navbar-custom .nav-link.active {
-            color: white !important;
-            background-color: rgba(255,255,255,0.1);
-            border-radius: 5px;
-        }
-        .stats-card {
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border-left: 4px solid #667eea;
-            margin-bottom: 1.5rem;
-            transition: transform 0.3s ease;
-        }
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
-        .stats-card.success {
-            border-left-color: #28a745;
-        }
-        .stats-card.warning {
-            border-left-color: #ffc107;
-        }
-        .stats-card.danger {
-            border-left-color: #dc3545;
-        }
-        .table-container {
-            background: white;
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-top: 2rem;
-        }
-        .coupon-card {
-            border: 2px dashed #28a745;
-            border-radius: 10px;
-            padding: 1rem;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            margin-bottom: 1rem;
-        }
-        .coupon-code {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: #28a745;
-        }
-        .discount-badge {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-        .pagination-info {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 10px;
-            margin-top: 1rem;
-        }
-    </style>
-</head>
-<body>
-    <!-- Navbar Superior do Admin Fidelidade -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
-        <div class="container">
-            <a class="navbar-brand" href="<?php echo e(route('admin.fidelidade.index')); ?>">
-                <i class="mdi mdi-chart-line"></i> Admin Fidelidade
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarFidelidade">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarFidelidade">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo e(route('admin.fidelidade.index')); ?>">
-                            <i class="mdi mdi-view-dashboard"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo e(route('admin.fidelidade.clientes')); ?>">
-                            <i class="mdi mdi-account-group"></i> Clientes
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo e(route('admin.fidelidade.transacoes')); ?>">
-                            <i class="mdi mdi-swap-horizontal"></i> Transações
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="<?php echo e(route('admin.fidelidade.cupons')); ?>">
-                            <i class="mdi mdi-ticket-percent"></i> Cupons
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo e(route('admin.fidelidade.cashback')); ?>">
-                            <i class="mdi mdi-cash-multiple"></i> Cashback
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo e(route('admin.fidelidade.relatorios')); ?>">
-                            <i class="mdi mdi-chart-box"></i> Relatórios
-                        </a>
-                    </li>
-                </ul>
-                
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/dashboard">
-                            <i class="mdi mdi-arrow-left"></i> Voltar Admin
-                        </a>
-                    </li>
-                </ul>
+<?php $__env->startSection('title', 'Cupons Fidelidade'); ?>
+
+<?php $__env->startSection('content'); ?>
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-0">
+                    <i class="mdi mdi-ticket-percent text-primary"></i> Sistema de Cupons
+                </h2>
+                <p class="text-muted mb-0">Gerenciamento geral de cupons do programa de fidelidade</p>
+            </div>
+            <div>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNovoCupom">
+                    <i class="mdi mdi-plus"></i> Novo Cupom
+                </button>
             </div>
         </div>
-    </nav>
+    </div>
+</div>
 
-    <div class="container mt-4">
-        <!-- Header -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h2 class="mb-0">
-                            <i class="mdi mdi-ticket-percent text-primary"></i> Cupons de Desconto
-                        </h2>
-                        <p class="text-muted mb-0">Gerenciamento de cupons do programa de fidelidade</p>
-                    </div>
-                    <div>
-                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNovoCupom">
-                            <i class="mdi mdi-plus"></i> Novo Cupom
-                        </button>
-                    </div>
+<!-- Estatísticas -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-muted mb-1">Total de Cupons</h6>
+                    <h4 class="mb-0"><?php echo e($stats['total_cupons'] ?? 0); ?></h4>
+                </div>
+                <div class="align-self-center">
+                    <i class="mdi mdi-ticket-percent text-primary" style="font-size: 2rem;"></i>
                 </div>
             </div>
         </div>
-
-        <!-- Estatísticas -->
-        <div class="row mb-4">
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="stats-card">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-1">Total de Cupons</h6>
-                            <h4 class="mb-0"><?php echo e($stats['total_cupons'] ?? 0); ?></h4>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="mdi mdi-ticket-percent text-primary" style="font-size: 2rem;"></i>
-                        </div>
-                    </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card success">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-muted mb-1">Cupons Ativos</h6>
+                    <h4 class="mb-0"><?php echo e($stats['cupons_ativos'] ?? 0); ?></h4>
                 </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="stats-card success">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-1">Cupons Ativos</h6>
-                            <h4 class="mb-0"><?php echo e($stats['cupons_ativos'] ?? 0); ?></h4>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="mdi mdi-check-circle text-success" style="font-size: 2rem;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="stats-card warning">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-1">Cupons Utilizados</h6>
-                            <h4 class="mb-0"><?php echo e($stats['cupons_utilizados'] ?? 0); ?></h4>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="mdi mdi-check text-warning" style="font-size: 2rem;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="stats-card danger">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6 class="text-muted mb-1">Desconto Total</h6>
-                            <h4 class="mb-0">R$ <?php echo e(number_format($stats['desconto_total'] ?? 0, 2, ',', '.')); ?></h4>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="mdi mdi-currency-usd text-danger" style="font-size: 2rem;"></i>
-                        </div>
-                    </div>
+                <div class="align-self-center">
+                    <i class="mdi mdi-check-circle text-success" style="font-size: 2rem;"></i>
                 </div>
             </div>
         </div>
-
-        <!-- Filtros -->
-        <div class="table-container">
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="mdi mdi-magnify"></i></span>
-                        <input type="text" class="form-control" placeholder="Buscar cupom...">
-                    </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card warning">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-muted mb-1">Cupons Utilizados</h6>
+                    <h4 class="mb-0"><?php echo e($stats['cupons_utilizados'] ?? 0); ?></h4>
                 </div>
-                <div class="col-md-3">
-                    <select class="form-select">
-                        <option value="">Todos os Status</option>
-                        <option value="ativo">Ativo</option>
-                        <option value="usado">Usado</option>
-                        <option value="expirado">Expirado</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select">
-                        <option value="">Todos os Tipos</option>
-                        <option value="percentual">Percentual</option>
-                        <option value="fixo">Valor Fixo</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select">
-                        <option value="codigo">Ordenar por Código</option>
-                        <option value="data">Ordenar por Data</option>
-                        <option value="desconto">Ordenar por Desconto</option>
-                    </select>
+                <div class="align-self-center">
+                    <i class="mdi mdi-check text-warning" style="font-size: 2rem;"></i>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stats-card danger">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-muted mb-1">Desconto Total</h6>
+                    <h4 class="mb-0">R$ <?php echo e(number_format($stats['desconto_total'] ?? 0, 2, ',', '.')); ?></h4>
+                </div>
+                <div class="align-self-center">
+                    <i class="mdi mdi-currency-usd text-danger" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-            <!-- Lista de Cupons -->
-            <div class="row">
-                <?php $__empty_1 = true; $__currentLoopData = $cupons; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cupom): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                <div class="col-md-6 mb-3">
-                    <div class="coupon-card">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="mdi mdi-ticket-percent text-success me-2" style="font-size: 1.5rem;"></i>
-                                    <span class="coupon-code"><?php echo e($cupom->codigo); ?></span>
-                                </div>
-                                <h6 class="mb-1"><?php echo e($cupom->nome ?? 'Cupom de Desconto'); ?></h6>
-                                <p class="text-muted small mb-2"><?php echo e($cupom->descricao ?? 'Cupom do sistema de fidelidade'); ?></p>
-                                
-                                <div class="row g-2 mb-2">
-                                    <div class="col-6">
-                                        <small class="text-muted">Desconto:</small>
-                                        <div class="discount-badge">
-                                            <?php echo e($cupom->valor_desconto ?? 10); ?><?php echo e(($cupom->tipo_desconto ?? 'percentual') == 'percentual' ? '%' : ''); ?>
+<!-- Filtros e Lista -->
+<div class="table-container">
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text"><i class="mdi mdi-magnify"></i></span>
+                <input type="text" class="form-control" placeholder="Buscar cupom...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select">
+                <option value="">Todos os Status</option>
+                <option value="ativo">Ativo</option>
+                <option value="usado">Usado</option>
+                <option value="expirado">Expirado</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select">
+                <option value="">Todos os Tipos</option>
+                <option value="percentual">Percentual</option>
+                <option value="fixo">Valor Fixo</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select">
+                <option value="codigo">Ordenar por Código</option>
+                <option value="data">Ordenar por Data</option>
+                <option value="desconto">Ordenar por Desconto</option>
+            </select>
+        </div>
+    </div>
 
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <small class="text-muted">Cliente:</small>
-                                        <br><strong><?php echo e($cupom->cliente_id ?? 'Geral'); ?></strong>
-                                    </div>
-                                </div>
-                                
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <small class="text-muted">Criado:</small>
-                                        <br><small><?php echo e(\Carbon\Carbon::parse($cupom->data_criacao ?? now())->format('d/m/Y')); ?></small>
-                                    </div>
-                                    <div class="col-6">
-                                        <small class="text-muted">Expira:</small>
-                                        <br><small><?php echo e(\Carbon\Carbon::parse($cupom->data_expiracao ?? now()->addDays(30))->format('d/m/Y')); ?></small>
-                                    </div>
-                                </div>
+    <!-- Lista de Cupons -->
+    <div class="row">
+        <?php $__empty_1 = true; $__currentLoopData = $cupons; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cupom): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+        <div class="col-md-6 mb-3">
+            <div class="cupom-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="mdi mdi-ticket-percent text-success me-2" style="font-size: 1.5rem;"></i>
+                            <strong class="coupon-code"><?php echo e($cupom->codigo ?? 'EXEMPLO'); ?></strong>
+                        </div>
+                        <h6 class="mb-1"><?php echo e($cupom->nome ?? 'Nome do Cupom'); ?></h6>
+                        <p class="text-muted small mb-2"><?php echo e($cupom->descricao ?? 'Descrição do cupom'); ?></p>
+                        
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <small class="text-muted">Desconto:</small>
+                                <br><strong class="text-success">
+                                    <?php echo e($cupom->valor ?? '0'); ?><?php echo e(($cupom->tipo_desconto ?? 'percentual') == 'percentual' ? '%' : ''); ?>
+
+                                </strong>
                             </div>
-                            
-                            <div class="ms-3">
-                                <?php if(($cupom->status ?? 'ativo') == 'ativo'): ?>
-                                    <span class="badge bg-success">Ativo</span>
-                                <?php elseif($cupom->status == 'usado'): ?>
-                                    <span class="badge bg-warning">Usado</span>
-                                <?php elseif($cupom->status == 'expirado'): ?>
-                                    <span class="badge bg-danger">Expirado</span>
-                                <?php else: ?>
-                                    <span class="badge bg-secondary"><?php echo e(ucfirst($cupom->status ?? 'Ativo')); ?></span>
-                                <?php endif; ?>
-                                
-                                <div class="mt-2">
-                                    <div class="btn-group-vertical">
-                                        <button class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
-                                            <i class="mdi mdi-eye"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-warning" title="Editar">
-                                            <i class="mdi mdi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" title="Desativar">
-                                            <i class="mdi mdi-close"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                            <div class="col-6">
+                                <small class="text-muted">Programa:</small>
+                                <br><strong><?php echo e($cupom->programa_nome ?? 'Geral'); ?></strong>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted">Criado:</small>
+                                <br><small><?php echo e(isset($cupom->created_at) ? \Carbon\Carbon::parse($cupom->created_at)->format('d/m/Y') : 'N/A'); ?></small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Expira:</small>
+                                <br><small><?php echo e(isset($cupom->data_fim) ? \Carbon\Carbon::parse($cupom->data_fim)->format('d/m/Y') : 'N/A'); ?></small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ms-3">
+                        <span class="badge bg-<?php echo e(($cupom->status ?? 'ativo') == 'ativo' ? 'success' : 'secondary'); ?>">
+                            <?php echo e(ucfirst($cupom->status ?? 'Ativo')); ?>
+
+                        </span>
+                        <div class="mt-2">
+                            <div class="btn-group-vertical">
+                                <button class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                                    <i class="mdi mdi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="mdi mdi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" title="Desativar">
+                                    <i class="mdi mdi-close"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                <div class="col-12">
-                    <div class="text-center py-5">
-                        <i class="mdi mdi-ticket-percent text-muted" style="font-size: 4rem;"></i>
-                        <h4 class="mt-3 text-muted">Nenhum cupom encontrado</h4>
-                        <p class="text-muted">Comece criando o primeiro cupom do sistema</p>
-                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNovoCupom">
-                            <i class="mdi mdi-plus"></i> Criar Primeiro Cupom
-                        </button>
-                    </div>
-                </div>
+            </div>
+        </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="mdi mdi-ticket-percent text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3 text-muted">Nenhum cupom encontrado</h4>
+                <p class="text-muted">Comece criando o primeiro cupom do sistema</p>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNovoCupom">
+                    <i class="mdi mdi-plus"></i> Criar Primeiro Cupom
+                </button>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Paginação -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="pagination-info">
+                <small class="text-muted">
+                    <?php if(isset($cupons) && method_exists($cupons, 'total')): ?>
+                        Mostrando <span><?php echo e($cupons->firstItem() ?? 0); ?></span> a <span><?php echo e($cupons->lastItem() ?? 0); ?></span> de <span><?php echo e($cupons->total() ?? 0); ?></span> registros
+                    <?php else: ?>
+                        Mostrando registros de exemplo
+                    <?php endif; ?>
+                </small>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex justify-content-end">
+                <?php if(isset($cupons) && method_exists($cupons, 'links')): ?>
+                    <?php echo e($cupons->links()); ?>
+
                 <?php endif; ?>
             </div>
+        </div>
+    </div>
+</div>
 
-            <!-- Paginação -->
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="pagination-info">
-                        <small class="text-muted">
-                            Mostrando <span><?php echo e($cupons->firstItem() ?? 0); ?></span> a <span><?php echo e($cupons->lastItem() ?? 0); ?></span> de <span><?php echo e($cupons->total() ?? 0); ?></span> registros
-                        </small>
-                    </div>
+<!-- Modal Novo Cupom -->
+<div class="modal fade" id="modalNovoCupom" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="mdi mdi-ticket-plus"></i> Novo Cupom
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="mdi mdi-information"></i>
+                    Esta é uma página administrativa apenas para visualização. 
+                    Para criar cupons, utilize o sistema operacional completo.
                 </div>
-                <div class="col-md-6">
-                    <div class="d-flex justify-content-end">
-                        <?php echo e($cupons->links()); ?>
-
-                    </div>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
+</div>
+<?php $__env->stopSection(); ?>
 
-    <!-- Modal Novo Cupom -->
-    <div class="modal fade" id="modalNovoCupom" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="mdi mdi-ticket-plus"></i> Novo Cupom
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        <i class="mdi mdi-information"></i>
-                        Esta é uma página administrativa apenas para visualização. 
-                        Para criar cupons, utilize o sistema operacional completo.
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="/Theme1/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-<?php /**PATH C:\xampp\htdocs\marketplace\resources\views/admin/fidelidade/cupons.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('admin.layouts.fidelidade', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/admin/fidelidade/cupons.blade.php ENDPATH**/ ?>

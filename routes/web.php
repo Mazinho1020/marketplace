@@ -10,7 +10,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
-    return redirect()->route('fidelidade.dashboard');
+    return redirect('/admin');
 });
 
 // ROTA DE TESTE - Layout
@@ -393,11 +393,26 @@ Route::middleware('auth.simple')->group(function () {
     // ============================================================================
     Route::prefix('admin/fidelidade')->name('admin.fidelidade.')->middleware('auth.simple:60')->group(function () {
         Route::get('/', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'dashboard'])->name('dashboard');
+        Route::get('/index', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'dashboard'])->name('index');
         Route::get('/clientes', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'clientes'])->name('clientes');
         Route::get('/transacoes', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'transacoes'])->name('transacoes');
         Route::get('/cupons', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'cupons'])->name('cupons');
         Route::get('/cashback', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'cashback'])->name('cashback');
         Route::get('/relatorios', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'relatorios'])->name('relatorios');
+        Route::get('/configuracoes', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'configuracoes'])->name('configuracoes');
+    });
+
+    // ============================================================================
+    // ROTAS DE TESTE SEM MIDDLEWARE (TEMPORÁRIO)
+    // ============================================================================
+    Route::prefix('test/fidelidade')->name('test.fidelidade.')->group(function () {
+        Route::get('/clientes', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'clientes'])->name('clientes');
+        Route::get('/dashboard', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'dashboard'])->name('dashboard');
+        Route::get('/transacoes', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'transacoes'])->name('transacoes');
+        Route::get('/cupons', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'cupons'])->name('cupons');
+        Route::get('/cashback', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'cashback'])->name('cashback');
+        Route::get('/relatorios', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'relatorios'])->name('relatorios');
+        Route::get('/configuracoes', [App\Http\Controllers\Admin\AdminFidelidadeController::class, 'configuracoes'])->name('configuracoes');
     });
 
     // ============================================================================
@@ -425,8 +440,8 @@ Route::middleware('auth.simple')->group(function () {
 // ADMIN - Rotas de administração
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('/', function () {
-        return redirect()->route('admin.config.index');
-    })->name('dashboard');
+        return redirect()->route('admin.dashboard');
+    });
 
     // COMENTADO PARA EVITAR CONFLITO COM SISTEMA SIMPLIFICADO
     // Route::resource('config', App\Http\Controllers\Admin\ConfigController::class);
@@ -482,6 +497,57 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('config/{config}/history-detail/{history}', function ($config, $history) {
         return response()->json(['message' => 'Detalhes do histórico em desenvolvimento']);
     })->name('config.history-detail');
+});
+
+// ADMIN - Sistema de Dashboard e Gestão
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Dashboard principal
+    Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('index');
+
+    // Merchants
+    Route::get('/merchants', function () {
+        return view('admin.temp', ['module' => 'Merchants']);
+    })->name('merchants.index');
+    Route::get('/merchants/create', function () {
+        return view('admin.temp', ['module' => 'Criar Merchant']);
+    })->name('merchants.create');
+
+    // Affiliates  
+    Route::get('/affiliates', function () {
+        return view('admin.temp', ['module' => 'Afiliados']);
+    })->name('affiliates.index');
+    Route::get('/affiliates/programs', function () {
+        return view('admin.temp', ['module' => 'Programas de Afiliados']);
+    })->name('affiliates.programs');
+
+    // Reports
+    Route::get('/reports', function () {
+        return view('admin.temp', ['module' => 'Relatórios']);
+    })->name('reports.index');
+    Route::get('/reports/revenue', function () {
+        return view('admin.temp', ['module' => 'Relatório de Receita']);
+    })->name('reports.revenue');
+
+    // Subscriptions
+    Route::get('/subscriptions', function () {
+        return view('admin.temp', ['module' => 'Assinaturas']);
+    })->name('subscriptions.index');
+
+    // Settings
+    Route::get('/settings', function () {
+        return view('admin.temp', ['module' => 'Configurações']);
+    })->name('settings');
+
+    // Logs
+    Route::get('/logs', function () {
+        return view('admin.temp', ['module' => 'Logs do Sistema']);
+    })->name('logs');
+
+    // Payments Analytics (route diferente para evitar conflito)
+    Route::get('/payment-analytics', function () {
+        return view('admin.temp', ['module' => 'Analytics de Pagamentos']);
+    })->name('payment.analytics');
 });
 
 // ADMIN - Configurações Simplificadas
@@ -560,11 +626,11 @@ Route::get('/debug-config-simple', function () {
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     Route::get('config/{config}/history', [App\Http\Controllers\Admin\ConfigController::class, 'history'])->name('config.history');
 
-    // Rotas de Fidelidade Admin com Soft Deletes
-    Route::resource('fidelidade', App\Http\Controllers\Admin\FidelidadeAdminController::class);
-    Route::get('fidelidade/deletados/{tipo?}', [App\Http\Controllers\Admin\FidelidadeAdminController::class, 'deletados'])->name('fidelidade.deletados');
-    Route::post('fidelidade/restaurar', [App\Http\Controllers\Admin\FidelidadeAdminController::class, 'restaurar'])->name('fidelidade.restaurar');
-    Route::delete('fidelidade/deletar-permanente', [App\Http\Controllers\Admin\FidelidadeAdminController::class, 'deletarPermanente'])->name('fidelidade.deletar-permanente');
+    // COMENTADO: Rotas de resource conflitantes - usando rotas específicas do AdminFidelidadeController
+    // Route::resource('fidelidade', App\Http\Controllers\Admin\FidelidadeAdminController::class);
+    // Route::get('fidelidade/deletados/{tipo?}', [App\Http\Controllers\Admin\FidelidadeAdminController::class, 'deletados'])->name('fidelidade.deletados');
+    // Route::post('fidelidade/restaurar', [App\Http\Controllers\Admin\FidelidadeAdminController::class, 'restaurar'])->name('fidelidade.restaurar');
+    // Route::delete('fidelidade/deletar-permanente', [App\Http\Controllers\Admin\FidelidadeAdminController::class, 'deletarPermanente'])->name('fidelidade.deletar-permanente');
 });
 
 // COMERCIANTE - Rotas para comerciantes

@@ -11,21 +11,10 @@
             background-color: #f8f9fa;
             font-family: 'Arial', sans-serif;
         }
-        .navbar-custom {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .navbar-custom .navbar-brand {
-            color: white !important;
-            font-weight: bold;
-        }
-        .navbar-custom .nav-link {
-            color: rgba(255,255,255,0.9) !important;
-            transition: color 0.3s ease;
-        }
-        .navbar-custom .nav-link:hover {
-            color: white !important;
-        }
+        
+        
+        
+        
         .stats-card {
             background: white;
             border-radius: 15px;
@@ -70,26 +59,32 @@
     </style>
 </head>
 <body>
-    <!-- Navbar Superior do Admin Fidelidade -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
-        <div class="container">
+    </head>
+<body>
+    {{-- Include do Menu Principal --}}
+    @include('admin.partials.menuConfig')
+    
+    {{-- Include do Menu Secundário Fidelidade --}}
+    @include('admin.partials.menuFidelidade')
+
+    <div class="container-fluid mt-4">
             <a class="navbar-brand" href="#">
                 <i class="mdi mdi-chart-line"></i> Admin Fidelidade - Relatórios
             </a>
             <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="<?php echo e(route('admin.fidelidade.index')); ?>">
+                <a class="nav-link" href="{{ route('admin.fidelidade.index') }}">
                     <i class="mdi mdi-view-dashboard"></i> Dashboard
                 </a>
-                <a class="nav-link" href="<?php echo e(route('admin.fidelidade.clientes')); ?>">
+                <a class="nav-link" href="{{ route('admin.fidelidade.clientes') }}">
                     <i class="mdi mdi-account-group"></i> Clientes
                 </a>
-                <a class="nav-link" href="<?php echo e(route('admin.fidelidade.transacoes')); ?>">
+                <a class="nav-link" href="{{ route('admin.fidelidade.transacoes') }}">
                     <i class="mdi mdi-swap-horizontal"></i> Transações
                 </a>
-                <a class="nav-link" href="<?php echo e(route('admin.fidelidade.cupons')); ?>">
+                <a class="nav-link" href="{{ route('admin.fidelidade.cupons') }}">
                     <i class="mdi mdi-ticket-percent"></i> Cupons
                 </a>
-                <a class="nav-link active" href="<?php echo e(route('admin.fidelidade.relatorios')); ?>">
+                <a class="nav-link active" href="{{ route('admin.fidelidade.relatorios') }}">
                     <i class="mdi mdi-chart-box"></i> Relatórios
                 </a>
             </div>
@@ -109,8 +104,7 @@
                     </div>
                     <div>
                         <span class="periodo-badge">
-                            <i class="mdi mdi-calendar"></i> <?php echo e($relatorio['periodo']['inicio']); ?> - <?php echo e($relatorio['periodo']['fim']); ?>
-
+                            <i class="mdi mdi-calendar"></i> {{ $relatorio['periodo']['inicio'] }} - {{ $relatorio['periodo']['fim'] }}
                         </span>
                     </div>
                 </div>
@@ -124,7 +118,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="text-muted mb-1">Transações no Período</h6>
-                            <h3 class="mb-0 text-primary"><?php echo e(number_format($relatorio['transacoes_periodo'], 0, ',', '.')); ?></h3>
+                            <h3 class="mb-0 text-primary">{{ number_format($relatorio['transacoes_periodo'], 0, ',', '.') }}</h3>
                         </div>
                         <div class="align-self-center">
                             <i class="mdi mdi-swap-horizontal text-primary" style="font-size: 2rem;"></i>
@@ -138,7 +132,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="text-muted mb-1">Valor Total</h6>
-                            <h3 class="mb-0 text-success">R$ <?php echo e(number_format($relatorio['valor_periodo'], 2, ',', '.')); ?></h3>
+                            <h3 class="mb-0 text-success">R$ {{ number_format($relatorio['valor_periodo'], 2, ',', '.') }}</h3>
                         </div>
                         <div class="align-self-center">
                             <i class="mdi mdi-currency-usd text-success" style="font-size: 2rem;"></i>
@@ -152,7 +146,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="text-muted mb-1">Cashback Distribuído</h6>
-                            <h3 class="mb-0 text-info">R$ <?php echo e(number_format($relatorio['cashback_periodo'], 2, ',', '.')); ?></h3>
+                            <h3 class="mb-0 text-info">R$ {{ number_format($relatorio['cashback_periodo'], 2, ',', '.') }}</h3>
                         </div>
                         <div class="align-self-center">
                             <i class="mdi mdi-cash-multiple text-info" style="font-size: 2rem;"></i>
@@ -166,7 +160,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="text-muted mb-1">Novos Clientes</h6>
-                            <h3 class="mb-0 text-warning"><?php echo e(number_format($relatorio['novos_clientes'], 0, ',', '.')); ?></h3>
+                            <h3 class="mb-0 text-warning">{{ number_format($relatorio['novos_clientes'], 0, ',', '.') }}</h3>
                         </div>
                         <div class="align-self-center">
                             <i class="mdi mdi-account-plus text-warning" style="font-size: 2rem;"></i>
@@ -190,7 +184,7 @@
                             <br><small class="text-muted">Transações vs Novos Clientes</small>
                         </div>
                         <div class="metric-value">
-                            <?php echo e($relatorio['novos_clientes'] > 0 ? number_format(($relatorio['transacoes_periodo'] / $relatorio['novos_clientes']) * 100, 1) : 0); ?>%
+                            {{ $relatorio['novos_clientes'] > 0 ? number_format(($relatorio['transacoes_periodo'] / $relatorio['novos_clientes']) * 100, 1) : 0 }}%
                         </div>
                     </div>
 
@@ -200,8 +194,7 @@
                             <br><small class="text-muted">Valor médio por transação</small>
                         </div>
                         <div class="metric-value">
-                            R$ <?php echo e($relatorio['transacoes_periodo'] > 0 ? number_format($relatorio['valor_periodo'] / $relatorio['transacoes_periodo'], 2, ',', '.') : '0,00'); ?>
-
+                            R$ {{ $relatorio['transacoes_periodo'] > 0 ? number_format($relatorio['valor_periodo'] / $relatorio['transacoes_periodo'], 2, ',', '.') : '0,00' }}
                         </div>
                     </div>
 
@@ -211,8 +204,7 @@
                             <br><small class="text-muted">Cashback por transação</small>
                         </div>
                         <div class="metric-value">
-                            R$ <?php echo e($relatorio['transacoes_periodo'] > 0 ? number_format($relatorio['cashback_periodo'] / $relatorio['transacoes_periodo'], 2, ',', '.') : '0,00'); ?>
-
+                            R$ {{ $relatorio['transacoes_periodo'] > 0 ? number_format($relatorio['cashback_periodo'] / $relatorio['transacoes_periodo'], 2, ',', '.') : '0,00' }}
                         </div>
                     </div>
 
@@ -222,7 +214,7 @@
                             <br><small class="text-muted">Cashback sobre valor total</small>
                         </div>
                         <div class="metric-value">
-                            <?php echo e($relatorio['valor_periodo'] > 0 ? number_format(($relatorio['cashback_periodo'] / $relatorio['valor_periodo']) * 100, 2) : 0); ?>%
+                            {{ $relatorio['valor_periodo'] > 0 ? number_format(($relatorio['cashback_periodo'] / $relatorio['valor_periodo']) * 100, 2) : 0 }}%
                         </div>
                     </div>
                 </div>
@@ -240,8 +232,7 @@
                             <br><small class="text-muted">Total no período</small>
                         </div>
                         <div class="metric-value">
-                            <?php echo e(number_format($relatorio['cupons_utilizados'], 0, ',', '.')); ?>
-
+                            {{ number_format($relatorio['cupons_utilizados'], 0, ',', '.') }}
                         </div>
                     </div>
 
@@ -251,7 +242,7 @@
                             <br><small class="text-muted">Cupons vs Transações</small>
                         </div>
                         <div class="metric-value">
-                            <?php echo e($relatorio['transacoes_periodo'] > 0 ? number_format(($relatorio['cupons_utilizados'] / $relatorio['transacoes_periodo']) * 100, 1) : 0); ?>%
+                            {{ $relatorio['transacoes_periodo'] > 0 ? number_format(($relatorio['cupons_utilizados'] / $relatorio['transacoes_periodo']) * 100, 1) : 0 }}%
                         </div>
                     </div>
 
@@ -261,8 +252,7 @@
                             <br><small class="text-muted">Cupons por novo cliente</small>
                         </div>
                         <div class="metric-value">
-                            <?php echo e($relatorio['novos_clientes'] > 0 ? number_format($relatorio['cupons_utilizados'] / $relatorio['novos_clientes'], 1) : 0); ?>
-
+                            {{ $relatorio['novos_clientes'] > 0 ? number_format($relatorio['cupons_utilizados'] / $relatorio['novos_clientes'], 1) : 0 }}
                         </div>
                     </div>
 
@@ -299,4 +289,3 @@
     <script src="/Theme1/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-<?php /**PATH C:\xampp\htdocs\marketplace\resources\views/admin/fidelidade/relatorios.blade.php ENDPATH**/ ?>

@@ -197,36 +197,81 @@
                             </a>
                         </li>
                         
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.usuarios.index') }}">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}" href="#paymentsSubmenu" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('admin.payments.*') ? 'true' : 'false' }}">
+                            <i class="uil uil-credit-card me-2"></i>
+                            Pagamentos
+                            <i class="uil uil-angle-down ms-auto"></i>
+                        </a>
+                        <div class="collapse {{ request()->routeIs('admin.payments.*') ? 'show' : '' }}" id="paymentsSubmenu">
+                            <ul class="list-unstyled ps-3">
+                                <li>
+                                    <a href="{{ route('admin.payments.dashboard') }}" class="nav-link {{ request()->routeIs('admin.payments.dashboard') ? 'active' : '' }}">
+                                        <i class="uil uil-chart-line me-2"></i>Dashboard
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.payments.transactions') }}" class="nav-link {{ request()->routeIs('admin.payments.transactions') ? 'active' : '' }}">
+                                        <i class="uil uil-transaction me-2"></i>Transações
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.payments.gateways') }}" class="nav-link {{ request()->routeIs('admin.payments.gateways') ? 'active' : '' }}">
+                                        <i class="uil uil-credit-card me-2"></i>Gateways
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.payments.methods') }}" class="nav-link {{ request()->routeIs('admin.payments.methods') ? 'active' : '' }}">
+                                        <i class="uil uil-money-bill me-2"></i>Métodos
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.payments.webhooks') }}" class="nav-link {{ request()->routeIs('admin.payments.webhooks') ? 'active' : '' }}">
+                                        <i class="uil uil-webhook me-2"></i>Webhooks
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.payments.reports') }}" class="nav-link {{ request()->routeIs('admin.payments.reports') ? 'active' : '' }}">
+                                        <i class="uil uil-chart me-2"></i>Relatórios
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.payments.settings') }}" class="nav-link {{ request()->routeIs('admin.payments.settings') ? 'active' : '' }}">
+                                        <i class="uil uil-setting me-2"></i>Configurações
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('admin.usuarios') }}">
                                 <i class="uil uil-users-alt me-2"></i>
                                 Usuários
                             </a>
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.empresas.index') }}">
+                            <a class="nav-link" href="#" onclick="alert('Módulo em desenvolvimento')">
                                 <i class="uil uil-shop me-2"></i>
                                 Empresas
                             </a>
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.financeiro.index') }}">
+                            <a class="nav-link" href="#" onclick="alert('Módulo em desenvolvimento')">
                                 <i class="uil uil-bill me-2"></i>
                                 Financeiro
                             </a>
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.pdv.index') }}">
+                            <a class="nav-link" href="#" onclick="alert('Módulo em desenvolvimento')">
                                 <i class="uil uil-cash-stack me-2"></i>
                                 PDV
                             </a>
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.delivery.index') }}">
+                            <a class="nav-link" href="#" onclick="alert('Módulo em desenvolvimento')">
                                 <i class="uil uil-truck me-2"></i>
                                 Delivery
                             </a>
@@ -235,14 +280,14 @@
                         <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
                         
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.relatorios.index') }}">
+                            <a class="nav-link" href="#" onclick="alert('Módulo em desenvolvimento')">
                                 <i class="uil uil-chart-line me-2"></i>
                                 Relatórios
                             </a>
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.sistema.index') }}">
+                            <a class="nav-link" href="#" onclick="alert('Módulo em desenvolvimento')">
                                 <i class="uil uil-cog me-2"></i>
                                 Sistema
                             </a>
