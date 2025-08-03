@@ -34,24 +34,33 @@
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <?php if($gateway->logo_url): ?>
-                            <img src="<?php echo e($gateway->logo_url); ?>" 
-                                 alt="<?php echo e($gateway->name); ?>" 
+                        <?php
+                            $logoMap = [
+                                'pix' => 'https://logoeps.com/wp-content/uploads/2022/12/pix-vector-logo.png',
+                                'boleto' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Boleto.svg/200px-Boleto.svg.png',
+                                'pagseguro' => 'https://assets.pagseguro.com.br/ps-sdk-js/v2/assets/logos/pagseguro.svg',
+                                'mercadopago' => 'https://http2.mlstatic.com/resources/frontend/statics/growth-sellers-landings/device-pictures/picture__medium@2x.png'
+                            ];
+                            $logoUrl = $logoMap[$gateway->provedor ?? ''] ?? null;
+                        ?>
+                        <?php if($logoUrl): ?>
+                            <img src="<?php echo e($logoUrl); ?>" 
+                                 alt="<?php echo e($gateway->nome); ?>" 
                                  style="width: 40px; height: 40px; object-fit: contain;"
-                                 class="me-3">
-                        <?php else: ?>
-                            <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center me-3" 
-                                 style="width: 40px; height: 40px;">
-                                <i class="uil uil-server-network"></i>
-                            </div>
+                                 class="me-3"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <?php endif; ?>
+                        <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center me-3 <?php echo e($logoUrl ? 'd-none' : ''); ?>" 
+                             style="width: 40px; height: 40px;">
+                            <i class="uil uil-server-network"></i>
+                        </div>
                         <div>
-                            <h5 class="mb-0"><?php echo e($gateway->name); ?></h5>
-                            <small class="text-muted"><?php echo e($gateway->provider); ?></small>
+                            <h5 class="mb-0"><?php echo e($gateway->nome); ?></h5>
+                            <small class="text-muted"><?php echo e($gateway->provedor ?? 'N/A'); ?></small>
                         </div>
                     </div>
                     <div>
-                        <?php if($gateway->is_active): ?>
+                        <?php if($gateway->ativo ?? false): ?>
                             <span class="badge bg-success">Ativo</span>
                         <?php else: ?>
                             <span class="badge bg-secondary">Inativo</span>
@@ -62,26 +71,26 @@
                     <div class="row text-center">
                         <div class="col-4">
                             <div class="mb-2">
-                                <h4 class="text-primary mb-0"><?php echo e($gateway->total_transactions); ?></h4>
+                                <h4 class="text-primary mb-0"><?php echo e($gateway->total_transacoes ?? 0); ?></h4>
                                 <small class="text-muted">Transações</small>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="mb-2">
                                 <h4 class="text-success mb-0">
-                                    <?php echo e($gateway->approved_transactions); ?>
+                                    <?php echo e($gateway->volume_aprovado ?? 0); ?>
 
                                 </h4>
-                                <small class="text-muted">Aprovadas</small>
+                                <small class="text-muted">Volume Aprovado</small>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="mb-2">
                                 <h4 class="text-warning mb-0">
-                                    <?php echo e($gateway->pending_transactions); ?>
+                                    <?php echo e(number_format($gateway->ticket_medio ?? 0, 2)); ?>
 
                                 </h4>
-                                <small class="text-muted">Pendentes</small>
+                                <small class="text-muted">Ticket Médio</small>
                             </div>
                         </div>
                     </div>
@@ -89,40 +98,30 @@
                     <hr>
 
                     <div class="mb-3">
-                        <small class="text-muted">Valor Total Processado:</small>
-                        <h5 class="text-success mb-0">
-                            R$ <?php echo e(number_format($gateway->approved_amount, 2, ',', '.')); ?>
-
+                        <small class="text-muted">Status do Gateway:</small>
+                        <h5 class="mb-0">
+                            <?php if($gateway->ativo ?? false): ?>
+                                <span class="text-success">Operacional</span>
+                            <?php else: ?>
+                                <span class="text-secondary">Inativo</span>
+                            <?php endif; ?>
                         </h5>
                     </div>
 
-                    <?php if($gateway->total_transactions > 0): ?>
                     <div class="mb-3">
-                        <small class="text-muted">Taxa de Aprovação:</small>
-                        <div class="progress mt-1" style="height: 8px;">
-                            <div class="progress-bar bg-success" 
-                                 style="width: <?php echo e($gateway->success_rate); ?>%"
-                                 title="<?php echo e(number_format($gateway->success_rate, 1)); ?>%"></div>
-                        </div>
-                        <small class="text-muted"><?php echo e(number_format($gateway->success_rate, 1)); ?>%</small>
+                        <small class="text-muted">Provedor:</small>
+                        <h6 class="mb-0 text-capitalize"><?php echo e($gateway->provedor ?? 'N/A'); ?></h6>
                     </div>
-                    <?php endif; ?>
-
-                    <?php if($gateway->description): ?>
-                    <div class="mb-3">
-                        <small class="text-muted"><?php echo e(Str::limit($gateway->description, 100)); ?></small>
-                    </div>
-                    <?php endif; ?>
 
                     <div class="mb-3">
                         <small class="text-muted">
-                            <strong>Criado:</strong> <?php echo e($gateway->created_at->format('d/m/Y H:i')); ?>
+                            <strong>Criado:</strong> <?php echo e(\Carbon\Carbon::parse($gateway->created_at)->format('d/m/Y H:i')); ?>
 
                         </small>
                         <?php if($gateway->updated_at != $gateway->created_at): ?>
                         <br>
                         <small class="text-muted">
-                            <strong>Atualizado:</strong> <?php echo e($gateway->updated_at->format('d/m/Y H:i')); ?>
+                            <strong>Atualizado:</strong> <?php echo e(\Carbon\Carbon::parse($gateway->updated_at)->format('d/m/Y H:i')); ?>
 
                         </small>
                         <?php endif; ?>
@@ -130,21 +129,21 @@
                 </div>
                 <div class="card-footer">
                     <div class="btn-group w-100">
-                        <a href="<?php echo e(route('admin.payments.gateway-details', $gateway->id)); ?>" 
+                        <a href="<?php echo e(route('admin.payments.settings')); ?>" 
                            class="btn btn-outline-primary btn-sm">
-                            <i class="uil uil-eye me-1"></i>
-                            Detalhes
+                            <i class="uil uil-setting me-1"></i>
+                            Configurar
                         </a>
-                        <a href="<?php echo e(route('admin.payments.transactions', ['gateway_id' => $gateway->id])); ?>" 
+                        <a href="<?php echo e(route('admin.payments.transactions')); ?>" 
                            class="btn btn-outline-info btn-sm">
                             <i class="uil uil-transaction me-1"></i>
                             Transações
                         </a>
                         <button type="button" 
-                                class="btn btn-outline-<?php echo e($gateway->is_active ? 'warning' : 'success'); ?> btn-sm"
-                                onclick="toggleGateway(<?php echo e($gateway->id); ?>, <?php echo e($gateway->is_active ? 'false' : 'true'); ?>)">
-                            <i class="uil uil-<?php echo e($gateway->is_active ? 'pause' : 'play'); ?> me-1"></i>
-                            <?php echo e($gateway->is_active ? 'Desativar' : 'Ativar'); ?>
+                                class="btn btn-outline-<?php echo e(($gateway->ativo ?? false) ? 'warning' : 'success'); ?> btn-sm"
+                                onclick="toggleGateway(<?php echo e($gateway->id); ?>, <?php echo e(($gateway->ativo ?? false) ? 'false' : 'true'); ?>)">
+                            <i class="uil uil-<?php echo e(($gateway->ativo ?? false) ? 'pause' : 'play'); ?> me-1"></i>
+                            <?php echo e(($gateway->ativo ?? false) ? 'Desativar' : 'Ativar'); ?>
 
                         </button>
                     </div>
@@ -186,16 +185,16 @@
                             <p class="text-muted mb-0">Total de Gateways</p>
                         </div>
                         <div class="col-md-3 text-center">
-                            <h3 class="text-success"><?php echo e($gateways->where('is_active', true)->count()); ?></h3>
+                            <h3 class="text-success"><?php echo e($gateways->where('ativo', true)->count()); ?></h3>
                             <p class="text-muted mb-0">Gateways Ativos</p>
                         </div>
                         <div class="col-md-3 text-center">
-                            <h3 class="text-info"><?php echo e($gateways->sum('total_transactions')); ?></h3>
+                            <h3 class="text-info"><?php echo e($gateways->sum('total_transacoes')); ?></h3>
                             <p class="text-muted mb-0">Total de Transações</p>
                         </div>
                         <div class="col-md-3 text-center">
                             <h3 class="text-warning">
-                                R$ <?php echo e(number_format($gateways->sum('approved_amount'), 2, ',', '.')); ?>
+                                R$ <?php echo e(number_format($gateways->sum('volume_aprovado'), 2, ',', '.')); ?>
 
                             </h3>
                             <p class="text-muted mb-0">Valor Total Processado</p>
@@ -220,7 +219,7 @@ function toggleGateway(gatewayId, activate) {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({ is_active: activate })
+            body: JSON.stringify({ ativo: activate })
         })
         .then(response => response.json())
         .then(data => {
@@ -237,10 +236,12 @@ function toggleGateway(gatewayId, activate) {
     }
 }
 
-// Atualizar dados a cada 30 segundos
+// Atualizar dados a cada 2 minutos (menos frequente)
 setInterval(function() {
-    location.reload();
-}, 30000);
+    if (document.visibilityState === 'visible') {
+        location.reload();
+    }
+}, 120000);
 </script>
 <?php $__env->stopSection(); ?>
 

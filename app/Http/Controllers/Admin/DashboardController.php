@@ -13,233 +13,268 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // Estatísticas gerais das views
+        // Estatísticas gerais
         $stats = $this->getGeneralStats();
 
         // Gráfico de receita dos últimos 12 meses
         $revenueChart = $this->getRevenueChart();
 
-        // Top merchants por receita
-        $topMerchants = $this->getTopMerchants();
-
-        // Top affiliates por comissão
-        $topAffiliates = $this->getTopAffiliates();
-
-        // Assinaturas recentes
-        $recentSubscriptions = $this->getRecentSubscriptions();
-
         // Transações recentes
         $recentTransactions = $this->getRecentTransactions();
+
+        // Top merchants
+        $topMerchants = $this->getTopMerchants();
 
         // Distribuição de planos
         $planDistribution = $this->getPlanDistribution();
 
+        // Estatísticas de pagamentos
+        $paymentStats = $this->getPaymentStats();
+
         return view('admin.dashboard.index', compact(
             'stats',
             'revenueChart',
-            'topMerchants',
-            'topAffiliates',
-            'recentSubscriptions',
             'recentTransactions',
-            'planDistribution'
+            'topMerchants',
+            'planDistribution',
+            'paymentStats'
         ));
     }
 
     /**
-     * Obter estatísticas gerais usando as views criadas
+     * Obter estatísticas gerais do sistema
      */
     private function getGeneralStats(): array
     {
-        // Usar a view admin_dashboard_stats
-        $stats = DB::selectOne("SELECT * FROM admin_dashboard_stats");
+        try {
+            // Estatísticas básicas do sistema
+            $totalEmpresas = DB::table('empresas')->where('status', 'ativo')->count();
+            $totalUsuarios = DB::table('funforcli')->count();
+            $totalTransacoes = DB::table('afi_plan_transacoes')->count();
+            $totalGateways = DB::table('afi_plan_gateways')->where('ativo', true)->count();
 
-        // Retornar dados no formato esperado pela view
-        return [
-            'total_merchants' => (int) $stats->total_merchants,
-            'new_merchants_month' => (int) $stats->new_merchants_month,
-            'active_subscriptions' => (int) $stats->active_subscriptions,
-            'monthly_revenue' => (float) $stats->monthly_revenue,
-            'mrr' => (float) $stats->mrr,
-            'total_affiliates' => (int) $stats->total_affiliates,
-            'active_affiliates' => (int) $stats->total_affiliates, // Mesma coisa que total_affiliates
-            'total_affiliate_sales' => (float) $stats->total_affiliate_sales,
-            'transactions_last_30_days' => (int) $stats->transactions_last_30_days,
-            'revenue_last_30_days' => (float) $stats->revenue_last_30_days,
-            'subscription_growth' => $stats->total_merchants > 0 ?
-                round(($stats->new_merchants_month / $stats->total_merchants) * 100, 1) : 0,
-            'conversion_rate' => 15.3, // Taxa de conversão fixa para exemplo
-            'avg_subscription_value' => $stats->active_subscriptions > 0 ?
-                round($stats->monthly_revenue / $stats->active_subscriptions, 2) : 0,
-            'success_rate' => 95.5
-        ];
+            // Estatísticas mensais
+            $newMerchantsMonth = DB::table('empresas')
+                ->where('created_at', '>=', now()->startOfMonth())
+                ->count();
+
+            // Assinaturas ativas (placeholder - implementar conforme modelo de assinatura)
+            $activeSubscriptions = DB::table('empresas')->where('status', 'ativo')->count();
+
+            // Receita mensal
+            $monthlyRevenue = DB::table('afi_plan_transacoes')
+                ->where('data_transacao', '>=', now()->startOfMonth())
+                ->where('status', 'aprovada')
+                ->sum('valor_final') ?? 0;
+
+            // MRR (Monthly Recurring Revenue)
+            $mrr = $monthlyRevenue; // Simplificado
+
+            // Afiliados ativos (placeholder)
+            $activeAffiliates = DB::table('funforcli')->where('tipo', 'afiliado')->count() ?? 0;
+
+            return [
+                'total_merchants' => $totalEmpresas,
+                'new_merchants_month' => $newMerchantsMonth,
+                'active_subscriptions' => $activeSubscriptions,
+                'subscription_growth' => 12.5, // Placeholder
+                'monthly_revenue' => $monthlyRevenue,
+                'mrr' => $mrr,
+                'active_affiliates' => $activeAffiliates,
+                'conversion_rate' => 3.2, // Placeholder
+                'total_usuarios' => $totalUsuarios,
+                'total_transacoes' => $totalTransacoes,
+                'total_gateways' => $totalGateways,
+                'crescimento_empresas' => $newMerchantsMonth,
+                'receita_mensal' => $monthlyRevenue,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'total_merchants' => 0,
+                'new_merchants_month' => 0,
+                'active_subscriptions' => 0,
+                'subscription_growth' => 0,
+                'monthly_revenue' => 0,
+                'mrr' => 0,
+                'active_affiliates' => 0,
+                'conversion_rate' => 0,
+                'total_usuarios' => 0,
+                'total_transacoes' => 0,
+                'total_gateways' => 0,
+                'crescimento_empresas' => 0,
+                'receita_mensal' => 0,
+            ];
+        }
     }
 
     /**
-     * Gráfico de receita dos últimos 12 meses usando view
+     * Gráfico de receita dos últimos 12 meses
      */
     private function getRevenueChart(): array
     {
-        $data = DB::select("SELECT * FROM monthly_revenue_chart ORDER BY month");
+        try {
+            $data = DB::select("
+                SELECT 
+                    DATE_FORMAT(data_transacao, '%Y-%m') as month,
+                    COALESCE(SUM(valor_final), 0) as revenue
+                FROM afi_plan_transacoes 
+                WHERE data_transacao >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+                    AND status = 'aprovada'
+                GROUP BY DATE_FORMAT(data_transacao, '%Y-%m')
+                ORDER BY month
+            ");
 
-        $months = [];
-        $revenues = [];
-        $subscriptions = [];
-
-        foreach ($data as $row) {
-            $months[] = $row->month_label;
-            $revenues[] = (float) $row->total_revenue;
-            $subscriptions[] = (int) $row->transaction_count;
+            return array_map(function ($item) {
+                return [
+                    'month' => $item->month,
+                    'revenue' => (float) $item->revenue
+                ];
+            }, $data);
+        } catch (\Exception $e) {
+            return [];
         }
-
-        return [
-            'months' => $months,
-            'revenues' => $revenues,
-            'subscriptions' => $subscriptions
-        ];
     }
 
     /**
-     * Top merchants por receita usando view
-     */
-    private function getTopMerchants(): array
-    {
-        $merchants = DB::select("
-            SELECT 
-                ms.id,
-                ms.name,
-                ms.email,
-                ms.subscription_count as total_subscriptions,
-                ms.total_revenue,
-                ms.transaction_count as total_transactions,
-                ms.current_plan as plan_name,
-                ms.created_at as last_subscription,
-                95.5 as success_rate
-            FROM merchant_stats ms
-            WHERE ms.subscription_count > 0
-            ORDER BY ms.total_revenue DESC, ms.subscription_count DESC
-            LIMIT 10
-        ");
-
-        // Converter strings de data em objetos Carbon
-        return array_map(function ($merchant) {
-            if ($merchant->last_subscription) {
-                $merchant->last_subscription = \Carbon\Carbon::parse($merchant->last_subscription);
-            }
-            return $merchant;
-        }, $merchants);
-    }
-
-    /**
-     * Top affiliates por comissão usando view
-     */
-    private function getTopAffiliates(): array
-    {
-        return DB::select("
-            SELECT 
-                id,
-                name,
-                email,
-                code as affiliate_code,
-                total_referrals,
-                converted_referrals as conversions,
-                total_commissions,
-                ROUND(
-                    CASE 
-                        WHEN total_referrals > 0 THEN (converted_referrals * 100.0 / total_referrals)
-                        ELSE 0
-                    END, 2
-                ) as conversion_rate
-            FROM affiliate_stats
-            WHERE total_commissions > 0 OR total_sales > 0
-            ORDER BY total_commissions DESC, total_sales DESC
-            LIMIT 10
-        ");
-    }
-
-    /**
-     * Assinaturas recentes
-     */
-    private function getRecentSubscriptions(): array
-    {
-        $subscriptions = DB::select("
-            SELECT 
-                ms.id,
-                ms.plan_name,
-                ms.amount,
-                ms.billing_cycle,
-                ms.status,
-                ms.created_at,
-                m.business_name as merchant_name,
-                m.email as merchant_email
-            FROM merchant_subscriptions ms
-            INNER JOIN merchants m ON ms.merchant_id = m.id
-            ORDER BY ms.created_at DESC
-            LIMIT 15
-        ");
-
-        // Converter strings de data em objetos Carbon
-        return array_map(function ($subscription) {
-            $subscription->created_at = \Carbon\Carbon::parse($subscription->created_at);
-            return $subscription;
-        }, $subscriptions);
-    }
-
-    /**
-     * Transações recentes usando view
+     * Transações recentes
      */
     private function getRecentTransactions(): array
     {
-        $transactions = DB::select("
-            SELECT 
-                rt.id,
-                rt.transaction_code as external_id,
-                rt.final_amount as amount,
-                rt.status,
-                rt.payment_method,
-                rt.created_at,
-                rt.gateway_name,
-                rt.merchant_name,
-                COALESCE(rt.customer_email, 'email@exemplo.com') as merchant_email
-            FROM recent_transactions rt
-            ORDER BY rt.created_at DESC
-            LIMIT 15
-        ");
+        try {
+            $transactions = DB::table('afi_plan_transacoes as t')
+                ->select([
+                    't.id',
+                    't.valor_final as amount',
+                    't.status',
+                    't.data_transacao as created_at',
+                    'e.nome_fantasia as merchant_name',
+                    'e.email as merchant_email'
+                ])
+                ->leftJoin('empresas as e', 't.empresa_id', '=', 'e.id')
+                ->orderBy('t.data_transacao', 'desc')
+                ->limit(10)
+                ->get();
 
-        // Converter strings de data em objetos Carbon
-        return array_map(function ($transaction) {
-            $transaction->created_at = \Carbon\Carbon::parse($transaction->created_at);
-            return $transaction;
-        }, $transactions);
+            return $transactions->map(function ($transaction) {
+                return (object) [
+                    'id' => $transaction->id,
+                    'amount' => $transaction->amount ?? 0,
+                    'status' => $transaction->status === 'aprovada' ? 'completed' : ($transaction->status === 'pendente' ? 'pending' : 'failed'),
+                    'merchant_name' => $transaction->merchant_name ?? 'N/A',
+                    'merchant_email' => $transaction->merchant_email ?? 'N/A',
+                    'created_at' => \Carbon\Carbon::parse($transaction->created_at ?? now())
+                ];
+            })->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 
     /**
-     * Distribuição de planos para gráfico
+     * Top merchants
+     */
+    private function getTopMerchants(): array
+    {
+        try {
+            $merchants = DB::table('empresas as e')
+                ->select([
+                    'e.nome_fantasia as name',
+                    'e.plano as plan_name',
+                    DB::raw('COALESCE(SUM(t.valor_final), 0) as total_revenue'),
+                    DB::raw('COUNT(t.id) as total_transactions'),
+                    DB::raw('(COUNT(CASE WHEN t.status = "aprovada" THEN 1 END) * 100.0 / NULLIF(COUNT(t.id), 0)) as success_rate')
+                ])
+                ->leftJoin('afi_plan_transacoes as t', function($join) {
+                    $join->on('e.id', '=', 't.empresa_id')
+                         ->where('t.data_transacao', '>=', now()->subDays(30));
+                })
+                ->groupBy('e.id', 'e.nome_fantasia', 'e.plano')
+                ->orderBy('total_revenue', 'desc')
+                ->limit(5)
+                ->get();
+
+            return $merchants->map(function ($merchant) {
+                return (object) [
+                    'name' => $merchant->name ?? 'N/A',
+                    'plan_name' => $merchant->plan_name ?? 'Básico',
+                    'total_revenue' => $merchant->total_revenue ?? 0,
+                    'total_transactions' => $merchant->total_transactions ?? 0,
+                    'success_rate' => $merchant->success_rate ?? 0
+                ];
+            })->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Distribuição de planos
      */
     private function getPlanDistribution(): array
     {
-        $plans = DB::select("
-            SELECT 
-                plan_name,
-                plan_code,
-                subscription_count as count,
-                total_revenue,
-                active_count,
-                trial_count
-            FROM plan_distribution
-            WHERE subscription_count > 0 OR active_count > 0
-            ORDER BY subscription_count DESC
-            LIMIT 10
-        ");
+        try {
+            $plans = DB::table('empresas')
+                ->select([
+                    'plano as plan_name',
+                    DB::raw('COUNT(*) as count')
+                ])
+                ->where('status', 'ativo')
+                ->groupBy('plano')
+                ->get();
 
-        // Se não há dados, retornar dados de exemplo
-        if (empty($plans)) {
+            return $plans->map(function ($plan) {
+                return [
+                    'plan_name' => $plan->plan_name ?? 'Básico',
+                    'count' => $plan->count ?? 0
+                ];
+            })->toArray();
+        } catch (\Exception $e) {
             return [
-                (object) ['plan_name' => 'Plano Básico', 'count' => 1],
-                (object) ['plan_name' => 'Plano Premium', 'count' => 0],
-                (object) ['plan_name' => 'Plano Enterprise', 'count' => 0]
+                ['plan_name' => 'Básico', 'count' => 0],
+                ['plan_name' => 'Pro', 'count' => 0],
+                ['plan_name' => 'Enterprise', 'count' => 0]
             ];
         }
+    }
 
-        return $plans;
+    /**
+     * Estatísticas de pagamentos
+     */
+    private function getPaymentStats(): array
+    {
+        try {
+            $stats = DB::selectOne("
+                SELECT 
+                    COUNT(*) as total_transacoes,
+                    COUNT(CASE WHEN status = 'aprovada' THEN 1 END) as aprovadas,
+                    COUNT(CASE WHEN status = 'pendente' THEN 1 END) as pendentes,
+                    COUNT(CASE WHEN status = 'cancelada' THEN 1 END) as canceladas,
+                    COALESCE(SUM(CASE WHEN status = 'aprovada' THEN valor_final END), 0) as volume_aprovado,
+                    COALESCE(AVG(CASE WHEN status = 'aprovada' THEN valor_final END), 0) as ticket_medio
+                FROM afi_plan_transacoes
+                WHERE data_transacao >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            ");
+
+            return [
+                'total_transacoes' => (int) $stats->total_transacoes,
+                'aprovadas' => (int) $stats->aprovadas,
+                'pendentes' => (int) $stats->pendentes,
+                'canceladas' => (int) $stats->canceladas,
+                'volume_aprovado' => (float) $stats->volume_aprovado,
+                'ticket_medio' => (float) $stats->ticket_medio,
+                'taxa_aprovacao' => $stats->total_transacoes > 0 ?
+                    round(($stats->aprovadas / $stats->total_transacoes) * 100, 2) : 0
+            ];
+        } catch (\Exception $e) {
+            return [
+                'total_transacoes' => 0,
+                'aprovadas' => 0,
+                'pendentes' => 0,
+                'canceladas' => 0,
+                'volume_aprovado' => 0,
+                'ticket_medio' => 0,
+                'taxa_aprovacao' => 0
+            ];
+        }
     }
 }

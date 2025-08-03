@@ -84,7 +84,7 @@ class ReportController extends Controller
                 'receita_total' => (float) $stats->receita_total,
                 'empresas_ativas' => (int) $stats->empresas_ativas,
                 'gateways_usados' => (int) $stats->gateways_usados,
-                'taxa_aprovacao' => $stats->total_transacoes > 0 ? 
+                'taxa_aprovacao' => $stats->total_transacoes > 0 ?
                     round(($stats->aprovadas / $stats->total_transacoes) * 100, 2) : 0
             ];
         } catch (\Exception $e) {

@@ -101,11 +101,11 @@
                                             <div class="d-flex align-items-center">
                                                 @if($transaction->gateway->logo_url)
                                                     <img src="{{ $transaction->gateway->logo_url }}" 
-                                                         alt="{{ $transaction->gateway->name }}" 
+                                                         alt="{{ $transaction->gateway->nome }}" 
                                                          style="width: 24px; height: 24px; object-fit: contain;"
                                                          class="me-2">
                                                 @endif
-                                                {{ $transaction->gateway->name }}
+                                                {{ $transaction->gateway->nome }}
                                             </div>
                                         @else
                                             <span class="text-muted">N/A</span>
@@ -136,10 +136,10 @@
                         </div>
                     </div>
 
-                    @if($transaction->description)
+                    @if($transaction->descricao)
                     <div class="mt-3">
                         <h6>Descrição:</h6>
-                        <p class="text-muted">{{ $transaction->description }}</p>
+                        <p class="text-muted">{{ $transaction->descricao }}</p>
                     </div>
                     @endif
                 </div>

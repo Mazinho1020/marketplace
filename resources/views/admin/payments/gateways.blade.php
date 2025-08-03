@@ -36,24 +36,33 @@
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        @if($gateway->logo_url)
-                            <img src="{{ $gateway->logo_url }}" 
-                                 alt="{{ $gateway->name }}" 
+                        @php
+                            $logoMap = [
+                                'pix' => 'https://logoeps.com/wp-content/uploads/2022/12/pix-vector-logo.png',
+                                'boleto' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Boleto.svg/200px-Boleto.svg.png',
+                                'pagseguro' => 'https://assets.pagseguro.com.br/ps-sdk-js/v2/assets/logos/pagseguro.svg',
+                                'mercadopago' => 'https://http2.mlstatic.com/resources/frontend/statics/growth-sellers-landings/device-pictures/picture__medium@2x.png'
+                            ];
+                            $logoUrl = $logoMap[$gateway->provedor ?? ''] ?? null;
+                        @endphp
+                        @if($logoUrl)
+                            <img src="{{ $logoUrl }}" 
+                                 alt="{{ $gateway->nome }}" 
                                  style="width: 40px; height: 40px; object-fit: contain;"
-                                 class="me-3">
-                        @else
-                            <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center me-3" 
-                                 style="width: 40px; height: 40px;">
-                                <i class="uil uil-server-network"></i>
-                            </div>
+                                 class="me-3"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         @endif
+                        <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center me-3 {{ $logoUrl ? 'd-none' : '' }}" 
+                             style="width: 40px; height: 40px;">
+                            <i class="uil uil-server-network"></i>
+                        </div>
                         <div>
-                            <h5 class="mb-0">{{ $gateway->name }}</h5>
-                            <small class="text-muted">{{ $gateway->provider }}</small>
+                            <h5 class="mb-0">{{ $gateway->nome }}</h5>
+                            <small class="text-muted">{{ $gateway->provedor ?? 'N/A' }}</small>
                         </div>
                     </div>
                     <div>
-                        @if($gateway->is_active)
+                        @if($gateway->ativo ?? false)
                             <span class="badge bg-success">Ativo</span>
                         @else
                             <span class="badge bg-secondary">Inativo</span>
@@ -64,24 +73,24 @@
                     <div class="row text-center">
                         <div class="col-4">
                             <div class="mb-2">
-                                <h4 class="text-primary mb-0">{{ $gateway->total_transactions }}</h4>
+                                <h4 class="text-primary mb-0">{{ $gateway->total_transacoes ?? 0 }}</h4>
                                 <small class="text-muted">Transações</small>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="mb-2">
                                 <h4 class="text-success mb-0">
-                                    {{ $gateway->approved_transactions }}
+                                    {{ $gateway->volume_aprovado ?? 0 }}
                                 </h4>
-                                <small class="text-muted">Aprovadas</small>
+                                <small class="text-muted">Volume Aprovado</small>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="mb-2">
                                 <h4 class="text-warning mb-0">
-                                    {{ $gateway->pending_transactions }}
+                                    {{ number_format($gateway->ticket_medio ?? 0, 2) }}
                                 </h4>
-                                <small class="text-muted">Pendentes</small>
+                                <small class="text-muted">Ticket Médio</small>
                             </div>
                         </div>
                     </div>
@@ -89,59 +98,50 @@
                     <hr>
 
                     <div class="mb-3">
-                        <small class="text-muted">Valor Total Processado:</small>
-                        <h5 class="text-success mb-0">
-                            R$ {{ number_format($gateway->approved_amount, 2, ',', '.') }}
+                        <small class="text-muted">Status do Gateway:</small>
+                        <h5 class="mb-0">
+                            @if($gateway->ativo ?? false)
+                                <span class="text-success">Operacional</span>
+                            @else
+                                <span class="text-secondary">Inativo</span>
+                            @endif
                         </h5>
                     </div>
 
-                    @if($gateway->total_transactions > 0)
                     <div class="mb-3">
-                        <small class="text-muted">Taxa de Aprovação:</small>
-                        <div class="progress mt-1" style="height: 8px;">
-                            <div class="progress-bar bg-success" 
-                                 style="width: {{ $gateway->success_rate }}%"
-                                 title="{{ number_format($gateway->success_rate, 1) }}%"></div>
-                        </div>
-                        <small class="text-muted">{{ number_format($gateway->success_rate, 1) }}%</small>
+                        <small class="text-muted">Provedor:</small>
+                        <h6 class="mb-0 text-capitalize">{{ $gateway->provedor ?? 'N/A' }}</h6>
                     </div>
-                    @endif
-
-                    @if($gateway->description)
-                    <div class="mb-3">
-                        <small class="text-muted">{{ Str::limit($gateway->description, 100) }}</small>
-                    </div>
-                    @endif
 
                     <div class="mb-3">
                         <small class="text-muted">
-                            <strong>Criado:</strong> {{ $gateway->created_at->format('d/m/Y H:i') }}
+                            <strong>Criado:</strong> {{ \Carbon\Carbon::parse($gateway->created_at)->format('d/m/Y H:i') }}
                         </small>
                         @if($gateway->updated_at != $gateway->created_at)
                         <br>
                         <small class="text-muted">
-                            <strong>Atualizado:</strong> {{ $gateway->updated_at->format('d/m/Y H:i') }}
+                            <strong>Atualizado:</strong> {{ \Carbon\Carbon::parse($gateway->updated_at)->format('d/m/Y H:i') }}
                         </small>
                         @endif
                     </div>
                 </div>
                 <div class="card-footer">
                     <div class="btn-group w-100">
-                        <a href="{{ route('admin.payments.gateway-details', $gateway->id) }}" 
+                        <a href="{{ route('admin.payments.settings') }}" 
                            class="btn btn-outline-primary btn-sm">
-                            <i class="uil uil-eye me-1"></i>
-                            Detalhes
+                            <i class="uil uil-setting me-1"></i>
+                            Configurar
                         </a>
-                        <a href="{{ route('admin.payments.transactions', ['gateway_id' => $gateway->id]) }}" 
+                        <a href="{{ route('admin.payments.transactions') }}" 
                            class="btn btn-outline-info btn-sm">
                             <i class="uil uil-transaction me-1"></i>
                             Transações
                         </a>
                         <button type="button" 
-                                class="btn btn-outline-{{ $gateway->is_active ? 'warning' : 'success' }} btn-sm"
-                                onclick="toggleGateway({{ $gateway->id }}, {{ $gateway->is_active ? 'false' : 'true' }})">
-                            <i class="uil uil-{{ $gateway->is_active ? 'pause' : 'play' }} me-1"></i>
-                            {{ $gateway->is_active ? 'Desativar' : 'Ativar' }}
+                                class="btn btn-outline-{{ ($gateway->ativo ?? false) ? 'warning' : 'success' }} btn-sm"
+                                onclick="toggleGateway({{ $gateway->id }}, {{ ($gateway->ativo ?? false) ? 'false' : 'true' }})">
+                            <i class="uil uil-{{ ($gateway->ativo ?? false) ? 'pause' : 'play' }} me-1"></i>
+                            {{ ($gateway->ativo ?? false) ? 'Desativar' : 'Ativar' }}
                         </button>
                     </div>
                 </div>
@@ -182,16 +182,16 @@
                             <p class="text-muted mb-0">Total de Gateways</p>
                         </div>
                         <div class="col-md-3 text-center">
-                            <h3 class="text-success">{{ $gateways->where('is_active', true)->count() }}</h3>
+                            <h3 class="text-success">{{ $gateways->where('ativo', true)->count() }}</h3>
                             <p class="text-muted mb-0">Gateways Ativos</p>
                         </div>
                         <div class="col-md-3 text-center">
-                            <h3 class="text-info">{{ $gateways->sum('total_transactions') }}</h3>
+                            <h3 class="text-info">{{ $gateways->sum('total_transacoes') }}</h3>
                             <p class="text-muted mb-0">Total de Transações</p>
                         </div>
                         <div class="col-md-3 text-center">
                             <h3 class="text-warning">
-                                R$ {{ number_format($gateways->sum('approved_amount'), 2, ',', '.') }}
+                                R$ {{ number_format($gateways->sum('volume_aprovado'), 2, ',', '.') }}
                             </h3>
                             <p class="text-muted mb-0">Valor Total Processado</p>
                         </div>
@@ -215,7 +215,7 @@ function toggleGateway(gatewayId, activate) {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({ is_active: activate })
+            body: JSON.stringify({ ativo: activate })
         })
         .then(response => response.json())
         .then(data => {
@@ -232,9 +232,11 @@ function toggleGateway(gatewayId, activate) {
     }
 }
 
-// Atualizar dados a cada 30 segundos
+// Atualizar dados a cada 2 minutos (menos frequente)
 setInterval(function() {
-    location.reload();
-}, 30000);
+    if (document.visibilityState === 'visible') {
+        location.reload();
+    }
+}, 120000);
 </script>
 @endsection

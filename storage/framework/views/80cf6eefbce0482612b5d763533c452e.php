@@ -36,10 +36,10 @@
                         <label class="form-label">Status</label>
                         <select name="status" class="form-select">
                             <option value="">Todos</option>
-                            <option value="pending" <?php echo e(request('status') === 'pending' ? 'selected' : ''); ?>>Pendente</option>
-                            <option value="approved" <?php echo e(request('status') === 'approved' ? 'selected' : ''); ?>>Aprovada</option>
-                            <option value="rejected" <?php echo e(request('status') === 'rejected' ? 'selected' : ''); ?>>Rejeitada</option>
-                            <option value="cancelled" <?php echo e(request('status') === 'cancelled' ? 'selected' : ''); ?>>Cancelada</option>
+                            <option value="pendente" <?php echo e(request('status') === 'pendente' ? 'selected' : ''); ?>>Pendente</option>
+                            <option value="aprovado" <?php echo e(request('status') === 'aprovado' ? 'selected' : ''); ?>>Aprovada</option>
+                            <option value="recusado" <?php echo e(request('status') === 'recusado' ? 'selected' : ''); ?>>Rejeitada</option>
+                            <option value="cancelado" <?php echo e(request('status') === 'cancelado' ? 'selected' : ''); ?>>Cancelada</option>
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -48,7 +48,7 @@
                             <option value="">Todos</option>
                             <?php $__currentLoopData = $gateways; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $gateway): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <option value="<?php echo e($gateway->id); ?>" <?php echo e(request('gateway_id') == $gateway->id ? 'selected' : ''); ?>>
-                                    <?php echo e($gateway->name); ?>
+                                    <?php echo e($gateway->nome); ?>
 
                                 </option>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -134,9 +134,9 @@
                         <tr>
                             <td>
                                 <div>
-                                    <code>#<?php echo e($transaction->external_id ?? $transaction->id); ?></code>
-                                    <?php if($transaction->description): ?>
-                                        <br><small class="text-muted"><?php echo e(Str::limit($transaction->description, 30)); ?></small>
+                                    <code>#<?php echo e($transaction->codigo_transacao ?? $transaction->id); ?></code>
+                                    <?php if($transaction->descricao): ?>
+                                        <br><small class="text-muted"><?php echo e(Str::limit($transaction->descricao, 30)); ?></small>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -144,7 +144,7 @@
                                 <strong class="text-primary">R$ <?php echo e(number_format($transaction->amount, 2, ',', '.')); ?></strong>
                             </td>
                             <td>
-                                <span class="badge bg-secondary"><?php echo e(ucfirst($transaction->payment_method)); ?></span>
+                                <span class="badge bg-secondary"><?php echo e(ucfirst($transaction->forma_pagamento)); ?></span>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
@@ -152,14 +152,14 @@
                                         <div class="me-2">
                                             <?php if($transaction->gateway->logo_url): ?>
                                                 <img src="<?php echo e($transaction->gateway->logo_url); ?>" 
-                                                     alt="<?php echo e($transaction->gateway->name); ?>" 
+                                                     alt="<?php echo e($transaction->gateway->nome); ?>" 
                                                      style="width: 24px; height: 24px; object-fit: contain;">
                                             <?php else: ?>
                                                 <i class="uil uil-server-network text-primary"></i>
                                             <?php endif; ?>
                                         </div>
                                         <div>
-                                            <strong><?php echo e($transaction->gateway->name); ?></strong>
+                                            <strong><?php echo e($transaction->gateway->nome); ?></strong>
                                         </div>
                                     <?php else: ?>
                                         <span class="text-muted">N/A</span>
@@ -167,19 +167,19 @@
                                 </div>
                             </td>
                             <td>
-                                <?php if($transaction->status === 'approved'): ?>
+                                <?php if($transaction->status === 'aprovado'): ?>
                                     <span class="badge bg-success">
                                         <i class="uil uil-check me-1"></i>Aprovada
                                     </span>
-                                <?php elseif($transaction->status === 'pending'): ?>
+                                <?php elseif($transaction->status === 'pendente'): ?>
                                     <span class="badge bg-warning">
                                         <i class="uil uil-clock me-1"></i>Pendente
                                     </span>
-                                <?php elseif($transaction->status === 'rejected'): ?>
+                                <?php elseif($transaction->status === 'recusado'): ?>
                                     <span class="badge bg-danger">
                                         <i class="uil uil-times me-1"></i>Rejeitada
                                     </span>
-                                <?php elseif($transaction->status === 'cancelled'): ?>
+                                <?php elseif($transaction->status === 'cancelado'): ?>
                                     <span class="badge bg-secondary">
                                         <i class="uil uil-ban me-1"></i>Cancelada
                                     </span>

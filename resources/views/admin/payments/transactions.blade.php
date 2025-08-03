@@ -38,10 +38,10 @@
                         <label class="form-label">Status</label>
                         <select name="status" class="form-select">
                             <option value="">Todos</option>
-                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pendente</option>
-                            <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Aprovada</option>
-                            <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejeitada</option>
-                            <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelada</option>
+                            <option value="pendente" {{ request('status') === 'pendente' ? 'selected' : '' }}>Pendente</option>
+                            <option value="aprovado" {{ request('status') === 'aprovado' ? 'selected' : '' }}>Aprovada</option>
+                            <option value="recusado" {{ request('status') === 'recusado' ? 'selected' : '' }}>Rejeitada</option>
+                            <option value="cancelado" {{ request('status') === 'cancelado' ? 'selected' : '' }}>Cancelada</option>
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -50,7 +50,7 @@
                             <option value="">Todos</option>
                             @foreach($gateways as $gateway)
                                 <option value="{{ $gateway->id }}" {{ request('gateway_id') == $gateway->id ? 'selected' : '' }}>
-                                    {{ $gateway->name }}
+                                    {{ $gateway->nome }}
                                 </option>
                             @endforeach
                         </select>
@@ -134,9 +134,9 @@
                         <tr>
                             <td>
                                 <div>
-                                    <code>#{{ $transaction->external_id ?? $transaction->id }}</code>
-                                    @if($transaction->description)
-                                        <br><small class="text-muted">{{ Str::limit($transaction->description, 30) }}</small>
+                                    <code>#{{ $transaction->codigo_transacao ?? $transaction->id }}</code>
+                                    @if($transaction->descricao)
+                                        <br><small class="text-muted">{{ Str::limit($transaction->descricao, 30) }}</small>
                                     @endif
                                 </div>
                             </td>
@@ -144,7 +144,7 @@
                                 <strong class="text-primary">R$ {{ number_format($transaction->amount, 2, ',', '.') }}</strong>
                             </td>
                             <td>
-                                <span class="badge bg-secondary">{{ ucfirst($transaction->payment_method) }}</span>
+                                <span class="badge bg-secondary">{{ ucfirst($transaction->forma_pagamento) }}</span>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
@@ -152,14 +152,14 @@
                                         <div class="me-2">
                                             @if($transaction->gateway->logo_url)
                                                 <img src="{{ $transaction->gateway->logo_url }}" 
-                                                     alt="{{ $transaction->gateway->name }}" 
+                                                     alt="{{ $transaction->gateway->nome }}" 
                                                      style="width: 24px; height: 24px; object-fit: contain;">
                                             @else
                                                 <i class="uil uil-server-network text-primary"></i>
                                             @endif
                                         </div>
                                         <div>
-                                            <strong>{{ $transaction->gateway->name }}</strong>
+                                            <strong>{{ $transaction->gateway->nome }}</strong>
                                         </div>
                                     @else
                                         <span class="text-muted">N/A</span>
@@ -167,19 +167,19 @@
                                 </div>
                             </td>
                             <td>
-                                @if($transaction->status === 'approved')
+                                @if($transaction->status === 'aprovado')
                                     <span class="badge bg-success">
                                         <i class="uil uil-check me-1"></i>Aprovada
                                     </span>
-                                @elseif($transaction->status === 'pending')
+                                @elseif($transaction->status === 'pendente')
                                     <span class="badge bg-warning">
                                         <i class="uil uil-clock me-1"></i>Pendente
                                     </span>
-                                @elseif($transaction->status === 'rejected')
+                                @elseif($transaction->status === 'recusado')
                                     <span class="badge bg-danger">
                                         <i class="uil uil-times me-1"></i>Rejeitada
                                     </span>
-                                @elseif($transaction->status === 'cancelled')
+                                @elseif($transaction->status === 'cancelado')
                                     <span class="badge bg-secondary">
                                         <i class="uil uil-ban me-1"></i>Cancelada
                                     </span>

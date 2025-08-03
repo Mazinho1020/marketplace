@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'empresa' => \App\Http\Middleware\EmpresaMiddleware::class,
             'auth.simple' => \App\Http\Middleware\AuthMiddleware::class,
+            'check.feature' => \App\Http\Middleware\CheckPlanFeature::class,
+            'check.user.limit' => \App\Http\Middleware\CheckUserLimit::class,
+            'check.subscription' => \App\Http\Middleware\CheckSubscriptionStatus::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -1,5 +1,12 @@
 <?php $__env->startSection('title', 'Dashboard'); ?>
-<?php $__env->startSection('page-title', 'Dashboard'); ?>
+
+<?php
+    $pageTitle = 'Dashboard';
+    $breadcrumbs = [
+        ['title' => 'Admin', 'url' => route('admin.dashboard')],
+        ['title' => 'Dashboard', 'url' => '#']
+    ];
+?>
 
 <?php $__env->startSection('content'); ?>
 <!-- KPI Cards -->
@@ -210,25 +217,25 @@
             <h5 class="mb-3">Ações Rápidas</h5>
             <div class="row">
                 <div class="col-md-3 mb-2">
-                    <a href="<?php echo e(route('admin.merchants.create')); ?>" class="btn btn-primary w-100">
+                    <a href="#" onclick="alert('Módulo em desenvolvimento')" class="btn btn-primary w-100">
                         <i class="fas fa-plus me-2"></i>
                         Novo Merchant
                     </a>
                 </div>
                 <div class="col-md-3 mb-2">
-                    <a href="<?php echo e(route('admin.reports.revenue')); ?>" class="btn btn-outline-primary w-100">
+                    <a href="<?php echo e(route('admin.payments.reports')); ?>" class="btn btn-outline-primary w-100">
                         <i class="fas fa-chart-line me-2"></i>
                         Relatório de Receita
                     </a>
                 </div>
                 <div class="col-md-3 mb-2">
-                    <a href="<?php echo e(route('admin.affiliates.programs')); ?>" class="btn btn-outline-primary w-100">
+                    <a href="#" onclick="alert('Módulo em desenvolvimento')" class="btn btn-outline-primary w-100">
                         <i class="fas fa-share-alt me-2"></i>
                         Gerenciar Afiliados
                     </a>
                 </div>
                 <div class="col-md-3 mb-2">
-                    <a href="<?php echo e(route('admin.payment.analytics')); ?>" class="btn btn-outline-primary w-100">
+                    <a href="<?php echo e(route('admin.payments.analytics')); ?>" class="btn btn-outline-primary w-100">
                         <i class="fas fa-analytics me-2"></i>
                         Analytics Pagamentos
                     </a>
@@ -241,76 +248,82 @@
 
 <?php $__env->startPush('scripts'); ?>
 <script>
-// Revenue Chart
-const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-let revenueChart = new Chart(revenueCtx, {
-    type: 'line',
-    data: {
-        labels: <?php echo json_encode(array_column($revenueChart, 'month')); ?>,
-        datasets: [{
-            label: 'Receita',
-            data: <?php echo json_encode(array_column($revenueChart, 'revenue')); ?>,
-            borderColor: '#667eea',
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.4
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return 'R$ ' + value.toLocaleString('pt-BR');
+document.addEventListener('DOMContentLoaded', function() {
+    // Revenue Chart
+    const revenueCtx = document.getElementById('revenueChart');
+    if (revenueCtx) {
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: <?php echo json_encode(array_column($revenueChart ?? [], 'month')); ?>,
+                datasets: [{
+                    label: 'Receita',
+                    data: <?php echo json_encode(array_column($revenueChart ?? [], 'revenue')); ?>,
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR');
+                            }
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        radius: 5,
+                        hoverRadius: 8
                     }
                 }
             }
-        },
-        elements: {
-            point: {
-                radius: 5,
-                hoverRadius: 8
-            }
-        }
+        });
     }
-});
 
-// Plan Distribution Chart
-const planCtx = document.getElementById('planChart').getContext('2d');
-const planChart = new Chart(planCtx, {
-    type: 'doughnut',
-    data: {
-        labels: <?php echo json_encode(array_column($planDistribution, 'plan_name')); ?>,
-        datasets: [{
-            data: <?php echo json_encode(array_column($planDistribution, 'count')); ?>,
-            backgroundColor: [
-                '#667eea',
-                '#764ba2',
-                '#28a745',
-                '#fd7e14',
-                '#e83e8c',
-                '#17a2b8'
-            ],
-            borderWidth: 0
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom'
+    // Plan Distribution Chart
+    const planCtx = document.getElementById('planChart');
+    if (planCtx) {
+        new Chart(planCtx, {
+            type: 'doughnut',
+            data: {
+                labels: <?php echo json_encode(array_column($planDistribution ?? [], 'plan_name')); ?>,
+                datasets: [{
+                    data: <?php echo json_encode(array_column($planDistribution ?? [], 'count')); ?>,
+                    backgroundColor: [
+                        '#667eea',
+                        '#764ba2',
+                        '#28a745',
+                        '#fd7e14',
+                        '#e83e8c',
+                        '#17a2b8'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
             }
-        }
+        });
     }
 });
 
@@ -323,27 +336,15 @@ function updateRevenueChart(period) {
     });
     
     // Add active class to clicked button
-    event.target.classList.remove('btn-outline-primary');
-    event.target.classList.add('btn-primary');
+    if (event && event.target) {
+        event.target.classList.remove('btn-outline-primary');
+        event.target.classList.add('btn-primary');
+    }
     
-    // Fetch new data (implement AJAX call here)
-    axios.get(`<?php echo e(route('admin.dashboard')); ?>?period=${period}`)
-        .then(response => {
-            // Update chart data
-            revenueChart.data.labels = response.data.revenueChart.labels;
-            revenueChart.data.datasets[0].data = response.data.revenueChart.data;
-            revenueChart.update();
-        })
-        .catch(error => {
-            console.error('Error updating chart:', error);
-        });
+    // TODO: Implement AJAX call to update chart data
+    console.log('Atualizando gráfico para período:', period);
 }
-
-// Auto refresh every 5 minutes
-setInterval(function() {
-    location.reload();
-}, 300000);
 </script>
 <?php $__env->stopPush(); ?>
 
-<?php echo $__env->make('admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/admin/dashboard/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/admin/dashboard/index.blade.php ENDPATH**/ ?>
