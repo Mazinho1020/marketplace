@@ -30,7 +30,7 @@ class RegisterController extends Controller
     public function showRegistrationForm(Request $request)
     {
         // Buscar empresas ativas da tabela empresas
-        $empresas = DB::table('empresas')->where('ativo', true)->get();
+        $empresas = DB::table('empresas')->where('status', 'ativo')->get();
         $tiposUsuario = EmpresaUsuarioTipo::where('ativo', true)
             ->whereIn('codigo', ['cliente', 'comerciante'])
             ->get();

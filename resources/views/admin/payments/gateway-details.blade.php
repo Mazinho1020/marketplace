@@ -404,9 +404,34 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Gráfico de Performance
-const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-new Chart(performanceCtx, {
+document.addEventListener('DOMContentLoaded', function() {
+    // Aguardar o Chart.js carregar completamente
+    function inicializar() {
+        if (typeof Chart !== 'undefined') {
+            console.log('Chart.js carregado com sucesso - Gateway Details');
+            configurarGraficos();
+        } else {
+            console.log('Aguardando Chart.js carregar...');
+            setTimeout(inicializar, 100);
+        }
+    }
+    
+    inicializar();
+});
+
+function configurarGraficos() {
+    try {
+        // Verificar se o Chart.js está carregado
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js não está carregado');
+            return;
+        }
+
+        // Gráfico de Performance
+        const performanceCanvas = document.getElementById('performanceChart');
+        if (performanceCanvas) {
+            const performanceCtx = performanceCanvas.getContext('2d');
+            new Chart(performanceCtx, {
     type: 'line',
     data: {
         labels: @json($performanceData['labels']),

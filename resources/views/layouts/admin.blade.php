@@ -16,6 +16,28 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
+    <!-- Chart.js Styles (Chart.js 4+ includes CSS automatically, but we include for better compatibility) -->
+    <style>
+        /* Chart.js custom styling for better integration */
+        .chart-container {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .chart-container canvas {
+            max-height: 400px;
+        }
+        
+        /* Chart tooltips styling */
+        .chartjs-tooltip {
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+    
     <!-- Custom Admin CSS -->
     <style>
         .sidebar {
@@ -189,6 +211,7 @@
         .notification-dropdown .dropdown-item {
             border-bottom: 1px solid #f1f1f1;
             padding: 15px 20px;
+            transition: background-color 0.2s ease;
         }
 
         .notification-dropdown .dropdown-item:last-child {
@@ -197,6 +220,15 @@
 
         .notification-dropdown .dropdown-item:hover {
             background: #f8f9fa;
+        }
+
+        .notification-dropdown .dropdown-item.bg-light {
+            background: #f8f9fc !important;
+            border-left: 3px solid #007bff;
+        }
+
+        .notification-dropdown .dropdown-item.bg-light:hover {
+            background: #e9ecef !important;
         }
 
         /* Badge de notificação */
@@ -318,7 +350,7 @@
                             </div>
                         </li>
 
-                        <!-- Notificações (Futuro) -->
+                        <!-- Notificações -->
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.notificacoes.*') ? 'active' : '' }}" href="#notificacoesSubmenu" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('admin.notificacoes.*') ? 'true' : 'false' }}">
                                 <i class="fas fa-bell me-2"></i>
@@ -328,22 +360,41 @@
                             </a>
                             <div class="collapse {{ request()->routeIs('admin.notificacoes.*') ? 'show' : '' }}" id="notificacoesSubmenu">
                                 <ul class="list-unstyled ps-3">
-                                    <li><a href="#" class="nav-link" onclick="alert('Módulo em desenvolvimento')"><i class="fas fa-inbox me-2"></i>Caixa de Entrada</a></li>
-                                    <li><a href="#" class="nav-link" onclick="alert('Módulo em desenvolvimento')"><i class="fas fa-paper-plane me-2"></i>Enviar Notificação</a></li>
-                                    <li><a href="#" class="nav-link" onclick="alert('Módulo em desenvolvimento')"><i class="fas fa-cogs me-2"></i>Configurações</a></li>
-                                    <li><a href="#" class="nav-link" onclick="alert('Módulo em desenvolvimento')"><i class="fas fa-history me-2"></i>Histórico</a></li>
+                                    <li><a href="{{ route('admin.notificacoes.index') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.index') ? 'active' : '' }}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                                    <li><hr class="my-2" style="border-color: rgba(255,255,255,0.1);"></li>
+                                    <li><a href="{{ route('admin.notificacoes.templates') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.templates') ? 'active' : '' }}"><i class="fas fa-file-alt me-2"></i>Templates</a></li>
+                                    <li><a href="{{ route('admin.notificacoes.tipos') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.tipos') ? 'active' : '' }}"><i class="fas fa-list me-2"></i>Tipos de Evento</a></li>
+                                    <li><a href="{{ route('admin.notificacoes.aplicacoes') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.aplicacoes') ? 'active' : '' }}"><i class="fas fa-desktop me-2"></i>Aplicações</a></li>
+                                    <li><a href="{{ route('admin.notificacoes.canais') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.canais') ? 'active' : '' }}"><i class="fas fa-share-alt me-2"></i>Canais</a></li>
+                                    <li><a href="{{ route('admin.notificacoes.usuarios') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.usuarios') ? 'active' : '' }}"><i class="fas fa-users me-2"></i>Usuários</a></li>
+                                    <li><hr class="my-2" style="border-color: rgba(255,255,255,0.1);"></li>
+                                    <li><a href="{{ route('admin.notificacoes.enviadas') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.enviadas') ? 'active' : '' }}"><i class="fas fa-paper-plane me-2"></i>Enviadas</a></li>
+                                    <li><a href="{{ route('admin.notificacoes.estatisticas') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.estatisticas') ? 'active' : '' }}"><i class="fas fa-chart-line me-2"></i>Estatísticas</a></li>
+                                    <li><a href="{{ route('admin.notificacoes.logs') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.logs') ? 'active' : '' }}"><i class="fas fa-file-text me-2"></i>Logs</a></li>
+                                    <li><a href="{{ route('admin.notificacoes.diagnostico') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.diagnostico') ? 'active' : '' }}"><i class="fas fa-stethoscope me-2"></i>Diagnóstico</a></li>
+                                    <li><hr class="my-2" style="border-color: rgba(255,255,255,0.1);"></li>
+                                    <li><a href="{{ route('admin.notificacoes.configuracoes') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.configuracoes') ? 'active' : '' }}"><i class="fas fa-cogs me-2"></i>Configurações</a></li>
+                                    <li><a href="{{ route('admin.notificacoes.teste') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.teste') ? 'active' : '' }}"><i class="fas fa-flask me-2"></i>Teste</a></li>
                                 </ul>
                             </div>
                         </li>
 
                         <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
 
-                        <!-- Módulos do Sistema -->
+                        <!-- Gestão de Empresas -->
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="alert('Módulo em desenvolvimento')">
-                                <i class="fas fa-store me-2"></i>
+                            <a class="nav-link {{ request()->routeIs('admin.empresas.*') ? 'active' : '' }}" href="#empresasSubmenu" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('admin.empresas.*') ? 'true' : 'false' }}">
+                                <i class="fas fa-building me-2"></i>
                                 Empresas
+                                <i class="fas fa-chevron-down ms-auto"></i>
                             </a>
+                            <div class="collapse {{ request()->routeIs('admin.empresas.*') ? 'show' : '' }}" id="empresasSubmenu">
+                                <ul class="list-unstyled ps-3">
+                                    <li><a href="{{ route('admin.empresas.index') }}" class="nav-link {{ request()->routeIs('admin.empresas.index') ? 'active' : '' }}"><i class="fas fa-list me-2"></i>Listar Empresas</a></li>
+                                    <li><a href="{{ route('admin.empresas.create') }}" class="nav-link {{ request()->routeIs('admin.empresas.create') ? 'active' : '' }}"><i class="fas fa-plus me-2"></i>Nova Empresa</a></li>
+                                    <li><a href="{{ route('admin.empresas.relatorio') }}" class="nav-link {{ request()->routeIs('admin.empresas.relatorio') ? 'active' : '' }}"><i class="fas fa-chart-bar me-2"></i>Relatórios</a></li>
+                                </ul>
+                            </div>
                         </li>
 
                         <li class="nav-item">
@@ -435,60 +486,29 @@
                         <div class="navbar-nav ms-auto">
                             <!-- Notificações -->
                             <div class="nav-item dropdown me-3">
-                                <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown">
+                                <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" id="notificationDropdown">
                                     <i class="fas fa-bell fa-lg"></i>
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        3
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge">
+                                        0
                                         <span class="visually-hidden">notificações não lidas</span>
                                     </span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end notification-dropdown" style="width: 300px;">
+                                <ul class="dropdown-menu dropdown-menu-end notification-dropdown" style="width: 320px;" id="notificationDropdownMenu">
                                     <li class="dropdown-header d-flex justify-content-between align-items-center">
                                         <span>Notificações</span>
-                                        <small class="text-muted">3 não lidas</small>
+                                        <small class="text-muted" id="notificationCount">0 não lidas</small>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item d-flex" href="#" onclick="alert('Sistema de notificações em desenvolvimento')">
-                                            <div class="flex-shrink-0">
-                                                <i class="fas fa-info-circle text-primary"></i>
-                                            </div>
-                                            <div class="flex-grow-1 ms-3">
-                                                <div class="fw-bold">Nova transação</div>
-                                                <div class="small text-muted">Pagamento de R$ 150,00 aprovado</div>
-                                                <div class="small text-muted">2 min atrás</div>
-                                            </div>
-                                        </a>
+                                    <li id="notificationLoading" class="text-center py-3">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        <span class="ms-2">Carregando...</span>
                                     </li>
+                                    <div id="notificationList">
+                                        <!-- Notificações serão carregadas aqui via JavaScript -->
+                                    </div>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <a class="dropdown-item d-flex" href="#" onclick="alert('Sistema de notificações em desenvolvimento')">
-                                            <div class="flex-shrink-0">
-                                                <i class="fas fa-user-plus text-success"></i>
-                                            </div>
-                                            <div class="flex-grow-1 ms-3">
-                                                <div class="fw-bold">Novo usuário</div>
-                                                <div class="small text-muted">João Silva se cadastrou</div>
-                                                <div class="small text-muted">5 min atrás</div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item d-flex" href="#" onclick="alert('Sistema de notificações em desenvolvimento')">
-                                            <div class="flex-shrink-0">
-                                                <i class="fas fa-exclamation-triangle text-warning"></i>
-                                            </div>
-                                            <div class="flex-grow-1 ms-3">
-                                                <div class="fw-bold">Sistema</div>
-                                                <div class="small text-muted">Backup automático realizado</div>
-                                                <div class="small text-muted">1 hora atrás</div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item text-center" href="#" onclick="alert('Sistema de notificações em desenvolvimento')">
+                                        <a class="dropdown-item text-center" href="{{ route('admin.notificacoes.enviadas') }}">
                                             Ver todas as notificações
                                         </a>
                                     </li>
@@ -498,7 +518,9 @@
                             <!-- Perfil do Usuário -->
                             <div class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                                    <img src="https://via.placeholder.com/32x32" class="rounded-circle me-2" alt="Avatar">
+                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
                                     <span>{{ auth()->user()->name ?? 'Administrador' }}</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -604,8 +626,8 @@
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js (Latest stable version) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
     
     <!-- Custom Admin JS -->
     <script>
@@ -706,6 +728,139 @@
 
         // Atualizar contadores a cada 30 segundos (simulação)
         setInterval(updateNotificationCount, 30000);
+
+        // Sistema de notificações reais
+        let notificationData = [];
+
+        // Carregar notificações do header
+        function loadHeaderNotifications() {
+            fetch('/admin/notificacoes/api/header-notifications')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        notificationData = data.data;
+                        updateNotificationDisplay();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar notificações:', error);
+                    showNotificationError();
+                });
+        }
+
+        // Atualizar exibição das notificações
+        function updateNotificationDisplay() {
+            const badge = document.getElementById('notificationBadge');
+            const count = document.getElementById('notificationCount');
+            const list = document.getElementById('notificationList');
+            const loading = document.getElementById('notificationLoading');
+
+            // Ocultar loading
+            loading.style.display = 'none';
+
+            // Atualizar badge e contador
+            const naoLidas = notificationData.nao_lidas || 0;
+            badge.textContent = naoLidas;
+            badge.style.display = naoLidas > 0 ? 'inline' : 'none';
+            count.textContent = naoLidas + ' não lidas';
+
+            // Atualizar também o badge do menu lateral
+            const sidebarBadge = document.querySelector('.sidebar .nav-link .badge');
+            if (sidebarBadge) {
+                sidebarBadge.textContent = naoLidas;
+                sidebarBadge.style.display = naoLidas > 0 ? 'inline' : 'none';
+            }
+
+            // Limpar lista atual
+            list.innerHTML = '';
+
+            // Adicionar notificações
+            if (notificationData.notificacoes && notificationData.notificacoes.length > 0) {
+                notificationData.notificacoes.forEach((notif, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <a class="dropdown-item d-flex ${!notif.lida ? 'bg-light' : ''}" href="#" onclick="markAsRead(${notif.id})" data-notification-id="${notif.id}">
+                            <div class="flex-shrink-0">
+                                <i class="${notif.icone} ${notif.cor}"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="fw-bold">${notif.titulo}</div>
+                                <div class="small text-muted">${notif.mensagem}</div>
+                                <div class="small text-muted">${notif.tempo}</div>
+                            </div>
+                            ${!notif.lida ? '<div class="flex-shrink-0 ms-2"><i class="fas fa-circle text-primary" style="font-size: 8px;"></i></div>' : ''}
+                        </a>
+                    `;
+                    list.appendChild(li);
+
+                    // Adicionar divider se não for o último item
+                    if (index < notificationData.notificacoes.length - 1) {
+                        const divider = document.createElement('li');
+                        divider.innerHTML = '<hr class="dropdown-divider">';
+                        list.appendChild(divider);
+                    }
+                });
+            } else {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="dropdown-item-text text-center text-muted py-3">
+                        <i class="fas fa-bell-slash mb-2"></i><br>
+                        Nenhuma notificação
+                    </div>
+                `;
+                list.appendChild(li);
+            }
+        }
+
+        // Mostrar erro ao carregar notificações
+        function showNotificationError() {
+            const loading = document.getElementById('notificationLoading');
+            const list = document.getElementById('notificationList');
+            
+            loading.style.display = 'none';
+            list.innerHTML = `
+                <li>
+                    <div class="dropdown-item-text text-center text-danger py-3">
+                        <i class="fas fa-exclamation-triangle mb-2"></i><br>
+                        Erro ao carregar notificações
+                    </div>
+                </li>
+            `;
+        }
+
+        // Marcar notificação como lida
+        function markAsRead(notificationId) {
+            fetch(`/admin/notificacoes/api/marcar-lida/${notificationId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Recarregar notificações para atualizar status
+                    loadHeaderNotifications();
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao marcar como lida:', error);
+            });
+        }
+
+        // Carregar notificações ao abrir o dropdown
+        document.getElementById('notificationDropdown').addEventListener('click', function() {
+            const loading = document.getElementById('notificationLoading');
+            loading.style.display = 'block';
+            loadHeaderNotifications();
+        });
+
+        // Carregar notificações inicialmente
+        loadHeaderNotifications();
+
+        // Atualizar notificações a cada 60 segundos
+        setInterval(loadHeaderNotifications, 60000);
     </script>
     
     @stack('scripts')

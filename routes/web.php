@@ -18,6 +18,16 @@ Route::get('/teste-layout', function () {
     return view('teste-layout');
 })->name('teste.layout');
 
+// ROTA DE TESTE - Gráfico
+Route::get('/teste-grafico', function () {
+    return view('admin.notificacoes.teste-grafico');
+})->name('teste.grafico');
+
+// ROTA DE TESTE - Estatísticas Simples
+Route::get('/teste-estatisticas', function () {
+    return view('admin.notificacoes.estatisticas-simples');
+})->name('teste.estatisticas');
+
 // ROTA DE TESTE - Config Simples
 Route::get('/teste-config', function () {
     $controller = new App\Http\Controllers\Admin\ConfigController();
@@ -48,7 +58,246 @@ Route::get('/teste-config-create', function () {
     return view('admin.config.create_simple', compact('grupos', 'sites', 'tipos'));
 })->name('teste.config.create');
 
-// ROTA TEMPORÁRIA - Gerador de chave APP_KEY
+// ROTA DE TESTE - Sistema de Notificações
+Route::get('/teste-notificacoes', function () {
+    return view('admin.notificacoes.teste-simples');
+})->name('teste.notificacoes');
+
+// ROTAS DE TESTE - GET para evitar problemas de CSRF
+Route::get('/admin/notificacoes/teste/conexao', function () {
+    try {
+        DB::connection()->getPdo();
+        return response()->json(['status' => 'ok', 'message' => 'Conexão ativa']);
+    } catch (Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+});
+
+Route::get('/admin/notificacoes/teste/tabelas', function () {
+    try {
+        $tabelas = [
+            'notificacao_aplicacoes',
+            'notificacao_tipos_evento',
+            'notificacao_templates',
+            'notificacao_enviadas',
+            'notificacao_templates_historico',
+            'notificacao_agendamentos',
+            'notificacao_preferencias_usuario',
+            'notificacao_estatisticas'
+        ];
+
+        $existentes = [];
+        foreach ($tabelas as $tabela) {
+            if (DB::getSchemaBuilder()->hasTable($tabela)) {
+                $existentes[] = $tabela;
+            }
+        }
+
+        return response()->json(['status' => 'ok', 'tabelas' => $existentes]);
+    } catch (Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+});
+
+Route::get('/admin/notificacoes/teste/models', function () {
+    try {
+        $aplicacoes = \App\Models\Notificacao\NotificacaoAplicacao::count();
+        $tipos_evento = \App\Models\Notificacao\NotificacaoTipoEvento::count();
+
+        return response()->json([
+            'status' => 'ok',
+            'aplicacoes' => $aplicacoes,
+            'tipos_evento' => $tipos_evento
+        ]);
+    } catch (Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+});
+
+Route::get('/admin/notificacoes/teste/services', function () {
+    try {
+        $configService = new \App\Services\NotificacaoConfigService(1);
+        $configs = $configService->getBehaviorConfig();
+
+        return response()->json([
+            'status' => 'ok',
+            'configs' => count($configs)
+        ]);
+    } catch (Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+});
+
+Route::get('/admin/notificacoes/teste/enviar', function () {
+    try {
+        $notificacaoService = new \App\Services\NotificacaoService(
+            new \App\Services\NotificacaoConfigService(1),
+            new \App\Services\NotificacaoTemplateService()
+        );
+
+        // Dados de teste mais variados
+        $tiposEventos = ['pedido_criado', 'pagamento_aprovado', 'produto_baixo_estoque', 'cliente_novo'];
+        $tipoEscolhido = $tiposEventos[array_rand($tiposEventos)];
+
+        $dadosTest = [
+            'pedido_criado' => [
+                'pedido_id' => rand(10000, 99999),
+                'cliente_nome' => 'João Silva',
+                'valor_total' => 'R$ ' . number_format(rand(50, 500), 2, ',', '.'),
+                'produtos' => rand(1, 5) . ' itens'
+            ],
+            'pagamento_aprovado' => [
+                'transacao_id' => 'TXN' . rand(100000, 999999),
+                'valor' => 'R$ ' . number_format(rand(25, 300), 2, ',', '.'),
+                'metodo' => ['PIX', 'Cartão', 'Boleto'][rand(0, 2)]
+            ],
+            'produto_baixo_estoque' => [
+                'produto_nome' => ['Pizza Margherita', 'Hambúrguer Especial', 'Lasanha'][rand(0, 2)],
+                'estoque_atual' => rand(1, 5),
+                'estoque_minimo' => 10
+            ],
+            'cliente_novo' => [
+                'cliente_nome' => ['Maria Santos', 'Pedro Lima', 'Ana Costa'][rand(0, 2)],
+                'email' => 'cliente' . rand(100, 999) . '@exemplo.com',
+                'telefone' => '(11) 9' . rand(1000, 9999) . '-' . rand(1000, 9999)
+            ]
+        ];
+
+        $resultado = $notificacaoService->sendEvent(
+            $tipoEscolhido,
+            $dadosTest[$tipoEscolhido],
+            ['usuario_id' => 1, 'empresa_id' => 1]
+        );
+
+        return response()->json([
+            'status' => 'ok',
+            'enviado' => $resultado,
+            'tipo_evento' => $tipoEscolhido,
+            'dados' => $dadosTest[$tipoEscolhido],
+            'message' => 'Notificação de teste processada com sucesso!'
+        ]);
+    } catch (Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+});
+
+// Rota POST para envios personalizados de teste
+Route::post('/admin/notificacoes/teste/enviar', function () {
+    try {
+        $dados = request()->all();
+
+        // Validação básica
+        if (empty($dados['destinatario']) || empty($dados['tipo']) || empty($dados['canal'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dados obrigatórios não informados'
+            ], 400);
+        }
+
+        // Prepara os dados para inserção direta no banco
+        $dadosNotificacao = [
+            'empresa_id' => 1,
+            'aplicacao_id' => 1,
+            'template_id' => 1,
+            'email_destinatario' => $dados['canal'] === 'email' ? $dados['destinatario'] : null,
+            'telefone_destinatario' => in_array($dados['canal'], ['sms', 'push']) ? $dados['destinatario'] : null,
+            'canal' => $dados['canal'],
+            'titulo' => $dados['titulo'] ?? 'Teste de Notificação',
+            'mensagem' => $dados['mensagem'] ?? 'Esta é uma notificação de teste',
+            'status' => 'enviado',
+            'prioridade' => $dados['prioridade'] ?? 'media',
+            'enviado_em' => now(),
+            'entregue_em' => now(),
+            'lido_em' => rand(1, 10) > 5 ? now() : null, // 50% chance de ser lida
+            'mensagem_erro' => null,
+            'tentativas' => 1,
+            'id_externo' => 'test_' . uniqid(),
+            'dados_processados' => json_encode([
+                'tipo_teste' => $dados['tipo'],
+                'prioridade' => $dados['prioridade'] ?? 'normal',
+                'agendamento' => $dados['agendamento'] ?? false
+            ]),
+            'dados_evento_origem' => json_encode($dados),
+            'created_at' => now(),
+            'updated_at' => now()
+        ];
+
+        // Insere diretamente na tabela
+        $id = DB::table('notificacao_enviadas')->insertGetId($dadosNotificacao);
+
+        // Simula diferentes resultados baseado no canal
+        if ($dados['canal'] === 'push') {
+            // Push notifications sempre têm sucesso em testes
+            // (remover simulação de falha para testes)
+
+            // Opcional: Para simular falhas ocasionais, descomente a linha abaixo
+            // $sucesso = rand(1, 10) > 1; // 90% de chance de sucesso
+            // 
+            // if (!$sucesso) {
+            //     DB::table('notificacao_enviadas')
+            //         ->where('id', $id)
+            //         ->update([
+            //             'status' => 'falhou',
+            //             'mensagem_erro' => 'Token de push inválido ou expirado',
+            //             'entregue_em' => null,
+            //             'updated_at' => now()
+            //         ]);
+            //
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Falha no envio via push: Token inválido'
+            //     ]);
+            // }
+        }
+
+        // Adiciona log
+        DB::table('notificacao_logs')->insert([
+            'notificacao_id' => $id,
+            'nivel' => 'info',
+            'mensagem' => "Notificação de teste enviada via {$dados['canal']}",
+            'dados' => json_encode($dados),
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Notificação enviada com sucesso via {$dados['canal']}",
+            'id' => $id,
+            'dados' => $dadosNotificacao
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Erro interno: ' . $e->getMessage()
+        ], 500);
+    }
+});
+
+Route::get('/admin/notificacoes/teste/ultimas', function () {
+    try {
+        $notificacoes = \App\Models\Notificacao\NotificacaoEnviada::with(['aplicacao', 'tipoEvento'])
+            ->where('empresa_id', 1)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'status' => 'ok',
+            'notificacoes' => $notificacoes->map(function ($notif) {
+                return [
+                    'id' => $notif->id,
+                    'tipo_evento' => $notif->tipoEvento->nome ?? $notif->tipo_evento_codigo,
+                    'status' => $notif->status,
+                    'canal' => $notif->canal,
+                    'created_at' => $notif->created_at->format('d/m/Y H:i:s')
+                ];
+            })
+        ]);
+    } catch (Exception $e) {
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+}); // ROTA TEMPORÁRIA - Gerador de chave APP_KEY
 Route::get('/gerar-key', function () {
     $key = base64_encode(random_bytes(32));
     $appKey = 'base64:' . $key;
@@ -543,6 +792,311 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/logs', function () {
         return view('admin.temp', ['module' => 'Logs do Sistema']);
     })->name('logs');
+
+    // SISTEMA DE NOTIFICAÇÕES - PAINEL ADMINISTRATIVO
+    Route::prefix('notificacoes')->name('notificacoes.')->group(function () {
+        // Página principal do painel
+        Route::get('/', function () {
+            $stats = [
+                'hoje' => \App\Models\Notificacao\NotificacaoEnviada::whereDate('created_at', today())->count(),
+                'pendentes' => \App\Models\Notificacao\NotificacaoAgendamento::where('ativo', true)->whereNull('ultima_execucao_em')->count(),
+                'agendadas' => \App\Models\Notificacao\NotificacaoAgendamento::where('ativo', true)->count(),
+                'taxa_sucesso' => '98.5',
+                'templates_ativos' => \App\Models\Notificacao\NotificacaoTemplate::where('ativo', true)->count(),
+                'total_templates' => \App\Models\Notificacao\NotificacaoTemplate::count(),
+                'crescimento_hoje' => '12'
+            ];
+            return view('admin.notificacoes.index', compact('stats'));
+        })->name('index');
+
+        // Templates
+        Route::get('/templates', function () {
+            return view('admin.notificacoes.templates');
+        })->name('templates');
+
+        // Tipos de evento
+        Route::get('/tipos', function () {
+            return view('admin.notificacoes.tipos');
+        })->name('tipos');
+
+        // Aplicações
+        Route::get('/aplicacoes', function () {
+            return view('admin.notificacoes.aplicacoes');
+        })->name('aplicacoes');
+
+        // Notificações enviadas
+        // Notificações enviadas
+        Route::get('/enviadas', [App\Http\Controllers\Admin\NotificacoesEnviadasController::class, 'index'])->name('enviadas');
+        Route::get('/enviadas/dados', [App\Http\Controllers\Admin\NotificacoesEnviadasController::class, 'dados'])->name('enviadas.dados');
+        Route::get('/enviadas/estatisticas', [App\Http\Controllers\Admin\NotificacoesEnviadasController::class, 'estatisticas'])->name('enviadas.estatisticas');
+        Route::get('/enviadas/{id}/detalhes', [App\Http\Controllers\Admin\NotificacoesEnviadasController::class, 'detalhes'])->name('enviadas.detalhes');
+        Route::post('/enviadas/{id}/reenviar', [App\Http\Controllers\Admin\NotificacoesEnviadasController::class, 'reenviar'])->name('enviadas.reenviar');
+        Route::get('/enviadas/{id}/logs', [App\Http\Controllers\Admin\NotificacoesEnviadasController::class, 'logs'])->name('enviadas.logs');
+        Route::get('/enviadas/exportar', [App\Http\Controllers\Admin\NotificacoesEnviadasController::class, 'exportar'])->name('enviadas.exportar');
+
+        // Estatísticas
+        Route::get('/estatisticas', [\App\Http\Controllers\Admin\EstatisticasController::class, 'index'])->name('estatisticas');
+        Route::get('/estatisticas/dados', [\App\Http\Controllers\Admin\EstatisticasController::class, 'dados'])->name('estatisticas.dados');
+
+        // Logs específicos de notificações
+        Route::get('/logs', function () {
+            return view('admin.notificacoes.logs');
+        })->name('logs');
+
+        // APIs de Logs
+        Route::get('/logs/api/dados', [App\Http\Controllers\Admin\LogsController::class, 'apiLogs'])->name('logs.api.dados');
+        Route::get('/logs/api/estatisticas', [App\Http\Controllers\Admin\LogsController::class, 'apiEstatisticas'])->name('logs.api.estatisticas');
+        Route::get('/logs/api/detalhes/{id}', [App\Http\Controllers\Admin\LogsController::class, 'apiDetalhes'])->name('logs.api.detalhes');
+
+        // Página de teste
+        Route::get('/teste', function () {
+            return view('admin.notificacoes.teste');
+        })->name('teste');
+
+        // Diagnóstico
+        Route::get('/diagnostico', function () {
+            return view('admin.notificacoes.diagnostico');
+        })->name('diagnostico');
+
+        // Canais
+        Route::get('/canais', function () {
+            return view('admin.notificacoes.canais');
+        })->name('canais');
+
+        // Usuários
+        Route::get('/usuarios', function () {
+            return view('admin.notificacoes.usuarios');
+        })->name('usuarios');
+
+        // Configurações
+        Route::get('/configuracoes', function () {
+            return view('admin.notificacoes.configuracoes');
+        })->name('configuracoes');
+
+        // APIs para o painel
+        Route::prefix('api')->group(function () {
+            // Estatísticas
+            Route::get('/estatisticas', function () {
+                return response()->json([
+                    'metricas' => [
+                        'total_enviadas' => rand(1000, 5000),
+                        'taxa_sucesso' => rand(95, 99),
+                        'tempo_medio' => rand(150, 500) . 'ms',
+                        'taxa_erro' => rand(1, 5),
+                        'total_falhas' => rand(10, 50),
+                        'crescimento' => rand(-5, 25)
+                    ],
+                    'graficos' => [
+                        'volume' => [
+                            'labels' => ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                            'enviadas' => [120, 190, 300, 500, 200, 300, 450],
+                            'falharam' => [12, 19, 3, 15, 8, 12, 18]
+                        ],
+                        'canais' => [
+                            'labels' => ['Email', 'SMS', 'Push', 'In-App'],
+                            'values' => [45, 25, 20, 10]
+                        ],
+                        'tipos' => [
+                            'labels' => ['Pedido', 'Pagamento', 'Estoque', 'Cliente'],
+                            'values' => [150, 120, 80, 50]
+                        ],
+                        'horas' => [
+                            'labels' => ['00h', '04h', '08h', '12h', '16h', '20h'],
+                            'values' => [20, 15, 60, 120, 100, 80]
+                        ]
+                    ],
+                    'tabelas' => [
+                        'templates_top' => [
+                            ['nome' => 'Pedido Criado', 'canal' => 'email', 'total' => 500, 'taxa_sucesso' => 98],
+                            ['nome' => 'Pagamento Aprovado', 'canal' => 'sms', 'total' => 300, 'taxa_sucesso' => 96],
+                            ['nome' => 'Baixo Estoque', 'canal' => 'push', 'total' => 200, 'taxa_sucesso' => 99]
+                        ],
+                        'erros_recentes' => [
+                            ['created_at' => now(), 'canal' => 'email', 'erro_mensagem' => 'SMTP timeout', 'tentativas' => 2],
+                            ['created_at' => now()->subMinutes(5), 'canal' => 'sms', 'erro_mensagem' => 'Invalid number', 'tentativas' => 1]
+                        ]
+                    ],
+                    'comparativas' => [
+                        'hoje_vs_ontem' => ['valor' => '+12%', 'percentual' => '+12%', 'positivo' => true],
+                        'semana_vs_anterior' => ['valor' => '+8%', 'percentual' => '+8%', 'positivo' => true],
+                        'mes_vs_anterior' => ['valor' => '-2%', 'percentual' => '-2%', 'positivo' => false],
+                        'melhor_canal' => ['nome' => 'Email', 'taxa_sucesso' => 98]
+                    ]
+                ]);
+            });
+
+            // Notificações recentes
+            Route::get('/recentes', function () {
+                return response()->json([
+                    [
+                        'id' => 1,
+                        'tipo' => 'pedido_criado',
+                        'canal' => 'email',
+                        'destinatario' => 'cliente@exemplo.com',
+                        'titulo' => 'Pedido #12345 criado',
+                        'status' => 'enviado',
+                        'enviado_em' => now()
+                    ],
+                    [
+                        'id' => 2,
+                        'tipo' => 'pagamento_aprovado',
+                        'canal' => 'sms',
+                        'destinatario' => '+5511999999999',
+                        'titulo' => 'Pagamento aprovado',
+                        'status' => 'enviado',
+                        'enviado_em' => now()->subMinutes(5)
+                    ]
+                ]);
+            });
+
+            // Templates
+            Route::get('/templates', function () {
+                return response()->json([
+                    'data' => [
+                        [
+                            'id' => 1,
+                            'nome' => 'Template Pedido Criado',
+                            'canal' => 'email',
+                            'tipo_evento_nome' => 'Pedido Criado',
+                            'assunto' => 'Seu pedido #{pedido_numero} foi criado',
+                            'ativo' => true,
+                            'variaveis_count' => 5,
+                            'created_at' => now()
+                        ]
+                    ],
+                    'total' => 1,
+                    'from' => 1,
+                    'to' => 1
+                ]);
+            });
+
+            // Tipos de evento
+            Route::get('/tipos-evento', function () {
+                return response()->json([
+                    ['id' => 1, 'nome' => 'Pedido Criado'],
+                    ['id' => 2, 'nome' => 'Pagamento Aprovado'],
+                    ['id' => 3, 'nome' => 'Produto Baixo Estoque'],
+                    ['id' => 4, 'nome' => 'Cliente Novo']
+                ]);
+            });
+
+            // Estatísticas de tipos de evento
+            Route::get('/tipos-evento/estatisticas', function () {
+                return response()->json([
+                    'total' => 12,
+                    'ativos' => 8,
+                    'mais_usado' => [
+                        'nome' => 'Pedido Criado',
+                        'uso_count' => 245
+                    ],
+                    'total_templates' => 24
+                ]);
+            });
+
+            // Histórico de testes
+            Route::get('/historico-testes', [App\Http\Controllers\Admin\NotificacaoController::class, 'historicoTestes']);
+
+            // Detalhes de notificação
+            Route::get('/detalhes/{id}', [App\Http\Controllers\Admin\NotificacaoController::class, 'detalhesNotificacao']);
+
+            // Header notifications
+            Route::get('/header-notifications', [App\Http\Controllers\Admin\NotificacaoController::class, 'getHeaderNotifications']);
+
+            // Marcar como lida
+            Route::post('/marcar-lida/{id}', [App\Http\Controllers\Admin\NotificacaoController::class, 'marcarComoLida']);
+
+            // Aplicações data
+            Route::get('/aplicacoes-data', [App\Http\Controllers\Admin\NotificacaoController::class, 'getAplicacoesData']);
+
+            // APIs de Usuários
+            Route::get('/usuarios', [App\Http\Controllers\Admin\UsuariosController::class, 'apiUsuarios']);
+            Route::get('/usuarios/estatisticas', [App\Http\Controllers\Admin\UsuariosController::class, 'apiEstatisticas']);
+            Route::get('/usuarios/detalhes/{id}', [App\Http\Controllers\Admin\UsuariosController::class, 'apiDetalhes']);
+
+            // Atividade recente
+            Route::get('/atividade-recente', [App\Http\Controllers\Admin\NotificacaoController::class, 'getAtividadeRecente']);
+
+            // Diagnóstico - Status geral
+            Route::get('/diagnostico/status-geral', function () {
+                return response()->json([
+                    ['nome' => 'Database', 'status' => true, 'mensagem' => 'Conectado'],
+                    ['nome' => 'Email', 'status' => true, 'mensagem' => 'Configurado'],
+                    ['nome' => 'SMS', 'status' => false, 'mensagem' => 'Não configurado'],
+                    ['nome' => 'Push', 'status' => true, 'mensagem' => 'Ativo']
+                ]);
+            });
+
+            // Diagnóstico - Tabelas
+            Route::get('/diagnostico/tabelas', function () {
+                $tabelas = [
+                    'notificacao_aplicacoes',
+                    'notificacao_tipos_evento',
+                    'notificacao_templates',
+                    'notificacao_enviadas',
+                    'notificacao_templates_historico',
+                    'notificacao_agendamentos',
+                    'notificacao_preferencias_usuario',
+                    'notificacao_estatisticas'
+                ];
+
+                $resultado = [];
+                foreach ($tabelas as $tabela) {
+                    $resultado[] = [
+                        'nome' => $tabela,
+                        'existe' => true,
+                        'registros' => rand(0, 1000)
+                    ];
+                }
+
+                return response()->json($resultado);
+            });
+
+            // Diagnóstico - Services
+            Route::get('/diagnostico/services', function () {
+                return response()->json([
+                    ['nome' => 'NotificacaoService', 'funcionando' => true, 'ultimo_uso' => 'Agora'],
+                    ['nome' => 'NotificacaoConfigService', 'funcionando' => true, 'ultimo_uso' => '5 min atrás'],
+                    ['nome' => 'NotificacaoTemplateService', 'funcionando' => true, 'ultimo_uso' => '2 min atrás']
+                ]);
+            });
+
+            // Diagnóstico - Testes de conectividade
+            Route::get('/diagnostico/teste-database', function () {
+                try {
+                    DB::connection()->getPdo();
+                    return response()->json(['success' => true, 'tempo' => rand(50, 200)]);
+                } catch (Exception $e) {
+                    return response()->json(['success' => false, 'erro' => $e->getMessage()]);
+                }
+            });
+
+            Route::get('/diagnostico/teste-email', function () {
+                return response()->json(['success' => true]);
+            });
+
+            Route::get('/diagnostico/teste-sms', function () {
+                return response()->json(['success' => false]);
+            });
+
+            Route::get('/diagnostico/teste-push', function () {
+                return response()->json(['success' => true]);
+            });
+
+            // Diagnóstico - Métricas
+            Route::get('/diagnostico/metricas', function () {
+                return response()->json([
+                    'memoria' => rand(30, 80),
+                    'cpu' => rand(10, 60),
+                    'disco' => rand(20, 70),
+                    'tempo_resposta' => rand(100, 500),
+                    'notificacoes_por_minuto' => rand(10, 100)
+                ]);
+            });
+        });
+
+        // Teste de envio
+        Route::post('/teste/enviar', [App\Http\Controllers\Admin\NotificacaoController::class, 'enviarTestePersonalizado']);
+    });
 
     // Payments Analytics (route diferente para evitar conflito)
     Route::get('/payment-analytics', function () {

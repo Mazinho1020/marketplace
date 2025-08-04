@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste dos Gráficos - Notificações</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .row { 
+            display: flex; 
+            gap: 20px; 
+            margin-bottom: 20px; 
+        }
+        .col { 
+            flex: 1; 
+            background: #fff; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            padding: 15px; 
+        }
+        .chart-container { 
+            position: relative; 
+            height: 300px; 
+            margin: 15px 0; 
+        }
+        .status { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 4px; 
+        }
+        .success { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb; 
+        }
+        .error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb; 
+        }
+        .info { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border: 1px solid #bee5eb; 
+        }
+        h2, h3 { 
+            color: #333; 
+            margin-top: 0; 
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🧪 Teste dos Gráficos de Notificações</h2>
+        
+        <div id="status-carregamento" class="status info">
+            <strong>Status:</strong> Carregando Chart.js...
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <h3>📈 Gráfico de Atividade (Linha)</h3>
+                <div class="chart-container">
+                    <canvas id="test-grafico-atividade"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <h3>🍰 Gráfico de Canais (Rosca)</h3>
+                <div class="chart-container">
+                    <canvas id="test-grafico-canais"></canvas>
+                </div>
+            </div>
+            
+            <div class="col">
+                <h3>📊 Gráfico de Barras (Tipos)</h3>
+                <div class="chart-container">
+                    <canvas id="test-grafico-tipos"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <h3>📋 Log de Eventos</h3>
+                <div id="log-eventos" class="loading">
+                    Aguardando eventos...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function adicionarLog(mensagem, tipo = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const log = document.getElementById('log-eventos');
+            
+            if (log.textContent === 'Aguardando eventos...') {
+                log.innerHTML = '';
+            }
+            
+            const cores = {
+                'info': '#0c5460',
+                'success': '#155724',
+                'error': '#721c24',
+                'warning': '#856404'
+            };
+            
+            log.innerHTML += `
+                <div style="color: ${cores[tipo] || cores.info}; margin: 5px 0;">
+                    [${timestamp}] ${mensagem}
+                </div>
+            `;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function atualizarStatus(mensagem, tipo) {
+            const status = document.getElementById('status-carregamento');
+            status.className = `status ${tipo}`;
+            status.innerHTML = `<strong>Status:</strong> ${mensagem}`;
+        }
+
+        function verificarChartJS() {
+            if (typeof Chart !== 'undefined') {
+                adicionarLog('✅ Chart.js carregado com sucesso!', 'success');
+                atualizarStatus('Chart.js carregado - Iniciando testes...', 'success');
+                return true;
+            } else {
+                adicionarLog('❌ Chart.js não encontrado', 'error');
+                atualizarStatus('Erro: Chart.js não carregou', 'error');
+                return false;
+            }
+        }
+
+        function criarGraficoAtividade() {
+            try {
+                adicionarLog('🔄 Criando gráfico de atividade...', 'info');
+                
+                const canvas = document.getElementById('test-grafico-atividade');
+                if (!canvas) {
+                    throw new Error('Canvas não encontrado');
+                }
+                
+                const ctx = canvas.getContext('2d');
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                        datasets: [{
+                            label: 'Notificações Enviadas',
+                            data: [120, 190, 300, 500, 200, 300, 450],
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                            tension: 0.1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                adicionarLog('✅ Gráfico de atividade criado', 'success');
+                return true;
+                
+            } catch (error) {
+                adicionarLog(`❌ Erro no gráfico de atividade: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        function criarGraficoCanais() {
+            try {
+                adicionarLog('🔄 Criando gráfico de canais...', 'info');
+                
+                const canvas = document.getElementById('test-grafico-canais');
+                if (!canvas) {
+                    throw new Error('Canvas não encontrado');
+                }
+                
+                const ctx = canvas.getContext('2d');
+                
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Email', 'SMS', 'Push', 'In-App'],
+                        datasets: [{
+                            data: [45, 25, 20, 10],
+                            backgroundColor: [
+                                '#ff6384',
+                                '#36a2eb',
+                                '#cc65fe',
+                                '#ffce56'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                
+                adicionarLog('✅ Gráfico de canais criado', 'success');
+                return true;
+                
+            } catch (error) {
+                adicionarLog(`❌ Erro no gráfico de canais: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        function criarGraficoTipos() {
+            try {
+                adicionarLog('🔄 Criando gráfico de tipos...', 'info');
+                
+                const canvas = document.getElementById('test-grafico-tipos');
+                if (!canvas) {
+                    throw new Error('Canvas não encontrado');
+                }
+                
+                const ctx = canvas.getContext('2d');
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Pedido', 'Pagamento', 'Estoque', 'Cliente'],
+                        datasets: [{
+                            label: 'Quantidade',
+                            data: [150, 120, 80, 50],
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                adicionarLog('✅ Gráfico de tipos criado', 'success');
+                return true;
+                
+            } catch (error) {
+                adicionarLog(`❌ Erro no gráfico de tipos: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        function executarTestes() {
+            adicionarLog('🚀 Iniciando testes dos gráficos...', 'info');
+            
+            let sucessos = 0;
+            let total = 3;
+            
+            if (criarGraficoAtividade()) sucessos++;
+            if (criarGraficoCanais()) sucessos++;
+            if (criarGraficoTipos()) sucessos++;
+            
+            const resultado = `${sucessos}/${total} gráficos criados com sucesso`;
+            
+            if (sucessos === total) {
+                atualizarStatus(`Todos os testes passaram! ${resultado}`, 'success');
+                adicionarLog(`🎉 Todos os testes concluídos: ${resultado}`, 'success');
+            } else {
+                atualizarStatus(`Alguns testes falharam: ${resultado}`, 'error');
+                adicionarLog(`⚠️ Testes concluídos com falhas: ${resultado}`, 'warning');
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            adicionarLog('📄 DOM carregado', 'info');
+            
+            function inicializar() {
+                if (verificarChartJS()) {
+                    setTimeout(executarTestes, 500); // Pequeno delay para garantir estabilidade
+                } else {
+                    adicionarLog('⏳ Aguardando Chart.js carregar...', 'info');
+                    setTimeout(inicializar, 100);
+                }
+            }
+            
+            inicializar();
+        });
+    </script>
+</body>
+</html>

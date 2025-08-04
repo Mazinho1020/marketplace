@@ -428,6 +428,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let mainChart, gatewayChart, methodChart;
+let graficosInicializados = false;
 
 // Dados de exemplo
 const sampleData = {
@@ -439,11 +440,43 @@ const sampleData = {
 
 // Inicializar gráficos
 document.addEventListener('DOMContentLoaded', function() {
-    initMainChart();
-    initGatewayChart();
-    initMethodChart();
-    loadTableData();
+    // Verificar se os gráficos já foram inicializados para evitar duplicação
+    if (graficosInicializados) {
+        console.log('Gráficos já inicializados, evitando duplicação - Payment Reports');
+        return;
+    }
+    
+    // Aguardar o Chart.js carregar completamente
+    function inicializar() {
+        if (typeof Chart !== 'undefined') {
+            console.log('Chart.js carregado com sucesso - Payment Reports');
+            inicializarGraficos();
+        } else {
+            console.log('Aguardando Chart.js carregar...');
+            setTimeout(inicializar, 100);
+        }
+    }
+    
+    inicializar();
 });
+
+function inicializarGraficos() {
+    if (graficosInicializados) {
+        console.log('Gráficos já inicializados, evitando duplicação');
+        return;
+    }
+    
+    try {
+        initMainChart();
+        initGatewayChart();
+        initMethodChart();
+        loadTableData();
+        graficosInicializados = true;
+        console.log('Gráficos de payment reports inicializados com sucesso');
+    } catch (error) {
+        console.error('Erro ao inicializar gráficos:', error);
+    }
+}
 
 function initMainChart() {
     const ctx = document.getElementById('mainChart').getContext('2d');

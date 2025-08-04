@@ -441,7 +441,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h5 class="card-title mb-0">
-                                <i class="mdi mdi-chart-line me-2"></i>Tendências do Sistema
+                                <i class="mdi mdi-chart-line me-2"></i>Receita dos Últimos 12 Meses
                             </h5>
                         </div>
                         <div class="card-body">
@@ -583,55 +583,118 @@
     <!-- Scripts -->
     <script src="/Theme1/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Configuração dos gráficos
-        const ctx1 = document.getElementById('trendsChart').getContext('2d');
-        const trendsChart = new Chart(ctx1, {
-            type: 'line',
-            data: {
-                labels: @json(array_column($chartData['usuarios_por_mes'] ?? [], 'mes')),
-                datasets: [{
-                    label: 'Usuários',
-                    data: @json(array_column($chartData['usuarios_por_mes'] ?? [], 'count')),
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    tension: 0.4
-                }, {
-                    label: 'Vendas (R$)',
-                    data: @json(array_column($chartData['vendas_por_mes'] ?? [], 'valor')),
-                    borderColor: '#38ef7d',
-                    backgroundColor: 'rgba(56, 239, 125, 0.1)',
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
+        let chartsInitialized = false;
+        
+        // Aguardar o DOM e Chart.js carregarem
+        document.addEventListener('DOMContentLoaded', function() {
+            if (chartsInitialized) {
+                return;
+            }
+            
+            // Verificar se Chart.js está disponível
+            if (typeof Chart !== 'undefined') {
+                initializeCharts();
+            } else {
+                // Aguardar 2 segundos para Chart.js carregar
+                setTimeout(() => {
+                    if (typeof Chart !== 'undefined') {
+                        initializeCharts();
+                    } else {
+                        console.error('Chart.js não foi carregado');
                     }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
-                }
+                }, 2000);
             }
         });
+        
+        function initializeCharts() {
+            if (chartsInitialized) {
+                return; // Evitar inicialização dupla
+            }
+            
+            chartsInitialized = true;
+            
+            try {
+                // Configuração dos gráficos
+                const ctx1 = document.getElementById('trendsChart');
+                if (ctx1) {
+                    const trendsChart = new Chart(ctx1.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: @json(array_column($chartData['usuarios_por_mes'] ?? [], 'mes')),
+                            datasets: [{
+                                label: 'Novos Usuários',
+                                data: @json(array_column($chartData['usuarios_por_mes'] ?? [], 'count')),
+                                borderColor: '#667eea',
+                                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                                tension: 0.4,
+                                yAxisID: 'y1'
+                            }, {
+                                label: 'Receita (R$)',
+                                data: @json(array_column($chartData['vendas_por_mes'] ?? [], 'valor')),
+                                borderColor: '#38ef7d',
+                                backgroundColor: 'rgba(56, 239, 125, 0.1)',
+                                tension: 0.4,
+                                yAxisID: 'y'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Receita (R$)'
+                                    },
+                                    ticks: {
+                                        callback: function(value) {
+                                            return 'R$ ' + value.toLocaleString('pt-BR');
+                                        }
+                                    }
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Usuários'
+                                    },
+                                    grid: {
+                                        drawOnChartArea: false,
+                                    },
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    console.error('Elemento trendsChart não encontrado');
+                }
 
-        const ctx2 = document.getElementById('topProductsChart').getContext('2d');
-        const topProductsChart = new Chart(ctx2, {
-            type: 'doughnut',
-            data: {
-                labels: @json(array_column($chartData['top_produtos'] ?? [], 'nome')),
-                datasets: [{
-                    data: @json(array_column($chartData['top_produtos'] ?? [], 'vendas')),
-                    backgroundColor: [
-                        '#667eea',
-                        '#38ef7d',
-                        '#f093fb',
-                        '#4facfe',
-                        '#ee9ca7'
+                const ctx2 = document.getElementById('topProductsChart');
+                if (ctx2) {
+                    const topProductsChart = new Chart(ctx2.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: @json(array_column($chartData['top_produtos'] ?? [], 'nome')),
+                            datasets: [{
+                                data: @json(array_column($chartData['top_produtos'] ?? [], 'vendas')),
+                                backgroundColor: [
+                                    '#667eea',
+                                    '#38ef7d',
+                                    '#f093fb',
+                                    '#4facfe',
+                                    '#ee9ca7'
                     ]
                 }]
             },
@@ -645,12 +708,32 @@
                 }
             }
         });
+                } else {
+                    console.error('Elemento topProductsChart não encontrado');
+                }
+                
+                console.log('Gráficos inicializados com sucesso');
+            } catch (error) {
+                console.error('Erro ao inicializar gráficos:', error);
+            }
+        }
 
-        // Atualização em tempo real (simulada)
-        setInterval(function() {
+        // Atualização em tempo real do horário (otimizada)
+        let timeInterval = setInterval(function() {
             const currentTime = new Date().toLocaleTimeString('pt-BR');
             const timeElements = document.querySelectorAll('.current-time');
-            timeElements.forEach(el => el.textContent = currentTime);
+            
+            // Só atualizar se encontrar elementos
+            if (timeElements.length > 0) {
+                timeElements.forEach(el => {
+                    if (el.textContent !== currentTime) {
+                        el.textContent = currentTime;
+                    }
+                });
+            } else {
+                // Se não há elementos de tempo, parar o interval
+                clearInterval(timeInterval);
+            }
         }, 1000);
     </script>
 

@@ -314,57 +314,87 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Gráfico de transações por dia
-    const ctx = document.getElementById('chartTransacoesDias').getContext('2d');
-    const chartData = @json($transacoesPorDia);
-    
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: chartData.map(item => {
-                const date = new Date(item.data);
-                return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-            }),
-            datasets: [{
-                label: 'Transações',
-                data: chartData.map(item => item.total),
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                tension: 0.1
-            }, {
-                label: 'Valor (R$)',
-                data: chartData.map(item => item.valor_aprovado),
-                borderColor: 'rgb(255, 99, 132)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                tension: 0.1,
-                yAxisID: 'y1'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Transações e Valores dos Últimos 7 Dias'
-                }
-            },
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    grid: {
-                        drawOnChartArea: false,
-                    },
-                }
-            }
+    // Aguardar o Chart.js carregar completamente
+    function inicializar() {
+        if (typeof Chart !== 'undefined') {
+            console.log('Chart.js carregado com sucesso - Payments Dashboard');
+            configurarGraficos();
+        } else {
+            console.log('Aguardando Chart.js carregar...');
+            setTimeout(inicializar, 100);
         }
-    });
+    }
+    
+    inicializar();
 });
+
+function configurarGraficos() {
+    try {
+        // Verificar se o Chart.js está carregado
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js não está carregado');
+            return;
+        }
+
+        // Gráfico de transações por dia
+        const chartCanvas = document.getElementById('chartTransacoesDias');
+        if (chartCanvas) {
+            const ctx = chartCanvas.getContext('2d');
+            const chartData = @json($transacoesPorDia);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.map(item => {
+                        const date = new Date(item.data);
+                        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                    }),
+                    datasets: [{
+                        label: 'Transações',
+                        data: chartData.map(item => item.total),
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }, {
+                        label: 'Valor (R$)',
+                        data: chartData.map(item => item.valor_aprovado),
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.1,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Transações e Valores dos Últimos 7 Dias'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('Canvas chartTransacoesDias não encontrado');
+        }
+    } catch (error) {
+        console.error('Erro ao configurar gráficos:', error);
+    }
+}
 </script>
 @endsection

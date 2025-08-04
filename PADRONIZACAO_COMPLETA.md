@@ -10,10 +10,15 @@
 2. [Padrões de Backend (Laravel)](#padrões-de-backend-laravel)
 3. [Padrões de Frontend (Theme Hyper)](#padrões-de-frontend-theme-hyper)
 4. [Padrões de Código](#padrões-de-código)
-5. [Base de Dados](#base-de-dados)
+5. [Base de Dados](#base-de-dados) 📖 **Ver**: [`PADRAO_BANCO_DADOS.md`](./PADRAO_BANCO_DADOS.md)
 6. [Validações e Segurança](#validações-e-segurança)
 7. [Configurações e Ambiente](#configurações-e-ambiente)
 8. [Sistema de Fidelidade](#sistema-de-fidelidade)
+
+### **📋 Documentos Auxiliares**
+
+- [`PADRAO_BANCO_DADOS.md`](./PADRAO_BANCO_DADOS.md) - Padrão completo para banco de dados
+- [`CHECKLIST_BANCO_DADOS.md`](./CHECKLIST_BANCO_DADOS.md) - Checklist rápido para banco de dados
 
 ---
 
@@ -136,53 +141,53 @@
 
 **CSS Framework:**
 
--   Bootstrap 5.x (base do Theme Hyper)
--   Unicons para ícones
--   CSS customizado para ajustes específicos
+- Bootstrap 5.x (base do Theme Hyper)
+- Unicons para ícones
+- CSS customizado para ajustes específicos
 
 **JavaScript:**
 
--   jQuery 3.x
--   Bootstrap 5 JS
--   DataTables para tabelas
--   ApexCharts para gráficos
--   Select2 para selects avançados
--   SweetAlert2 para alertas
--   Flatpickr para date/time pickers
+- jQuery 3.x
+- Bootstrap 5 JS
+- DataTables para tabelas
+- ApexCharts para gráficos
+- Select2 para selects avançados
+- SweetAlert2 para alertas
+- Flatpickr para date/time pickers
 
 ### **Sistema de Cores (Theme Hyper)**
 
 ```css
 /* Cores Primárias */
 :root {
-    --bs-primary: #727cf5; /* Roxo principal */
-    --bs-secondary: #6c757d; /* Cinza */
-    --bs-success: #0acf97; /* Verde */
-    --bs-info: #39afd1; /* Azul claro */
-    --bs-warning: #ffbc00; /* Amarelo */
-    --bs-danger: #fa5c7c; /* Vermelho */
-    --bs-light: #eef2f7; /* Cinza claro */
-    --bs-dark: #313a46; /* Azul escuro */
+  --bs-primary: #727cf5; /* Roxo principal */
+  --bs-secondary: #6c757d; /* Cinza */
+  --bs-success: #0acf97; /* Verde */
+  --bs-info: #39afd1; /* Azul claro */
+  --bs-warning: #ffbc00; /* Amarelo */
+  --bs-danger: #fa5c7c; /* Vermelho */
+  --bs-light: #eef2f7; /* Cinza claro */
+  --bs-dark: #313a46; /* Azul escuro */
 }
 
 /* Cores para Status de Fidelidade */
 .text-cashback {
-    color: #0acf97;
+  color: #0acf97;
 } /* Verde para cashback */
 .text-pontos {
-    color: #727cf5;
+  color: #727cf5;
 } /* Roxo para pontos */
 .text-conquista {
-    color: #ffbc00;
+  color: #ffbc00;
 } /* Amarelo para conquistas */
 .bg-cashback {
-    background-color: #0acf97;
+  background-color: #0acf97;
 }
 .bg-pontos {
-    background-color: #727cf5;
+  background-color: #727cf5;
 }
 .bg-conquista {
-    background-color: #ffbc00;
+  background-color: #ffbc00;
 }
 ```
 
@@ -193,34 +198,34 @@
 ```html
 <!-- Botão Primário -->
 <button type="button" class="btn btn-primary">
-    <i class="uil uil-plus me-1"></i> Adicionar
+  <i class="uil uil-plus me-1"></i> Adicionar
 </button>
 
 <!-- Botão Secundário -->
 <button type="button" class="btn btn-secondary">
-    <i class="uil uil-eye me-1"></i> Visualizar
+  <i class="uil uil-eye me-1"></i> Visualizar
 </button>
 
 <!-- Botão de Sucesso -->
 <button type="button" class="btn btn-success">
-    <i class="uil uil-check me-1"></i> Confirmar
+  <i class="uil uil-check me-1"></i> Confirmar
 </button>
 
 <!-- Botão de Perigo -->
 <button
-    type="button"
-    class="btn btn-danger btn-sm"
-    onclick="confirmarExclusao()"
+  type="button"
+  class="btn btn-danger btn-sm"
+  onclick="confirmarExclusao()"
 >
-    <i class="uil uil-trash-alt me-1"></i> Excluir
+  <i class="uil uil-trash-alt me-1"></i> Excluir
 </button>
 
 <!-- Botão de Edição -->
 <a
-    href="{{ route('admin.business.edit', $business) }}"
-    class="btn btn-warning btn-sm"
+  href="{{ route('admin.business.edit', $business) }}"
+  class="btn btn-warning btn-sm"
 >
-    <i class="uil uil-edit me-1"></i> Editar
+  <i class="uil uil-edit me-1"></i> Editar
 </a>
 ```
 
@@ -229,40 +234,40 @@
 ```html
 <!-- Card Básico -->
 <div class="card">
-    <div class="card-header">
-        <h4 class="header-title">Título do Card</h4>
-        <div class="card-widgets">
-            <a href="#" data-bs-toggle="collapse" data-bs-target="#cardContent">
-                <i class="mdi mdi-minus"></i>
-            </a>
-        </div>
+  <div class="card-header">
+    <h4 class="header-title">Título do Card</h4>
+    <div class="card-widgets">
+      <a href="#" data-bs-toggle="collapse" data-bs-target="#cardContent">
+        <i class="mdi mdi-minus"></i>
+      </a>
     </div>
-    <div class="card-body collapse show" id="cardContent">
-        <!-- Conteúdo -->
-    </div>
+  </div>
+  <div class="card-body collapse show" id="cardContent">
+    <!-- Conteúdo -->
+  </div>
 </div>
 
 <!-- Card de Estatística -->
 <div class="card widget-rounded-circle">
-    <div class="card-body">
-        <div class="row">
-            <div class="col-6">
-                <div
-                    class="avatar-lg rounded-circle bg-soft-primary border-primary border"
-                >
-                    <i
-                        class="uil uil-money-withdrawal font-22 avatar-title text-primary"
-                    ></i>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="text-end">
-                    <h3 class="mt-1">R$ 1.250,00</h3>
-                    <p class="text-muted mb-1 text-truncate">Cashback Total</p>
-                </div>
-            </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-6">
+        <div
+          class="avatar-lg rounded-circle bg-soft-primary border-primary border"
+        >
+          <i
+            class="uil uil-money-withdrawal font-22 avatar-title text-primary"
+          ></i>
         </div>
+      </div>
+      <div class="col-6">
+        <div class="text-end">
+          <h3 class="mt-1">R$ 1.250,00</h3>
+          <p class="text-muted mb-1 text-truncate">Cashback Total</p>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 ```
 
@@ -270,37 +275,37 @@
 
 ```html
 <div class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table
-                id="basic-datatable"
-                class="table table-striped dt-responsive nowrap w-100"
-            >
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nome</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Dados da tabela -->
-                </tbody>
-            </table>
-        </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table
+        id="basic-datatable"
+        class="table table-striped dt-responsive nowrap w-100"
+      >
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dados da tabela -->
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 
 <script>
-    $(document).ready(function () {
-        $("#basic-datatable").DataTable({
-            language: {
-                url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
-            },
-            responsive: true,
-        });
+  $(document).ready(function () {
+    $("#basic-datatable").DataTable({
+      language: {
+        url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Portuguese-Brasil.json",
+      },
+      responsive: true,
     });
+  });
 </script>
 ```
 
@@ -308,63 +313,61 @@
 
 ```html
 <form
-    action="{{ route('admin.business.store') }}"
-    method="POST"
-    class="needs-validation"
-    novalidate
+  action="{{ route('admin.business.store') }}"
+  method="POST"
+  class="needs-validation"
+  novalidate
 >
-    @csrf
+  @csrf
 
-    <div class="row">
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label for="razao_social" class="form-label"
-                    >Razão Social <span class="text-danger">*</span></label
-                >
-                <input
-                    type="text"
-                    class="form-control @error('razao_social') is-invalid @enderror"
-                    id="razao_social"
-                    name="razao_social"
-                    value="{{ old('razao_social') }}"
-                    required
-                />
-                @error('razao_social')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label for="nome_fantasia" class="form-label"
-                    >Nome Fantasia</label
-                >
-                <input
-                    type="text"
-                    class="form-control @error('nome_fantasia') is-invalid @enderror"
-                    id="nome_fantasia"
-                    name="nome_fantasia"
-                    value="{{ old('nome_fantasia') }}"
-                />
-                @error('nome_fantasia')
-                <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-        </div>
-    </div>
-
-    <div class="text-end">
-        <button type="submit" class="btn btn-success">
-            <i class="uil uil-check me-1"></i> Salvar
-        </button>
-        <a
-            href="{{ route('admin.business.index') }}"
-            class="btn btn-secondary ms-1"
+  <div class="row">
+    <div class="col-md-6">
+      <div class="mb-3">
+        <label for="razao_social" class="form-label"
+          >Razão Social <span class="text-danger">*</span></label
         >
-            <i class="uil uil-times me-1"></i> Cancelar
-        </a>
+        <input
+          type="text"
+          class="form-control @error('razao_social') is-invalid @enderror"
+          id="razao_social"
+          name="razao_social"
+          value="{{ old('razao_social') }}"
+          required
+        />
+        @error('razao_social')
+        <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+      </div>
     </div>
+
+    <div class="col-md-6">
+      <div class="mb-3">
+        <label for="nome_fantasia" class="form-label">Nome Fantasia</label>
+        <input
+          type="text"
+          class="form-control @error('nome_fantasia') is-invalid @enderror"
+          id="nome_fantasia"
+          name="nome_fantasia"
+          value="{{ old('nome_fantasia') }}"
+        />
+        @error('nome_fantasia')
+        <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+      </div>
+    </div>
+  </div>
+
+  <div class="text-end">
+    <button type="submit" class="btn btn-success">
+      <i class="uil uil-check me-1"></i> Salvar
+    </button>
+    <a
+      href="{{ route('admin.business.index') }}"
+      class="btn btn-secondary ms-1"
+    >
+      <i class="uil uil-times me-1"></i> Cancelar
+    </a>
+  </div>
 </form>
 ```
 
@@ -373,40 +376,40 @@
 ```html
 <!-- Modal de Confirmação -->
 <div
-    class="modal fade"
-    id="delete-modal"
-    tabindex="-1"
-    role="dialog"
-    aria-hidden="true"
+  class="modal fade"
+  id="delete-modal"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="true"
 >
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-body p-4">
-                <div class="text-center">
-                    <i class="uil uil-exclamation-triangle h1 text-warning"></i>
-                    <h4 class="mt-2">Confirmar Exclusão</h4>
-                    <p class="mt-3">
-                        Tem certeza que deseja excluir este registro? Esta ação
-                        não pode ser desfeita.
-                    </p>
-                    <button
-                        type="button"
-                        class="btn btn-danger my-2"
-                        onclick="confirmarExclusao()"
-                    >
-                        Sim, excluir
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal"
-                    >
-                        Cancelar
-                    </button>
-                </div>
-            </div>
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-body p-4">
+        <div class="text-center">
+          <i class="uil uil-exclamation-triangle h1 text-warning"></i>
+          <h4 class="mt-2">Confirmar Exclusão</h4>
+          <p class="mt-3">
+            Tem certeza que deseja excluir este registro? Esta ação não pode ser
+            desfeita.
+          </p>
+          <button
+            type="button"
+            class="btn btn-danger my-2"
+            onclick="confirmarExclusao()"
+          >
+            Sim, excluir
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Cancelar
+          </button>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 ```
 
@@ -415,41 +418,41 @@
 ```javascript
 // Alerta de Sucesso
 function showSuccess(message = "Operação realizada com sucesso!") {
-    Swal.fire({
-        icon: "success",
-        title: "Sucesso!",
-        text: message,
-        confirmButtonColor: "#0acf97",
-    });
+  Swal.fire({
+    icon: "success",
+    title: "Sucesso!",
+    text: message,
+    confirmButtonColor: "#0acf97",
+  });
 }
 
 // Alerta de Erro
 function showError(message = "Ocorreu um erro. Tente novamente.") {
-    Swal.fire({
-        icon: "error",
-        title: "Erro!",
-        text: message,
-        confirmButtonColor: "#fa5c7c",
-    });
+  Swal.fire({
+    icon: "error",
+    title: "Erro!",
+    text: message,
+    confirmButtonColor: "#fa5c7c",
+  });
 }
 
 // Confirmação de Exclusão
 function confirmarExclusao() {
-    Swal.fire({
-        title: "Tem certeza?",
-        text: "Esta ação não pode ser desfeita!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#fa5c7c",
-        cancelButtonColor: "#6c757d",
-        confirmButtonText: "Sim, excluir!",
-        cancelButtonText: "Cancelar",
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Executar exclusão
-            document.getElementById("delete-form").submit();
-        }
-    });
+  Swal.fire({
+    title: "Tem certeza?",
+    text: "Esta ação não pode ser desfeita!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#fa5c7c",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: "Sim, excluir!",
+    cancelButtonText: "Cancelar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Executar exclusão
+      document.getElementById("delete-form").submit();
+    }
+  });
 }
 ```
 
@@ -469,15 +472,15 @@ return redirect()->back()
 <!-- Na View (layout) -->
 @if(session('success'))
 <div class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="uil uil-check-circle me-2"></i>
-    {{ session('success') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  <i class="uil uil-check-circle me-2"></i>
+  {{ session('success') }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 @endif @if(session('error'))
 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="uil uil-exclamation-triangle me-2"></i>
-    {{ session('error') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  <i class="uil uil-exclamation-triangle me-2"></i>
+  {{ session('error') }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 @endif
 ```
@@ -958,58 +961,35 @@ class ModelNameService
 
 ## 🗄️ **BASE DE DADOS**
 
-### **Naming Conventions**
+> 📖 **DOCUMENTO DEDICADO**: Para o padrão completo de banco de dados, consulte: [`PADRAO_BANCO_DADOS.md`](./PADRAO_BANCO_DADOS.md)
 
--   **Tabelas**: plural, snake_case (`businesses`, `fidelidade_cashback_transacoes`)
--   **Colunas**: snake_case (`razao_social`, `data_criacao`)
--   **Chaves primárias**: `id` (auto increment)
--   **Chaves estrangeiras**: `{table}_id` (`business_id`, `user_id`)
--   **Timestamps**: `created_at`, `updated_at`, `deleted_at`
+### **Resumo das Convenções**
 
-### **Padrões Obrigatórios para Todas as Tabelas**
+- **Tabelas**: plural, snake_case (`empresas`, `fidelidade_cashback_transacoes`)
+- **Colunas**: snake_case (`razao_social`, `data_criacao`)
+- **Chaves primárias**: `id` (auto increment)
+- **Chaves estrangeiras**: `{table}_id` (`empresa_id`, `usuario_id`)
+- **Timestamps**: `created_at`, `updated_at`, `deleted_at`
 
-#### **1. Colunas de Controle (OBRIGATÓRIAS):**
+### **Campos Obrigatórios Resumidos**
 
-```sql
--- Timestamps Laravel (SEMPRE usar estes nomes)
-`created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-`updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-`deleted_at` TIMESTAMP NULL DEFAULT NULL,  -- Para SoftDeletes
-
--- Multitenancy (OBRIGATÓRIO)
-`empresa_id` INT UNSIGNED NOT NULL COMMENT 'ID da empresa (multitenancy)',
-
--- Sincronização Multi-Sites (OBRIGATÓRIO)
-`sync_hash` VARCHAR(64) NULL COMMENT 'Hash MD5 para controle de sincronização',
-`sync_status` ENUM('pending', 'synced', 'error', 'ignored') DEFAULT 'pending' COMMENT 'Status da sincronização',
-`sync_data` TIMESTAMP NULL DEFAULT NULL COMMENT 'Data da última sincronização'
-```
-
-#### **2. Índices Obrigatórios:**
+> 📋 **Para detalhes completos**: Consulte [`PADRAO_BANCO_DADOS.md`](./PADRAO_BANCO_DADOS.md)
 
 ```sql
--- Índices para performance
-INDEX `idx_empresa_id` (`empresa_id`),
-INDEX `idx_created_at` (`created_at`),
-INDEX `idx_sync_status` (`sync_status`),
-INDEX `idx_deleted_at` (`deleted_at`),
-
--- Índice composto para sincronização
-INDEX `idx_sync_control` (`empresa_id`, `sync_status`, `sync_data`)
+-- Estrutura mínima obrigatória para TODAS as tabelas
+id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+empresa_id INT UNSIGNED NOT NULL,
+created_at TIMESTAMP NULL,
+updated_at TIMESTAMP NULL,
+deleted_at TIMESTAMP NULL,
+sync_hash VARCHAR(64) NULL,
+sync_status ENUM('pending', 'synced', 'error', 'ignored') DEFAULT 'pending',
+sync_data TIMESTAMP NULL
 ```
 
-#### **3. Foreign Keys Obrigatórias:**
+### **Migration Template Simplificado**
 
-```sql
--- Relacionamento com empresas
-CONSTRAINT `fk_{table_name}_empresa_id`
-    FOREIGN KEY (`empresa_id`)
-    REFERENCES `empresas` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE
-```
-
-### **Estrutura de Migration Padrão**
+> 📖 **Template completo**: Ver [`PADRAO_BANCO_DADOS.md`](./PADRAO_BANCO_DADOS.md)
 
 ```php
 <?php
@@ -1022,124 +1002,48 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('table_name', function (Blueprint $table) {
+        Schema::create('nome_da_tabela', function (Blueprint $table) {
             // 1. CHAVE PRIMÁRIA
             $table->id();
 
             // 2. MULTITENANCY (OBRIGATÓRIO)
             $table->foreignId('empresa_id')
                   ->constrained('empresas')
-                  ->onDelete('cascade')
-                  ->comment('ID da empresa (multitenancy)');
+                  ->onDelete('cascade');
 
-            // 3. CAMPOS ESPECÍFICOS DA TABELA
-            $table->string('name', 100);
-            $table->text('description')->nullable();
-            $table->decimal('value', 10, 2)->default(0);
+            // 3. CAMPOS ESPECÍFICOS
+            $table->string('nome', 100);
+            $table->decimal('valor', 10, 2)->default(0);
             $table->boolean('is_active')->default(true);
-            $table->json('metadata')->nullable();
 
-            // 4. SINCRONIZAÇÃO MULTI-SITES (OBRIGATÓRIO)
-            $table->string('sync_hash', 64)->nullable()->comment('Hash MD5 para controle de sincronização');
-            $table->enum('sync_status', ['pending', 'synced', 'error', 'ignored'])
-                  ->default('pending')
-                  ->comment('Status da sincronização');
-            $table->timestamp('sync_data')->nullable()->comment('Data da última sincronização');
+            // 4. SINCRONIZAÇÃO (OBRIGATÓRIO)
+            $table->string('sync_hash', 64)->nullable();
+            $table->enum('sync_status', ['pending', 'synced', 'error', 'ignored'])->default('pending');
+            $table->timestamp('sync_data')->nullable();
 
-            // 5. TIMESTAMPS PADRÃO (OBRIGATÓRIO)
+            // 5. TIMESTAMPS PADRÃO
             $table->timestamps();
             $table->softDeletes();
 
             // 6. ÍNDICES OBRIGATÓRIOS
-            $table->index(['empresa_id', 'is_active'], 'idx_empresa_active');
-            $table->index('created_at', 'idx_created_at');
-            $table->index('sync_status', 'idx_sync_status');
-            $table->index('deleted_at', 'idx_deleted_at');
+            $table->index(['empresa_id', 'is_active']);
+            $table->index('sync_status');
             $table->index(['empresa_id', 'sync_status', 'sync_data'], 'idx_sync_control');
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('table_name');
+        Schema::dropIfExists('nome_da_tabela');
     }
 };
 ```
 
-### **Script de Migração para Tabelas Existentes**
+### **Atualização de Tabelas Existentes**
 
-**Para aplicar os padrões em tabelas já existentes:**
+> 🔄 **Scripts completos**: Ver seção "Script para Tabelas Existentes" em [`PADRAO_BANCO_DADOS.md`](./PADRAO_BANCO_DADOS.md)
 
-```sql
--- Exemplo de script para atualizar tabela existente
--- SEMPRE FAZER BACKUP ANTES DE EXECUTAR!
-
--- 1. Renomear colunas para padrão Laravel
-ALTER TABLE `nome_da_tabela`
-CHANGE `criado_em` `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-CHANGE `atualizado_em` `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP;
-
--- 2. Adicionar SoftDeletes
-ALTER TABLE `nome_da_tabela`
-ADD `deleted_at` TIMESTAMP NULL DEFAULT NULL;
-
--- 3. Adicionar multitenancy
-ALTER TABLE `nome_da_tabela`
-ADD `empresa_id` INT UNSIGNED NOT NULL COMMENT 'ID da empresa (multitenancy)';
-
--- 4. Adicionar campos de sincronização
-ALTER TABLE `nome_da_tabela`
-ADD `sync_hash` VARCHAR(64) NULL COMMENT 'Hash MD5 para controle de sincronização',
-ADD `sync_status` ENUM('pending', 'synced', 'error', 'ignored') DEFAULT 'pending' COMMENT 'Status da sincronização',
-ADD `sync_data` TIMESTAMP NULL DEFAULT NULL COMMENT 'Data da última sincronização';
-
--- 5. Adicionar índices obrigatórios
-ALTER TABLE `nome_da_tabela`
-ADD INDEX `idx_empresa_id` (`empresa_id`),
-ADD INDEX `idx_created_at` (`created_at`),
-ADD INDEX `idx_sync_status` (`sync_status`),
-ADD INDEX `idx_deleted_at` (`deleted_at`),
-ADD INDEX `idx_sync_control` (`empresa_id`, `sync_status`, `sync_data`);
-
--- 6. Adicionar foreign key
-ALTER TABLE `nome_da_tabela`
-ADD CONSTRAINT `fk_nome_da_tabela_empresa_id`
-    FOREIGN KEY (`empresa_id`)
-    REFERENCES `empresas` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE;
-```
-
-### **Seeds Organizados**
-
-```php
-<?php
-
-namespace Database\Seeders;
-
-use Illuminate\Database\Seeder;
-use App\Models\Business\Business;
-
-class BusinessSeeder extends Seeder
-{
-    public function run()
-    {
-        // Empresa padrão para desenvolvimento
-        Business::create([
-            'razao_social' => 'Marketplace Demo LTDA',
-            'nome_fantasia' => 'Demo Store',
-            'cnpj' => '12.345.678/0001-90',
-            'email' => 'demo@marketplace.com',
-            'ativo' => true,
-        ]);
-
-        // Criar empresas para teste
-        if (app()->environment('local')) {
-            Business::factory(10)->create();
-        }
-    }
-}
-```
+Para aplicar os padrões em tabelas já existentes, use os scripts SQL e migrations disponíveis no documento dedicado.
 
 ---
 
@@ -1522,44 +1426,44 @@ function cancelarTransacao(id) {
 
 ### **Para cada nova funcionalidade:**
 
--   [ ] Criar migration seguindo padrões
--   [ ] Criar model com todas as seções obrigatórias
--   [ ] Criar Form Requests para validação
--   [ ] Criar Service para lógica de negócio
--   [ ] Criar Controller seguindo estrutura padrão
--   [ ] Criar views usando componentes Theme Hyper
--   [ ] Implementar testes unitários e feature
--   [ ] Adicionar tradução de mensagens
--   [ ] Implementar autorização (Policies)
--   [ ] Documenter API endpoints (se aplicável)
--   [ ] Testar responsividade
--   [ ] Verificar performance (N+1, cache)
+- [ ] Criar migration seguindo padrões
+- [ ] Criar model com todas as seções obrigatórias
+- [ ] Criar Form Requests para validação
+- [ ] Criar Service para lógica de negócio
+- [ ] Criar Controller seguindo estrutura padrão
+- [ ] Criar views usando componentes Theme Hyper
+- [ ] Implementar testes unitários e feature
+- [ ] Adicionar tradução de mensagens
+- [ ] Implementar autorização (Policies)
+- [ ] Documenter API endpoints (se aplicável)
+- [ ] Testar responsividade
+- [ ] Verificar performance (N+1, cache)
 
 ### **Para cada Model:**
 
--   [ ] Usar SoftDeletes
--   [ ] Definir fillable explicitamente
--   [ ] Implementar casts apropriados
--   [ ] Criar relacionamentos necessários
--   [ ] Implementar scopes comuns
--   [ ] Adicionar métodos de conveniência
--   [ ] Implementar multitenancy (business_id)
--   [ ] Criar Factory para testes
+- [ ] Usar SoftDeletes
+- [ ] Definir fillable explicitamente
+- [ ] Implementar casts apropriados
+- [ ] Criar relacionamentos necessários
+- [ ] Implementar scopes comuns
+- [ ] Adicionar métodos de conveniência
+- [ ] Implementar multitenancy (business_id)
+- [ ] Criar Factory para testes
 
 ### **Para cada View:**
 
--   [ ] Estender layout apropriado
--   [ ] Usar componentes Blade reutilizáveis
--   [ ] Implementar breadcrumb
--   [ ] Adicionar filtros quando necessário
--   [ ] Usar classes CSS do Theme Hyper
--   [ ] Implementar JavaScript necessário
--   [ ] Adicionar loading states
--   [ ] Testar em diferentes resoluções
+- [ ] Estender layout apropriado
+- [ ] Usar componentes Blade reutilizáveis
+- [ ] Implementar breadcrumb
+- [ ] Adicionar filtros quando necessário
+- [ ] Usar classes CSS do Theme Hyper
+- [ ] Implementar JavaScript necessário
+- [ ] Adicionar loading states
+- [ ] Testar em diferentes resoluções
 
 ---
 
--   [ ] Testar em diferentes resoluções
+- [ ] Testar em diferentes resoluções
 
 ---
 
@@ -1688,34 +1592,34 @@ As seguintes extensões são **obrigatórias** para desenvolvimento no projeto:
 
 #### **PHP & Laravel:**
 
--   `bmewburn.vscode-intelephense-client` - IntelliSense para PHP
--   `onecentlin.laravel-blade` - Suporte para Blade templates
--   `onecentlin.laravel5-snippets` - Snippets do Laravel
--   `ryannaddy.laravel-artisan` - Comandos Artisan integrados
--   `codingyu.laravel-goto-view` - Navegação rápida para views
+- `bmewburn.vscode-intelephense-client` - IntelliSense para PHP
+- `onecentlin.laravel-blade` - Suporte para Blade templates
+- `onecentlin.laravel5-snippets` - Snippets do Laravel
+- `ryannaddy.laravel-artisan` - Comandos Artisan integrados
+- `codingyu.laravel-goto-view` - Navegação rápida para views
 
 #### **GitHub Copilot:**
 
--   `github.copilot` - Assistente de código IA
--   `github.copilot-chat` - Chat integrado
--   `github.copilot-labs` - Funcionalidades experimentais
+- `github.copilot` - Assistente de código IA
+- `github.copilot-chat` - Chat integrado
+- `github.copilot-labs` - Funcionalidades experimentais
 
 #### **Frontend:**
 
--   `bradlc.vscode-tailwindcss` - IntelliSense para Tailwind (se usado)
--   `formulahendry.auto-rename-tag` - Renomear tags HTML automaticamente
--   `esbenp.prettier-vscode` - Formatador de código
+- `bradlc.vscode-tailwindcss` - IntelliSense para Tailwind (se usado)
+- `formulahendry.auto-rename-tag` - Renomear tags HTML automaticamente
+- `esbenp.prettier-vscode` - Formatador de código
 
 #### **Banco de Dados:**
 
--   `cweijan.vscode-mysql-client2` - Cliente MySQL integrado
+- `cweijan.vscode-mysql-client2` - Cliente MySQL integrado
 
 #### **Úteis:**
 
--   `ms-vscode.vscode-json` - Suporte melhorado para JSON
--   `streetsidesoftware.code-spell-checker` - Corretor ortográfico
--   `gruntfuggly.todo-tree` - Visualizador de TODOs
--   `aaron-bond.better-comments` - Comentários coloridos
+- `ms-vscode.vscode-json` - Suporte melhorado para JSON
+- `streetsidesoftware.code-spell-checker` - Corretor ortográfico
+- `gruntfuggly.todo-tree` - Visualizador de TODOs
+- `aaron-bond.better-comments` - Comentários coloridos
 
 ### **Snippets Customizados**
 
@@ -1723,62 +1627,62 @@ Crie snippets específicos para o projeto em `Arquivo > Preferências > Configur
 
 ```json
 {
-    "Laravel Model": {
-        "prefix": "model",
-        "body": [
-            "<?php",
-            "",
-            "namespace AppModels${1:Domain};",
-            "",
-            "use IlluminateDatabaseEloquentFactoriesHasFactory;",
-            "use IlluminateDatabaseEloquentModel;",
-            "use IlluminateDatabaseEloquentSoftDeletes;",
-            "",
-            "class ${2:ModelName} extends Model",
-            "{",
-            "    use HasFactory, SoftDeletes;",
-            "",
-            "    protected $table = '${3:table_name}';",
-            "",
-            "    protected $fillable = [",
-            "        '${4:field_name}',",
-            "    ];",
-            "",
-            "    protected $casts = [",
-            "        'created_at' => 'datetime',",
-            "        'updated_at' => 'datetime',",
-            "        'deleted_at' => 'datetime',",
-            "    ];",
-            "}"
-        ],
-        "description": "Criar um Model Laravel seguindo os padrões do projeto"
-    },
+  "Laravel Model": {
+    "prefix": "model",
+    "body": [
+      "<?php",
+      "",
+      "namespace AppModels${1:Domain};",
+      "",
+      "use IlluminateDatabaseEloquentFactoriesHasFactory;",
+      "use IlluminateDatabaseEloquentModel;",
+      "use IlluminateDatabaseEloquentSoftDeletes;",
+      "",
+      "class ${2:ModelName} extends Model",
+      "{",
+      "    use HasFactory, SoftDeletes;",
+      "",
+      "    protected $table = '${3:table_name}';",
+      "",
+      "    protected $fillable = [",
+      "        '${4:field_name}',",
+      "    ];",
+      "",
+      "    protected $casts = [",
+      "        'created_at' => 'datetime',",
+      "        'updated_at' => 'datetime',",
+      "        'deleted_at' => 'datetime',",
+      "    ];",
+      "}"
+    ],
+    "description": "Criar um Model Laravel seguindo os padrões do projeto"
+  },
 
-    "Laravel Controller": {
-        "prefix": "controller",
-        "body": [
-            "<?php",
-            "",
-            "namespace AppHttpControllers${1:UserType};",
-            "",
-            "use AppHttpControllersController;",
-            "use IlluminateHttpRequest;",
-            "",
-            "class ${2:ControllerName} extends Controller",
-            "{",
-            "    public function __construct()",
-            "    {",
-            "        $this->middleware('auth');",
-            "    }",
-            "",
-            "    public function index()",
-            "    {",
-            "        return view('${3:view_name}');",
-            "    }",
-            "}"
-        ],
-        "description": "Criar um Controller Laravel seguindo os padrões do projeto"
-    }
+  "Laravel Controller": {
+    "prefix": "controller",
+    "body": [
+      "<?php",
+      "",
+      "namespace AppHttpControllers${1:UserType};",
+      "",
+      "use AppHttpControllersController;",
+      "use IlluminateHttpRequest;",
+      "",
+      "class ${2:ControllerName} extends Controller",
+      "{",
+      "    public function __construct()",
+      "    {",
+      "        $this->middleware('auth');",
+      "    }",
+      "",
+      "    public function index()",
+      "    {",
+      "        return view('${3:view_name}');",
+      "    }",
+      "}"
+    ],
+    "description": "Criar um Controller Laravel seguindo os padrões do projeto"
+  }
 }
 ```
 

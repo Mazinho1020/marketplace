@@ -98,29 +98,39 @@ class DashboardController extends Controller
 
     private function getChartData()
     {
+        // Usar timestamp para seed consistente
+        srand(date('Ymd'));
+
+        // Gerar dados dos últimos 12 meses
+        $months = [];
+        $users = [];
+        $revenue = [];
+
+        for ($i = 11; $i >= 0; $i--) {
+            $date = date('M/y', strtotime("-{$i} months"));
+            $months[] = $date;
+
+            // Usar seed baseado no mês para valores consistentes
+            $monthSeed = date('Ym', strtotime("-{$i} months"));
+            mt_srand($monthSeed);
+
+            $users[] = mt_rand(10, 30);
+            $revenue[] = mt_rand(8000, 25000);
+        }
+
         return [
-            'usuarios_por_mes' => [
-                ['mes' => 'Fev/25', 'count' => 10],
-                ['mes' => 'Mar/25', 'count' => 15],
-                ['mes' => 'Abr/25', 'count' => 12],
-                ['mes' => 'Mai/25', 'count' => 18],
-                ['mes' => 'Jun/25', 'count' => 22],
-                ['mes' => 'Ago/25', 'count' => 25],
-            ],
-            'vendas_por_mes' => [
-                ['mes' => 'Fev/25', 'valor' => 5000],
-                ['mes' => 'Mar/25', 'valor' => 7500],
-                ['mes' => 'Abr/25', 'valor' => 6200],
-                ['mes' => 'Mai/25', 'valor' => 8900],
-                ['mes' => 'Jun/25', 'valor' => 9500],
-                ['mes' => 'Ago/25', 'valor' => 12000],
-            ],
+            'usuarios_por_mes' => array_map(function ($i) use ($months, $users) {
+                return ['mes' => $months[$i], 'count' => $users[$i]];
+            }, array_keys($months)),
+            'vendas_por_mes' => array_map(function ($i) use ($months, $revenue) {
+                return ['mes' => $months[$i], 'valor' => $revenue[$i]];
+            }, array_keys($months)),
             'top_produtos' => [
-                ['nome' => 'Produto A', 'vendas' => 25],
-                ['nome' => 'Produto B', 'vendas' => 18],
-                ['nome' => 'Produto C', 'vendas' => 15],
-                ['nome' => 'Produto D', 'vendas' => 12],
-                ['nome' => 'Produto E', 'vendas' => 8],
+                ['nome' => 'Assinaturas Premium', 'vendas' => 45],
+                ['nome' => 'Planos Básicos', 'vendas' => 32],
+                ['nome' => 'Planos Enterprise', 'vendas' => 18],
+                ['nome' => 'Add-ons', 'vendas' => 12],
+                ['nome' => 'Consultoria', 'vendas' => 8],
             ]
         ];
     }

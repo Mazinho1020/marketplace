@@ -27,28 +27,28 @@
             <h5 class="mb-4">Resumo Executivo</h5>
             <div class="row">
                 <div class="col-md-2 text-center mb-3">
-                    <div class="h2 text-primary">{{ number_format($executiveSummary['total_merchants']) }}</div>
-                    <div class="text-muted">Merchants Totais</div>
+                    <div class="h2 text-primary">{{ number_format($executiveSummary['empresas_ativas'] ?? 0) }}</div>
+                    <div class="text-muted">Empresas Ativas</div>
                 </div>
                 <div class="col-md-2 text-center mb-3">
-                    <div class="h2 text-success">{{ number_format($executiveSummary['active_subscriptions']) }}</div>
-                    <div class="text-muted">Assinaturas Ativas</div>
+                    <div class="h2 text-success">{{ number_format($executiveSummary['aprovadas'] ?? 0) }}</div>
+                    <div class="text-muted">Transações Aprovadas</div>
                 </div>
                 <div class="col-md-2 text-center mb-3">
-                    <div class="h2 text-info">{{ number_format($executiveSummary['active_affiliates']) }}</div>
-                    <div class="text-muted">Afiliados Ativos</div>
+                    <div class="h2 text-info">{{ number_format($executiveSummary['gateways_usados'] ?? 0) }}</div>
+                    <div class="text-muted">Gateways Ativos</div>
                 </div>
                 <div class="col-md-2 text-center mb-3">
-                    <div class="h2 text-warning">R$ {{ number_format($executiveSummary['monthly_revenue'], 0, ',', '.') }}</div>
-                    <div class="text-muted">Receita Mensal</div>
+                    <div class="h2 text-warning">R$ {{ number_format($executiveSummary['receita_total'] ?? 0, 2, ',', '.') }}</div>
+                    <div class="text-muted">Receita Total</div>
                 </div>
                 <div class="col-md-2 text-center mb-3">
-                    <div class="h2 text-dark">R$ {{ number_format($executiveSummary['monthly_volume'], 0, ',', '.') }}</div>
-                    <div class="text-muted">Volume (30d)</div>
+                    <div class="h2 text-dark">{{ number_format($executiveSummary['total_transacoes'] ?? 0) }}</div>
+                    <div class="text-muted">Total Transações</div>
                 </div>
                 <div class="col-md-2 text-center mb-3">
-                    <div class="h2 text-secondary">{{ number_format($executiveSummary['monthly_transactions']) }}</div>
-                    <div class="text-muted">Transações</div>
+                    <div class="h2 text-secondary">{{ number_format($executiveSummary['taxa_aprovacao'] ?? 0, 1) }}%</div>
+                    <div class="text-muted">Taxa de Aprovação</div>
                 </div>
             </div>
         </div>
@@ -62,24 +62,24 @@
             <h5 class="mb-3">KPIs Principais</h5>
             <div class="row">
                 <div class="col-6 text-center mb-3">
-                    <div class="h3 text-success">R$ {{ number_format($kpis['mrr'], 2, ',', '.') }}</div>
-                    <div class="text-muted">MRR (Monthly Recurring Revenue)</div>
+                    <div class="h3 text-success">R$ {{ number_format($executiveSummary['receita_total'] ?? 0, 2, ',', '.') }}</div>
+                    <div class="text-muted">Receita Total (30d)</div>
                     <small class="text-success">
                         <i class="fas fa-arrow-up"></i>
-                        {{ number_format($kpis['mrr_growth'], 1) }}% vs mês anterior
+                        {{ number_format($executiveSummary['taxa_aprovacao'] ?? 0, 1) }}% taxa aprovação
                     </small>
                 </div>
                 <div class="col-6 text-center mb-3">
-                    <div class="h3 text-primary">R$ {{ number_format($kpis['arpu'], 2, ',', '.') }}</div>
-                    <div class="text-muted">ARPU (Average Revenue Per User)</div>
+                    <div class="h3 text-primary">R$ {{ number_format(($executiveSummary['receita_total'] ?? 0) / max($executiveSummary['empresas_ativas'] ?? 1, 1), 2, ',', '.') }}</div>
+                    <div class="text-muted">Receita Média por Empresa</div>
                 </div>
                 <div class="col-6 text-center mb-3">
-                    <div class="h3 text-danger">{{ number_format($kpis['churn_rate'], 1) }}%</div>
-                    <div class="text-muted">Taxa de Churn</div>
+                    <div class="h3 text-warning">{{ number_format($executiveSummary['total_transacoes'] ?? 0) }}</div>
+                    <div class="text-muted">Total de Transações</div>
                 </div>
                 <div class="col-6 text-center mb-3">
-                    <div class="h3 text-info">{{ number_format($kpis['new_subscriptions']) }}</div>
-                    <div class="text-muted">Novas Assinaturas (30d)</div>
+                    <div class="h3 text-info">{{ number_format($executiveSummary['gateways_usados'] ?? 0) }}</div>
+                    <div class="text-muted">Gateways Utilizados</div>
                 </div>
             </div>
         </div>
@@ -104,17 +104,28 @@
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body text-center">
                             <div class="mb-3">
-                                <i class="fas fa-{{ $report['icon'] }} fa-3x text-primary"></i>
+                                <i class="{{ $report['icon'] ?? 'uil uil-chart-line' }} fa-3x text-primary" style="font-size: 3rem;"></i>
                             </div>
-                            <h6 class="card-title">{{ $report['name'] }}</h6>
-                            <p class="card-text small text-muted">{{ $report['description'] }}</p>
+                            <h6 class="card-title">{{ $report['title'] ?? 'Relatório' }}</h6>
+                            <p class="card-text small text-muted">{{ $report['description'] ?? 'Descrição não disponível' }}</p>
                             <div class="d-grid gap-2">
-                                <a href="{{ route($report['route']) }}" class="btn btn-primary">
-                                    <i class="fas fa-chart-line me-1"></i>
-                                    Ver Relatório
-                                </a>
-                                <button class="btn btn-outline-secondary btn-sm" onclick="exportReport('{{ strtolower($report['name']) }}')">
-                                    <i class="fas fa-download me-1"></i>
+                                @if(isset($report['route']))
+                                    @if(isset($report['params']))
+                                        <a href="{{ route($report['route'], $report['params']) }}" class="btn btn-primary">
+                                    @else
+                                        <a href="{{ route($report['route']) }}" class="btn btn-primary">
+                                    @endif
+                                        <i class="uil uil-chart-line me-1"></i>
+                                        Ver Relatório
+                                    </a>
+                                @else
+                                    <button class="btn btn-primary" disabled>
+                                        <i class="uil uil-chart-line me-1"></i>
+                                        Ver Relatório
+                                    </button>
+                                @endif
+                                <button class="btn btn-outline-secondary btn-sm" onclick="exportReport('{{ strtolower($report['title'] ?? '') }}')">
+                                    <i class="uil uil-download-alt me-1"></i>
                                     Exportar
                                 </button>
                             </div>
@@ -205,36 +216,73 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Merchant Growth Chart
-const merchantCtx = document.getElementById('merchantGrowthChart').getContext('2d');
-const merchantGrowthChart = new Chart(merchantCtx, {
-    type: 'bar',
-    data: {
-        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-        datasets: [{
-            label: 'Novos Merchants',
-            data: [12, 19, 15, 25, 22, 30],
-            backgroundColor: 'rgba(102, 126, 234, 0.8)',
-            borderColor: '#667eea',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    // Aguardar o Chart.js carregar completamente
+    function inicializar() {
+        if (typeof Chart !== 'undefined') {
+            console.log('Chart.js carregado com sucesso - Reports');
+            
+            // Configurar gráficos
+            configurarGraficos();
+            
+        } else {
+            console.log('Aguardando Chart.js carregar...');
+            setTimeout(inicializar, 100);
         }
     }
+    
+    inicializar();
 });
+
+function configurarGraficos() {
+    try {
+        // Verificar se o Chart.js está carregado
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js não está carregado');
+            return;
+        }
+
+        // Merchant Growth Chart
+        const merchantCanvas = document.getElementById('merchantGrowthChart');
+        if (merchantCanvas) {
+            const merchantCtx = merchantCanvas.getContext('2d');
+            
+            const merchantGrowthChart = new Chart(merchantCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: 'Novos Merchants',
+                        data: [12, 19, 15, 25, 22, 30],
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: '#667eea',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('Canvas merchantGrowthChart não encontrado');
+        }
+    } catch (error) {
+        console.error('Erro ao configurar gráficos:', error);
+    }
+}
 
 function exportReport(reportType) {
     // Show export modal or redirect to export page

@@ -1,6 +1,15 @@
-@extends('admin.layouts.fidelidade')
+@extends('layouts.admin')
 
 @section('title', 'Configurações Fidelidade')
+
+@php
+    $pageTitle = 'Configurações Fidelidade';
+    $breadcrumbs = [
+        ['title' => 'Admin', 'url' => route('admin.dashboard')],
+        ['title' => 'Fidelidade', 'url' => route('admin.fidelidade.dashboard')],
+        ['title' => 'Configurações', 'url' => '#']
+    ];
+@endphp
 
 @section('content')
 <!-- Header -->

@@ -2,6 +2,11 @@
 
 @section('title', 'Dashboard')
 
+@push('head')
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@endpush
+
 @php
     $pageTitle = 'Dashboard';
     $breadcrumbs = [
@@ -250,83 +255,104 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Revenue Chart
-    const revenueCtx = document.getElementById('revenueChart');
-    if (revenueCtx) {
-        new Chart(revenueCtx, {
-            type: 'line',
-            data: {
-                labels: {!! json_encode(array_column($revenueChart ?? [], 'month')) !!},
-                datasets: [{
-                    label: 'Receita',
-                    data: {!! json_encode(array_column($revenueChart ?? [], 'revenue')) !!},
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return 'R$ ' + value.toLocaleString('pt-BR');
-                            }
-                        }
-                    }
-                },
-                elements: {
-                    point: {
-                        radius: 5,
-                        hoverRadius: 8
-                    }
-                }
+    // Aguardar o Chart.js carregar completamente
+    if (typeof Chart === 'undefined') {
+        setTimeout(() => {
+            if (typeof Chart !== 'undefined') {
+                initializeCharts();
             }
-        });
-    }
-
-    // Plan Distribution Chart
-    const planCtx = document.getElementById('planChart');
-    if (planCtx) {
-        new Chart(planCtx, {
-            type: 'doughnut',
-            data: {
-                labels: {!! json_encode(array_column($planDistribution ?? [], 'plan_name')) !!},
-                datasets: [{
-                    data: {!! json_encode(array_column($planDistribution ?? [], 'count')) !!},
-                    backgroundColor: [
-                        '#667eea',
-                        '#764ba2',
-                        '#28a745',
-                        '#fd7e14',
-                        '#e83e8c',
-                        '#17a2b8'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
+        }, 1000);
+    } else {
+        initializeCharts();
     }
 });
+
+function initializeCharts() {
+    try {
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart');
+        if (revenueCtx) {
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: {!! json_encode(array_column($revenueChart ?? [], 'month')) !!},
+                    datasets: [{
+                        label: 'Receita',
+                        data: {!! json_encode(array_column($revenueChart ?? [], 'revenue')) !!},
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: 5,
+                            hoverRadius: 8
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('Elemento revenueChart não encontrado');
+        }
+
+        // Plan Distribution Chart
+        const planCtx = document.getElementById('planChart');
+        if (planCtx) {
+            new Chart(planCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: {!! json_encode(array_column($planDistribution ?? [], 'plan_name')) !!},
+                    datasets: [{
+                        data: {!! json_encode(array_column($planDistribution ?? [], 'count')) !!},
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#28a745',
+                            '#fd7e14',
+                            '#e83e8c',
+                            '#17a2b8'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        } else {
+            console.error('Elemento planChart não encontrado');
+        }
+    } catch (error) {
+        console.error('Erro ao inicializar gráficos:', error);
+    }
+}
 
 // Update revenue chart function
 function updateRevenueChart(period) {

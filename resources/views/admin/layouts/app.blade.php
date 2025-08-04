@@ -9,7 +9,28 @@
     <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.min.css" rel="stylesheet">
+    
+    <!-- Chart.js 4+ doesn't need separate CSS file, styles are included automatically -->
+    <style>
+        /* Chart.js custom styling for better integration */
+        .chart-container {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .chart-container canvas {
+            max-height: 400px;
+        }
+        
+        /* Chart tooltips styling */
+        .chartjs-tooltip {
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    </style>
     
     <style>
         .sidebar {
@@ -160,7 +181,12 @@
                             Relatórios
                         </a>
                         
-                        <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+                        <a href="{{ route('admin.notificacoes.index') }}" class="nav-link {{ request()->routeIs('admin.notificacoes.*') ? 'active' : '' }}">
+                            <i class="fas fa-bell"></i>
+                            Notificações
+                        </a>
+                        
+                        <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">>
                         
                         <a href="{{ route('admin.settings') }}" class="nav-link">
                             <i class="fas fa-cogs"></i>
@@ -227,7 +253,7 @@
     
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.0.0/dist/axios.min.js"></script>
     
     <script>

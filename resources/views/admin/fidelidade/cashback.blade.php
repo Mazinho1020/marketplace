@@ -1,6 +1,15 @@
-@extends('admin.layouts.fidelidade')
+@extends('layouts.admin')
 
 @section('title', 'Cashback Fidelidade')
+
+@php
+    $pageTitle = 'Cashback Fidelidade';
+    $breadcrumbs = [
+        ['title' => 'Admin', 'url' => route('admin.dashboard')],
+        ['title' => 'Fidelidade', 'url' => route('admin.fidelidade.dashboard')],
+        ['title' => 'Cashback', 'url' => '#']
+    ];
+@endphp
 
 @section('content')
 <!-- Header -->

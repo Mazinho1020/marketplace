@@ -1,0 +1,17 @@
+empresa_cache
+empresa_certificados
+empresa_cnaes
+empresa_config_seguranca
+empresa_logs_permissoes
+empresa_papeis
+empresa_papel_permissoes
+empresa_permissoes
+empresa_socios
+empresa_usuarios_activity_log
+empresa_usuarios_remember_tokens
+empresa_usuarios_security_settings
+empresa_usuario_empresas
+empresa_usuario_papeis
+empresa_usuario_permissoes
+login
+produto_importar

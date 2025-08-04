@@ -15,7 +15,7 @@
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}" 
                        href="{{ url('/admin/dashboard') }}">
-                        <i class="mdi mdi-view-dashboard"></i> Dashboard
+                        <i class="mdi mdi-view-dashboard"></i> Dashboards
                     </a>
                 </li>
 
@@ -37,6 +37,58 @@
                         </a></li>
                         <li><a class="dropdown-item" href="{{ url('/admin/config/sistema') }}">
                             <i class="mdi mdi-desktop-tower"></i> Sistema
+                        </a></li>
+                    </ul>
+                </li>
+
+                {{-- Sistema de Notificações --}}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle {{ request()->is('admin/notificacoes*') ? 'active' : '' }}" 
+                       href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="mdi mdi-bell-ring"></i> Notificações
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.index') }}">
+                            <i class="mdi mdi-view-dashboard"></i> Dashboard
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header">Gerenciamento</h6></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.templates') }}">
+                            <i class="mdi mdi-file-document-edit"></i> Templates
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.tipos') }}">
+                            <i class="mdi mdi-format-list-bulleted"></i> Tipos de Evento
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.aplicacoes') }}">
+                            <i class="mdi mdi-application"></i> Aplicações
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.canais') }}">
+                            <i class="mdi mdi-transit-connection-variant"></i> Canais
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.usuarios') }}">
+                            <i class="mdi mdi-account-group"></i> Usuários
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header">Monitoramento</h6></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.enviadas') }}">
+                            <i class="mdi mdi-send"></i> Enviadas
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.estatisticas') }}">
+                            <i class="mdi mdi-chart-line"></i> Estatísticas
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.logs') }}">
+                            <i class="mdi mdi-file-document-outline"></i> Logs
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.diagnostico') }}">
+                            <i class="mdi mdi-pulse"></i> Diagnóstico
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header">Configurações</h6></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.configuracoes') }}">
+                            <i class="mdi mdi-cog"></i> Configurações
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.notificacoes.teste') }}">
+                            <i class="mdi mdi-test-tube"></i> Teste
                         </a></li>
                     </ul>
                 </li>
@@ -170,6 +222,33 @@
                     <li class="breadcrumb-item active">Transações</li>
                 @elseif(request()->is('admin/fidelidade/cupons'))
                     <li class="breadcrumb-item active">Cupons</li>
+                @endif
+            @elseif(request()->is('admin/notificacoes*'))
+                <li class="breadcrumb-item">
+                    <a href="{{ route('admin.notificacoes.index') }}">Notificações</a>
+                </li>
+                @if(request()->is('admin/notificacoes/templates'))
+                    <li class="breadcrumb-item active">Templates</li>
+                @elseif(request()->is('admin/notificacoes/tipos'))
+                    <li class="breadcrumb-item active">Tipos de Evento</li>
+                @elseif(request()->is('admin/notificacoes/aplicacoes'))
+                    <li class="breadcrumb-item active">Aplicações</li>
+                @elseif(request()->is('admin/notificacoes/canais'))
+                    <li class="breadcrumb-item active">Canais</li>
+                @elseif(request()->is('admin/notificacoes/usuarios'))
+                    <li class="breadcrumb-item active">Usuários</li>
+                @elseif(request()->is('admin/notificacoes/enviadas'))
+                    <li class="breadcrumb-item active">Enviadas</li>
+                @elseif(request()->is('admin/notificacoes/estatisticas'))
+                    <li class="breadcrumb-item active">Estatísticas</li>
+                @elseif(request()->is('admin/notificacoes/logs'))
+                    <li class="breadcrumb-item active">Logs</li>
+                @elseif(request()->is('admin/notificacoes/diagnostico'))
+                    <li class="breadcrumb-item active">Diagnóstico</li>
+                @elseif(request()->is('admin/notificacoes/configuracoes'))
+                    <li class="breadcrumb-item active">Configurações</li>
+                @elseif(request()->is('admin/notificacoes/teste'))
+                    <li class="breadcrumb-item active">Teste</li>
                 @endif
             @elseif(request()->is('admin/config*'))
                 <li class="breadcrumb-item">

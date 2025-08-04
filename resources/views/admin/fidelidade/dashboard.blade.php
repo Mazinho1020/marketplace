@@ -1,5 +1,15 @@
-@extends('admin.layouts.fidelidade')
-@section('title', 'Admin Fidelidade - MeuFinanceiro')
+@extends('layouts.admin')
+@section('title', 'Dashboard Fidelidade')
+
+@php
+    $pageTitle = 'Dashboard Fidelidade';
+    $breadcrumbs = [
+        ['title' => 'Admin', 'url' => route('admin.dashboard')],
+        ['title' => 'Fidelidade', 'url' => route('admin.fidelidade.dashboard')],
+        ['title' => 'Dashboard', 'url' => '#']
+    ];
+@endphp
+
 @section('content')
 <div class="container-fluid mt-4">
     <div class="container">

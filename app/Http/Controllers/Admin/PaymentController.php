@@ -127,7 +127,7 @@ class PaymentController extends Controller
             LEFT JOIN afi_plan_transacoes t ON g.id = t.gateway_id
                 AND t.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
             GROUP BY g.id, g.nome, g.provedor, g.ativo, g.empresa_id, g.codigo, g.ambiente, 
-                     g.credenciais, g.configuracoes, g.url_webhook, g.created_at, g.updated_at
+                     g.credenciais, g.configuracoes, g.configuracao, g.url_webhook, g.created_at, g.updated_at
             ORDER BY g.nome
         ");
 

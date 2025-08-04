@@ -1,4 +1,14 @@
-<?php $__env->startSection('title', 'Admin Fidelidade - MeuFinanceiro'); ?>
+<?php $__env->startSection('title', 'Dashboard Fidelidade'); ?>
+
+<?php
+    $pageTitle = 'Dashboard Fidelidade';
+    $breadcrumbs = [
+        ['title' => 'Admin', 'url' => route('admin.dashboard')],
+        ['title' => 'Fidelidade', 'url' => route('admin.fidelidade.dashboard')],
+        ['title' => 'Dashboard', 'url' => '#']
+    ];
+?>
+
 <?php $__env->startSection('content'); ?>
 <div class="container-fluid mt-4">
     <div class="container">
@@ -247,4 +257,4 @@ document.getElementById('cupons-table').innerHTML = `
 </script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('admin.layouts.fidelidade', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/admin/fidelidade/dashboard.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/admin/fidelidade/dashboard.blade.php ENDPATH**/ ?>

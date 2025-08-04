@@ -194,6 +194,9 @@
     <script src="/Theme1/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="/js/admin-menus.js"></script>
     
+    <!-- Chart.js (Latest stable version) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+    
     {{-- Funções JavaScript Base --}}
     <script>
         // Toast notification system

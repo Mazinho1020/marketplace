@@ -6,7 +6,18 @@ use PDO;
 use Exception;
 
 /**
- * Serviço simples e robusto para detecção de ambiente e configuração de banco
+ * Serviço simples e robusto para detecção de ambiente e conf            return [
+                'driver' => 'mysql',
+                'host' => $connection['host'],
+                'port' => (int)$connection['porta'],
+                'database' => $connection['database'],
+                'username' => $connection['usuario'],
+                'password' => $this->decryptPassword($connection['senha']),
+                'charset' => $connection['charset'],
+                'collation' => $connection['collation'],
+                'prefix' => $connection['prefixo'] ?? '',
+                'timezone' => 'America/Cuiaba',
+            ]; banco
  */
 class DatabaseEnvironmentService
 {
@@ -62,14 +73,14 @@ class DatabaseEnvironmentService
     private function loadConfig(): void
     {
         if ($this->environment === 'desenvolvimento') {
-            // Configuração fixa para desenvolvimento
+            // Configuração usando variáveis do .env para desenvolvimento
             $this->config = [
                 'driver' => 'mysql',
-                'host' => '127.0.0.1',
-                'port' => 3306,
-                'database' => 'meufinanceiro',
-                'username' => 'root',
-                'password' => '',
+                'host' => $_ENV['DB_HOST'] ?? '127.0.0.1',
+                'port' => (int)($_ENV['DB_PORT'] ?? 3306),
+                'database' => $_ENV['DB_DATABASE'] ?? 'meufinanceiro',
+                'username' => $_ENV['DB_USERNAME'] ?? 'root',
+                'password' => $_ENV['DB_PASSWORD'] ?? 'root',
                 'charset' => 'utf8mb4',
                 'collation' => 'utf8mb4_unicode_ci',
                 'prefix' => '',
@@ -143,6 +154,7 @@ class DatabaseEnvironmentService
                 'charset' => 'utf8mb4',
                 'collation' => 'utf8mb4_unicode_ci',
                 'prefix' => '',
+                'timezone' => 'America/Cuiaba',
             ];
         }
     }
