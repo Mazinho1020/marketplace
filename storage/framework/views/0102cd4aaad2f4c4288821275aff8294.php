@@ -243,6 +243,14 @@
                                 </a>
                             </li>
 
+                            <li class="nav-item">
+                                <a class="nav-link <?php echo e(request()->routeIs('comerciantes.horarios.*') ? 'active' : ''); ?>" 
+                                   href="<?php echo e(route('comerciantes.empresas.index')); ?>">
+                                    <i class="fas fa-clock"></i>
+                                    Horários de Funcionamento
+                                </a>
+                            </li>
+
                             <hr class="border-light border-opacity-25 my-3">
                             
                             <li class="nav-item">

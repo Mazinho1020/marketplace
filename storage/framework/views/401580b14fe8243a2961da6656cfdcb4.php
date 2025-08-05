@@ -316,7 +316,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-user-circle me-2" style="font-size: 1.5rem;"></i>
-                            <span><?php echo e(auth()->user()->nome); ?></span>
+                            <span><?php echo e(auth('comerciante')->user()?->nome ?? 'Usuário'); ?></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>

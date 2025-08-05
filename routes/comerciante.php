@@ -29,7 +29,7 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
     /**
      * ROTAS PROTEGIDAS (com autenticação)
      */
-    Route::middleware(['auth:comerciante'])->group(function () {
+    Route::middleware(['auth.comerciante'])->group(function () {
 
         // Logout
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
@@ -68,11 +68,24 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
         /**
          * HORÁRIOS DE FUNCIONAMENTO
          * Sistema completo de gerenciamento de horários padrão e exceções
+         * Organizados por empresa (seguindo o padrão do sistema)
          */
-        Route::prefix('horarios')->name('horarios.')->group(function () {
+
+        // ROTA DE TESTE - SEM MIDDLEWARE
+        Route::get('/horarios-teste', function () {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Rota de teste funcionando!',
+                'timestamp' => now(),
+                'user_authenticated' => Auth::guard('comerciante')->check(),
+                'user_id' => Auth::guard('comerciante')->id()
+            ]);
+        })->name('horarios.teste');
+
+        Route::prefix('empresas/{empresa}/horarios')->name('horarios.')->group(function () {
             // Dashboard principal dos horários
             Route::get('/', [HorarioFuncionamentoController::class, 'index'])->name('index');
-            
+
             // Horários Padrão
             Route::prefix('padrao')->name('padrao.')->group(function () {
                 Route::get('/', [HorarioFuncionamentoController::class, 'horariosPadrao'])->name('index');

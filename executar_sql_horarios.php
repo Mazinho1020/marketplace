@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Script para criar estrutura completa do sistema de horários de funcionamento
  * Execute este arquivo para criar/atualizar todas as tabelas necessárias
@@ -158,17 +159,15 @@ try {
     // Mostrar resumo das tabelas criadas
     $stmt = $pdo->query("SHOW TABLES LIKE '%horario%' OR SHOW TABLES LIKE '%dias_semana%'");
     $tabelas = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    
+
     echo "📋 Tabelas criadas:\n";
     foreach ($tabelas as $tabela) {
         $count_stmt = $pdo->query("SELECT COUNT(*) FROM $tabela");
         $count = $count_stmt->fetchColumn();
         echo "   - $tabela ($count registros)\n";
     }
-
 } catch (PDOException $e) {
     echo "❌ Erro de banco de dados: " . $e->getMessage() . "\n";
 } catch (Exception $e) {
     echo "❌ Erro geral: " . $e->getMessage() . "\n";
 }
-?>

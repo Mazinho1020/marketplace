@@ -86,13 +86,13 @@ return new class extends Migration
             ['empresa_id' => 1, 'dia_semana_id' => 3, 'sistema' => 'PDV', 'aberto' => true, 'hora_abertura' => '08:00:00', 'hora_fechamento' => '18:00:00', 'observacoes' => 'Horário comercial padrão'],
             ['empresa_id' => 1, 'dia_semana_id' => 4, 'sistema' => 'PDV', 'aberto' => true, 'hora_abertura' => '08:00:00', 'hora_fechamento' => '18:00:00', 'observacoes' => 'Horário comercial padrão'],
             ['empresa_id' => 1, 'dia_semana_id' => 5, 'sistema' => 'PDV', 'aberto' => true, 'hora_abertura' => '08:00:00', 'hora_fechamento' => '18:00:00', 'observacoes' => 'Horário comercial padrão'],
-            
+
             // Sábado meio período
             ['empresa_id' => 1, 'dia_semana_id' => 6, 'sistema' => 'PDV', 'aberto' => true, 'hora_abertura' => '08:00:00', 'hora_fechamento' => '12:00:00', 'observacoes' => 'Meio período aos sábados'],
-            
+
             // Domingo fechado
             ['empresa_id' => 1, 'dia_semana_id' => 7, 'sistema' => 'PDV', 'aberto' => false, 'hora_abertura' => null, 'hora_fechamento' => null, 'observacoes' => 'Fechado aos domingos'],
-            
+
             // Sistema Online 24h
             ['empresa_id' => 1, 'dia_semana_id' => 1, 'sistema' => 'ONLINE', 'aberto' => true, 'hora_abertura' => '00:00:00', 'hora_fechamento' => '23:59:59', 'observacoes' => 'Sistema online 24h'],
             ['empresa_id' => 1, 'dia_semana_id' => 2, 'sistema' => 'ONLINE', 'aberto' => true, 'hora_abertura' => '00:00:00', 'hora_fechamento' => '23:59:59', 'observacoes' => 'Sistema online 24h'],
@@ -101,7 +101,7 @@ return new class extends Migration
             ['empresa_id' => 1, 'dia_semana_id' => 5, 'sistema' => 'ONLINE', 'aberto' => true, 'hora_abertura' => '00:00:00', 'hora_fechamento' => '23:59:59', 'observacoes' => 'Sistema online 24h'],
             ['empresa_id' => 1, 'dia_semana_id' => 6, 'sistema' => 'ONLINE', 'aberto' => true, 'hora_abertura' => '00:00:00', 'hora_fechamento' => '23:59:59', 'observacoes' => 'Sistema online 24h'],
             ['empresa_id' => 1, 'dia_semana_id' => 7, 'sistema' => 'ONLINE', 'aberto' => true, 'hora_abertura' => '00:00:00', 'hora_fechamento' => '23:59:59', 'observacoes' => 'Sistema online 24h'],
-            
+
             // Sistema Financeiro
             ['empresa_id' => 1, 'dia_semana_id' => 1, 'sistema' => 'FINANCEIRO', 'aberto' => true, 'hora_abertura' => '09:00:00', 'hora_fechamento' => '17:00:00', 'observacoes' => 'Horário administrativo'],
             ['empresa_id' => 1, 'dia_semana_id' => 2, 'sistema' => 'FINANCEIRO', 'aberto' => true, 'hora_abertura' => '09:00:00', 'hora_fechamento' => '17:00:00', 'observacoes' => 'Horário administrativo'],

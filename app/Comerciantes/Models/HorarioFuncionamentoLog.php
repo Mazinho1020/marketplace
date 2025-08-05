@@ -63,7 +63,7 @@ class HorarioFuncionamentoLog extends Model
     {
         try {
             $usuario = Auth::guard('comerciante')->user();
-            
+
             self::create([
                 'empresa_id' => $empresaId,
                 'horario_id' => $horarioId,
@@ -136,10 +136,10 @@ class HorarioFuncionamentoLog extends Model
 
         if ($this->acao === 'UPDATE' && $this->dados_anteriores && $this->dados_novos) {
             $alteracoes = [];
-            
+
             foreach ($this->dados_novos as $campo => $valorNovo) {
                 $valorAntigo = $this->dados_anteriores[$campo] ?? null;
-                
+
                 if ($valorAntigo != $valorNovo) {
                     $alteracoes[] = "{$campo}: {$valorAntigo} → {$valorNovo}";
                 }

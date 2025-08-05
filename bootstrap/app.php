@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         then: function () {
             Route::middleware('web')->group(base_path('routes/admin.php'));
+            Route::middleware('web')->group(base_path('routes/comerciante.php'));
         },
         health: '/up',
     )
@@ -21,9 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'empresa' => \App\Http\Middleware\EmpresaMiddleware::class,
             'auth.simple' => \App\Http\Middleware\AuthMiddleware::class,
-            'check.feature' => \App\Http\Middleware\CheckPlanFeature::class,
-            'check.user.limit' => \App\Http\Middleware\CheckUserLimit::class,
-            'check.subscription' => \App\Http\Middleware\CheckSubscriptionStatus::class,
+            'auth.comerciante' => \App\Http\Middleware\ComercianteAuthMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

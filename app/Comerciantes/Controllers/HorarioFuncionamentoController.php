@@ -5,6 +5,7 @@ namespace App\Comerciantes\Controllers;
 use App\Http\Controllers\Controller;
 use App\Comerciantes\Models\HorarioFuncionamento;
 use App\Comerciantes\Models\DiaSemana;
+use App\Comerciantes\Models\EmpresaUsuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -13,33 +14,31 @@ use Illuminate\Support\Facades\Log;
 class HorarioFuncionamentoController extends Controller
 {
     /**
-     * Construtor - garantir autenticação
-     */
-    public function __construct()
-    {
-        $this->middleware('auth:comerciante');
-    }
-
-    /**
      * Página principal - Dashboard de horários
      */
-    public function index(Request $request)
+    public function index(Request $request, $empresa)
     {
         try {
-            $user = Auth::guard('comerciante')->user();
-            $empresaId = $this->getEmpresaId();
-            
+            $user = auth('comerciante')->user();
+
+            // Verificar se o usuário tem permissão para acessar esta empresa
+            if (!$user->temPermissaoEmpresa($empresa)) {
+                abort(403, 'Acesso negado a esta empresa.');
+            }
+
+            $empresaId = $empresa;
+
             $sistema = $request->get('sistema');
-            
+
             // Status atual de todos os sistemas
             $relatorioStatus = HorarioFuncionamento::getRelatorioStatus($empresaId);
-            
+
             // Horários padrão
             $horariosPadrao = HorarioFuncionamento::porEmpresa($empresaId)
                 ->horariosPadrao()
                 ->ativo()
                 ->with('diaSemana')
-                ->when($sistema, function($query) use ($sistema) {
+                ->when($sistema, function ($query) use ($sistema) {
                     return $query->porSistema($sistema);
                 })
                 ->orderBy('sistema')
@@ -51,7 +50,7 @@ class HorarioFuncionamentoController extends Controller
                 ->excecoes()
                 ->ativo()
                 ->where('data_excecao', '>=', now()->format('Y-m-d'))
-                ->when($sistema, function($query) use ($sistema) {
+                ->when($sistema, function ($query) use ($sistema) {
                     return $query->porSistema($sistema);
                 })
                 ->orderBy('data_excecao')
@@ -62,12 +61,12 @@ class HorarioFuncionamentoController extends Controller
 
             return view('comerciantes.horarios.index', compact(
                 'relatorioStatus',
-                'horariosPadrao', 
+                'horariosPadrao',
                 'excecoesFuturas',
                 'sistemas',
-                'sistema'
+                'sistema',
+                'empresa'
             ));
-
         } catch (\Exception $e) {
             Log::error('Erro ao carregar horários: ' . $e->getMessage());
             return redirect()->back()->with('erro', 'Erro ao carregar horários: ' . $e->getMessage());
@@ -77,17 +76,24 @@ class HorarioFuncionamentoController extends Controller
     /**
      * Listar horários padrão
      */
-    public function horariosPadrao(Request $request)
+    public function horariosPadrao(Request $request, $empresa)
     {
         try {
-            $empresaId = $this->getEmpresaId();
+            $user = auth('comerciante')->user();
+
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!$user->temPermissaoEmpresa($empresa)) {
+                abort(403, 'Acesso negado a esta empresa.');
+            }
+
+            $empresaId = $empresa;
             $sistema = $request->get('sistema');
-            
+
             $horarios = HorarioFuncionamento::porEmpresa($empresaId)
                 ->horariosPadrao()
                 ->ativo()
                 ->with('diaSemana')
-                ->when($sistema, function($query) use ($sistema) {
+                ->when($sistema, function ($query) use ($sistema) {
                     return $query->porSistema($sistema);
                 })
                 ->orderBy('sistema')
@@ -99,12 +105,12 @@ class HorarioFuncionamentoController extends Controller
             $sistemas = ['TODOS', 'PDV', 'FINANCEIRO', 'ONLINE'];
 
             return view('comerciantes.horarios.padrao.index', compact(
-                'horarios', 
+                'horarios',
                 'statusPDV',
                 'sistemas',
-                'sistema'
+                'sistema',
+                'empresa'
             ));
-
         } catch (\Exception $e) {
             Log::error('Erro ao listar horários padrão: ' . $e->getMessage());
             return redirect()->back()->with('erro', 'Erro ao carregar horários');
@@ -114,28 +120,41 @@ class HorarioFuncionamentoController extends Controller
     /**
      * Formulário para criar horário padrão
      */
-    public function createPadrao()
+    public function createPadrao($empresa)
     {
         try {
+            $user = auth('comerciante')->user();
+
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!$user->temPermissaoEmpresa($empresa)) {
+                abort(403, 'Acesso negado a esta empresa.');
+            }
+
             $diasSemana = DiaSemana::getAll();
             $sistemas = ['TODOS', 'PDV', 'FINANCEIRO', 'ONLINE'];
-            
-            return view('comerciantes.horarios.padrao.create', compact('diasSemana', 'sistemas'));
 
+            return view('comerciantes.horarios.padrao.create', compact('diasSemana', 'sistemas', 'empresa'));
         } catch (\Exception $e) {
             Log::error('Erro ao abrir formulário de criação: ' . $e->getMessage());
-            return redirect()->route('comerciantes.horarios.padrao')->with('erro', 'Erro ao abrir formulário');
+            return redirect()->route('comerciantes.horarios.padrao', $empresa)->with('erro', 'Erro ao abrir formulário');
         }
     }
 
     /**
      * Salvar horário padrão
      */
-    public function storePadrao(Request $request)
+    public function storePadrao(Request $request, $empresa)
     {
         try {
-            $empresaId = $this->getEmpresaId();
-            
+            $user = auth('comerciante')->user();
+
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!$user->temPermissaoEmpresa($empresa)) {
+                abort(403, 'Acesso negado a esta empresa.');
+            }
+
+            $empresaId = $empresa;
+
             // Validação dos dados
             $validator = Validator::make($request->all(), [
                 'dia_semana_id' => 'required|exists:empresa_dias_semana,id',
@@ -172,9 +191,8 @@ class HorarioFuncionamentoController extends Controller
 
             HorarioFuncionamento::create($dados);
 
-            return redirect()->route('comerciantes.horarios.padrao')
+            return redirect()->route('comerciantes.horarios.padrao', $empresa)
                 ->with('sucesso', 'Horário padrão cadastrado com sucesso!');
-
         } catch (\Exception $e) {
             Log::error('Erro ao salvar horário padrão: ' . $e->getMessage());
             return redirect()->back()
@@ -186,11 +204,18 @@ class HorarioFuncionamentoController extends Controller
     /**
      * Formulário para editar horário padrão
      */
-    public function editPadrao($id)
+    public function editPadrao($empresa, $id)
     {
         try {
-            $empresaId = $this->getEmpresaId();
-            
+            $user = auth('comerciante')->user();
+
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!$user->temPermissaoEmpresa($empresa)) {
+                abort(403, 'Acesso negado a esta empresa.');
+            }
+
+            $empresaId = $empresa;
+
             $horario = HorarioFuncionamento::porEmpresa($empresaId)
                 ->horariosPadrao()
                 ->findOrFail($id);
@@ -198,22 +223,28 @@ class HorarioFuncionamentoController extends Controller
             $diasSemana = DiaSemana::getAll();
             $sistemas = ['TODOS', 'PDV', 'FINANCEIRO', 'ONLINE'];
 
-            return view('comerciantes.horarios.padrao.edit', compact('horario', 'diasSemana', 'sistemas'));
-
+            return view('comerciantes.horarios.padrao.edit', compact('horario', 'diasSemana', 'sistemas', 'empresa'));
         } catch (\Exception $e) {
             Log::error('Erro ao abrir edição de horário: ' . $e->getMessage());
-            return redirect()->route('comerciantes.horarios.padrao')->with('erro', 'Horário não encontrado');
+            return redirect()->route('comerciantes.horarios.padrao', $empresa)->with('erro', 'Horário não encontrado');
         }
     }
 
     /**
      * Atualizar horário padrão
      */
-    public function updatePadrao(Request $request, $id)
+    public function updatePadrao(Request $request, $empresa, $id)
     {
         try {
-            $empresaId = $this->getEmpresaId();
-            
+            $user = auth('comerciante')->user();
+
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!$user->temPermissaoEmpresa($empresa)) {
+                abort(403, 'Acesso negado a esta empresa.');
+            }
+
+            $empresaId = $empresa;
+
             $horario = HorarioFuncionamento::porEmpresa($empresaId)
                 ->horariosPadrao()
                 ->findOrFail($id);
@@ -253,9 +284,8 @@ class HorarioFuncionamentoController extends Controller
 
             $horario->update($dados);
 
-            return redirect()->route('comerciantes.horarios.padrao')
+            return redirect()->route('comerciantes.horarios.padrao', $empresa)
                 ->with('sucesso', 'Horário padrão atualizado com sucesso!');
-
         } catch (\Exception $e) {
             Log::error('Erro ao atualizar horário padrão: ' . $e->getMessage());
             return redirect()->back()
@@ -267,16 +297,23 @@ class HorarioFuncionamentoController extends Controller
     /**
      * Listar exceções
      */
-    public function excecoes(Request $request)
+    public function excecoes(Request $request, $empresa)
     {
         try {
-            $empresaId = $this->getEmpresaId();
+            $user = auth('comerciante')->user();
+
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!$user->temPermissaoEmpresa($empresa)) {
+                abort(403, 'Acesso negado a esta empresa.');
+            }
+
+            $empresaId = $empresa;
             $sistema = $request->get('sistema');
-            
+
             $excecoes = HorarioFuncionamento::porEmpresa($empresaId)
                 ->excecoes()
                 ->ativo()
-                ->when($sistema, function($query) use ($sistema) {
+                ->when($sistema, function ($query) use ($sistema) {
                     return $query->porSistema($sistema);
                 })
                 ->orderBy('data_excecao', 'desc')
@@ -287,9 +324,9 @@ class HorarioFuncionamentoController extends Controller
             return view('comerciantes.horarios.excecoes.index', compact(
                 'excecoes',
                 'sistemas',
-                'sistema'
+                'sistema',
+                'empresa'
             ));
-
         } catch (\Exception $e) {
             Log::error('Erro ao listar exceções: ' . $e->getMessage());
             return redirect()->back()->with('erro', 'Erro ao carregar exceções');
@@ -299,27 +336,36 @@ class HorarioFuncionamentoController extends Controller
     /**
      * Formulário para criar exceção
      */
-    public function createExcecao()
+    public function createExcecao($empresa)
     {
         try {
-            $sistemas = ['TODOS', 'PDV', 'FINANCEIRO', 'ONLINE'];
-            
-            return view('comerciantes.horarios.excecoes.create', compact('sistemas'));
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!EmpresaUsuario::temPermissaoEmpresa(auth('comerciante')->id(), $empresa)) {
+                return response()->json(['error' => 'Sem permissão para acessar esta empresa'], 403);
+            }
 
+            $sistemas = ['TODOS', 'PDV', 'FINANCEIRO', 'ONLINE'];
+
+            return view('comerciantes.horarios.excecoes.create', compact('sistemas', 'empresa'));
         } catch (\Exception $e) {
             Log::error('Erro ao abrir formulário de exceção: ' . $e->getMessage());
-            return redirect()->route('comerciantes.horarios.excecoes')->with('erro', 'Erro ao abrir formulário');
+            return redirect()->route('comerciantes.horarios.excecoes', $empresa)->with('erro', 'Erro ao abrir formulário');
         }
     }
 
     /**
      * Salvar exceção
      */
-    public function storeExcecao(Request $request)
+    public function storeExcecao(Request $request, $empresa)
     {
         try {
-            $empresaId = $this->getEmpresaId();
-            
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!EmpresaUsuario::temPermissaoEmpresa(auth('comerciante')->id(), $empresa)) {
+                return response()->json(['error' => 'Sem permissão para acessar esta empresa'], 403);
+            }
+
+            $empresaId = $empresa;
+
             // Validação dos dados
             $validator = Validator::make($request->all(), [
                 'data_excecao' => 'required|date|after_or_equal:today',
@@ -358,9 +404,8 @@ class HorarioFuncionamentoController extends Controller
 
             HorarioFuncionamento::create($dados);
 
-            return redirect()->route('comerciantes.horarios.excecoes')
+            return redirect()->route('comerciantes.horarios.excecoes', $empresa)
                 ->with('sucesso', 'Exceção cadastrada com sucesso!');
-
         } catch (\Exception $e) {
             Log::error('Erro ao salvar exceção: ' . $e->getMessage());
             return redirect()->back()
@@ -372,33 +417,42 @@ class HorarioFuncionamentoController extends Controller
     /**
      * Formulário para editar exceção
      */
-    public function editExcecao($id)
+    public function editExcecao($empresa, $id)
     {
         try {
-            $empresaId = $this->getEmpresaId();
-            
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!EmpresaUsuario::temPermissaoEmpresa(auth('comerciante')->id(), $empresa)) {
+                return response()->json(['error' => 'Sem permissão para acessar esta empresa'], 403);
+            }
+
+            $empresaId = $empresa;
+
             $excecao = HorarioFuncionamento::porEmpresa($empresaId)
                 ->excecoes()
                 ->findOrFail($id);
 
             $sistemas = ['TODOS', 'PDV', 'FINANCEIRO', 'ONLINE'];
 
-            return view('comerciantes.horarios.excecoes.edit', compact('excecao', 'sistemas'));
-
+            return view('comerciantes.horarios.excecoes.edit', compact('excecao', 'sistemas', 'empresa'));
         } catch (\Exception $e) {
             Log::error('Erro ao abrir edição de exceção: ' . $e->getMessage());
-            return redirect()->route('comerciantes.horarios.excecoes')->with('erro', 'Exceção não encontrada');
+            return redirect()->route('comerciantes.horarios.excecoes', $empresa)->with('erro', 'Exceção não encontrada');
         }
     }
 
     /**
      * Atualizar exceção
      */
-    public function updateExcecao(Request $request, $id)
+    public function updateExcecao(Request $request, $empresa, $id)
     {
         try {
-            $empresaId = $this->getEmpresaId();
-            
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!EmpresaUsuario::temPermissaoEmpresa(auth('comerciante')->id(), $empresa)) {
+                return response()->json(['error' => 'Sem permissão para acessar esta empresa'], 403);
+            }
+
+            $empresaId = $empresa;
+
             $excecao = HorarioFuncionamento::porEmpresa($empresaId)
                 ->excecoes()
                 ->findOrFail($id);
@@ -439,9 +493,8 @@ class HorarioFuncionamentoController extends Controller
 
             $excecao->update($dados);
 
-            return redirect()->route('comerciantes.horarios.excecoes')
+            return redirect()->route('comerciantes.horarios.excecoes', $empresa)
                 ->with('sucesso', 'Exceção atualizada com sucesso!');
-
         } catch (\Exception $e) {
             Log::error('Erro ao atualizar exceção: ' . $e->getMessage());
             return redirect()->back()
@@ -453,21 +506,25 @@ class HorarioFuncionamentoController extends Controller
     /**
      * Deletar horário ou exceção
      */
-    public function destroy($id)
+    public function destroy($empresa, $id)
     {
         try {
-            $empresaId = $this->getEmpresaId();
-            
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!EmpresaUsuario::temPermissaoEmpresa(auth('comerciante')->id(), $empresa)) {
+                return response()->json(['error' => 'Sem permissão para acessar esta empresa'], 403);
+            }
+
+            $empresaId = $empresa;
+
             $horario = HorarioFuncionamento::porEmpresa($empresaId)->findOrFail($id);
             $isExcecao = $horario->is_excecao;
-            
+
             $horario->delete();
 
             $mensagem = $isExcecao ? 'Exceção removida com sucesso!' : 'Horário removido com sucesso!';
             $rota = $isExcecao ? 'comerciantes.horarios.excecoes' : 'comerciantes.horarios.padrao';
 
             return redirect()->route($rota)->with('sucesso', $mensagem);
-
         } catch (\Exception $e) {
             Log::error('Erro ao deletar horário: ' . $e->getMessage());
             return redirect()->back()->with('erro', 'Erro ao remover registro');
@@ -477,19 +534,23 @@ class HorarioFuncionamentoController extends Controller
     /**
      * API - Status atual
      */
-    public function apiStatus(Request $request)
+    public function apiStatus(Request $request, $empresa)
     {
         try {
-            $empresaId = $this->getEmpresaId();
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!EmpresaUsuario::temPermissaoEmpresa(auth('comerciante')->id(), $empresa)) {
+                return response()->json(['error' => 'Sem permissão para acessar esta empresa'], 403);
+            }
+
+            $empresaId = $empresa;
             $sistema = $request->get('sistema', 'TODOS');
 
             $status = HorarioFuncionamento::getStatusHoje($empresaId, $sistema);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $status
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -501,19 +562,23 @@ class HorarioFuncionamentoController extends Controller
     /**
      * API - Próximo funcionamento
      */
-    public function apiProximoAberto(Request $request)
+    public function apiProximoAberto(Request $request, $empresa)
     {
         try {
-            $empresaId = $this->getEmpresaId();
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!EmpresaUsuario::temPermissaoEmpresa(auth('comerciante')->id(), $empresa)) {
+                return response()->json(['error' => 'Sem permissão para acessar esta empresa'], 403);
+            }
+
+            $empresaId = $empresa;
             $sistema = $request->get('sistema', 'TODOS');
 
             $proximo = HorarioFuncionamento::getProximoDiaAberto($empresaId, $sistema);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $proximo
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -525,15 +590,19 @@ class HorarioFuncionamentoController extends Controller
     /**
      * Relatório completo
      */
-    public function relatorio(Request $request)
+    public function relatorio(Request $request, $empresa)
     {
         try {
-            $empresaId = $this->getEmpresaId();
-            
-            $relatorio = HorarioFuncionamento::getRelatorioStatus($empresaId);
-            
-            return view('comerciantes.horarios.relatorio', compact('relatorio'));
+            // Verificar se o comerciante tem permissão para esta empresa
+            if (!EmpresaUsuario::temPermissaoEmpresa(auth('comerciante')->id(), $empresa)) {
+                return response()->json(['error' => 'Sem permissão para acessar esta empresa'], 403);
+            }
 
+            $empresaId = $empresa;
+
+            $relatorio = HorarioFuncionamento::getRelatorioStatus($empresaId);
+
+            return view('comerciantes.horarios.relatorio', compact('relatorio', 'empresa'));
         } catch (\Exception $e) {
             Log::error('Erro ao gerar relatório: ' . $e->getMessage());
             return redirect()->back()->with('erro', 'Erro ao gerar relatório');
@@ -547,8 +616,28 @@ class HorarioFuncionamentoController extends Controller
      */
     private function getEmpresaId()
     {
-        // Para este exemplo, vamos usar uma empresa padrão
-        // Na implementação real, você pode buscar a empresa vinculada ao usuário
+        $user = Auth::guard('comerciante')->user();
+
+        if (!$user) {
+            return 1; // Empresa padrão para desenvolvimento
+        }
+
+        // Primeira tentativa: empresa selecionada na sessão
+        if (session('empresa_atual_id')) {
+            return session('empresa_atual_id');
+        }
+
+        // Segunda tentativa: empresa do usuário
+        if ($user->empresa_id) {
+            return $user->empresa_id;
+        }
+
+        // Terceira tentativa: primeira empresa vinculada ao usuário
+        if ($user->todas_empresas && $user->todas_empresas->count() > 0) {
+            return $user->todas_empresas->first()->id;
+        }
+
+        // Fallback: empresa padrão
         return 1;
     }
 }

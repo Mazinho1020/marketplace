@@ -335,13 +335,35 @@
 
             <!-- Horário de Funcionamento -->
             <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h6 class="card-title mb-0">
                         <i class="fas fa-clock text-primary me-2"></i>
                         Horário de Funcionamento
                     </h6>
+                    <a href="{{ route('comerciantes.horarios.index', $empresa->id) }}" 
+                       class="btn btn-sm btn-outline-primary"
+                       title="Gerenciar horários completos">
+                        <i class="fas fa-cog"></i>
+                    </a>
                 </div>
                 <div class="card-body">
+                    <div class="alert alert-info border-0" style="background-color: #e7f3ff;">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle text-primary me-2"></i>
+                            <div>
+                                <small class="text-primary fw-medium">Sistema Avançado Disponível</small>
+                                <div class="small text-muted mt-1">
+                                    Configure horários por sistema (PDV, Online, Financeiro) e exceções especiais.
+                                </div>
+                                <a href="{{ route('comerciantes.horarios.index', $empresa->id) }}" 
+                                   class="btn btn-sm btn-primary mt-2">
+                                    <i class="fas fa-external-link-alt me-1"></i>
+                                    Gerenciar Horários Completos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     @php
                         $horarios = $empresa->horario_funcionamento ? json_decode($empresa->horario_funcionamento, true) : [];
                         $diasSemana = [
@@ -354,6 +376,8 @@
                             'domingo' => 'Domingo'
                         ];
                     @endphp
+
+                    <h6 class="small text-muted mb-3 mt-3">Horários Básicos (Compatibilidade)</h6>
 
                     @foreach($diasSemana as $dia => $nome)
                         <div class="mb-3">

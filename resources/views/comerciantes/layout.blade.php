@@ -245,7 +245,7 @@
 
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('comerciantes.horarios.*') ? 'active' : '' }}" 
-                                   href="{{ route('comerciantes.horarios.index') }}">
+                                   href="{{ route('comerciantes.empresas.index') }}">
                                     <i class="fas fa-clock"></i>
                                     Horários de Funcionamento
                                 </a>
