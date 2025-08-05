@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Log;
 
 class HorarioFuncionamentoLog extends Model
 {
@@ -77,7 +78,7 @@ class HorarioFuncionamentoLog extends Model
             ]);
         } catch (\Exception $e) {
             // Log de auditoria não deve quebrar a operação principal
-            \Log::error("Erro ao registrar log de auditoria: " . $e->getMessage());
+            Log::error("Erro ao registrar log de auditoria: " . $e->getMessage());
         }
     }
 

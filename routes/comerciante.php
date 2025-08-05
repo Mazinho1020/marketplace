@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Comerciantes\Controllers\Auth\LoginController;
 use App\Comerciantes\Controllers\DashboardController;
 use App\Comerciantes\Controllers\MarcaController;
@@ -82,7 +83,40 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
             ]);
         })->name('horarios.teste');
 
-        Route::prefix('empresas/{empresa}/horarios')->name('horarios.')->group(function () {
+        // ROTAS SIMPLES (sem empresa na URL) - Detectam empresa automaticamente
+        Route::prefix('horarios')->name('horarios.')->group(function () {
+            // Dashboard principal dos horários (detecta empresa automaticamente)
+            Route::get('/', [HorarioFuncionamentoController::class, 'indexSemEmpresa'])->name('index');
+
+            // Horários Padrão
+            Route::prefix('padrao')->name('padrao.')->group(function () {
+                Route::get('/', [HorarioFuncionamentoController::class, 'horariosPadraoSemEmpresa'])->name('index');
+                Route::get('/criar', [HorarioFuncionamentoController::class, 'createPadraoSemEmpresa'])->name('create');
+                Route::post('/criar', [HorarioFuncionamentoController::class, 'storePadraoSemEmpresa'])->name('store');
+                Route::get('/{id}/editar', [HorarioFuncionamentoController::class, 'editPadraoSemEmpresa'])->name('edit');
+                Route::put('/{id}', [HorarioFuncionamentoController::class, 'updatePadraoSemEmpresa'])->name('update');
+            });
+
+            // Exceções
+            Route::prefix('excecoes')->name('excecoes.')->group(function () {
+                Route::get('/', [HorarioFuncionamentoController::class, 'excecoesSemEmpresa'])->name('index');
+                Route::get('/criar', [HorarioFuncionamentoController::class, 'createExcecaoSemEmpresa'])->name('create');
+                Route::post('/criar', [HorarioFuncionamentoController::class, 'storeExcecaoSemEmpresa'])->name('store');
+                Route::get('/{id}/editar', [HorarioFuncionamentoController::class, 'editExcecaoSemEmpresa'])->name('edit');
+                Route::put('/{id}', [HorarioFuncionamentoController::class, 'updateExcecaoSemEmpresa'])->name('update');
+            });
+
+            // Ações comuns (deletar)
+            Route::delete('/{id}', [HorarioFuncionamentoController::class, 'destroySemEmpresa'])->name('destroy');
+
+            // Relatórios e APIs
+            Route::get('/relatorio', [HorarioFuncionamentoController::class, 'relatorioSemEmpresa'])->name('relatorio');
+            Route::get('/api/status', [HorarioFuncionamentoController::class, 'apiStatusSemEmpresa'])->name('api.status');
+            Route::get('/api/proximo-aberto', [HorarioFuncionamentoController::class, 'apiProximoAbertoSemEmpresa'])->name('api.proximo');
+        });
+
+        // ROTAS ESPECÍFICAS POR EMPRESA (estrutura atual - mantida para compatibilidade)
+        Route::prefix('empresas/{empresa}/horarios')->name('empresas.horarios.')->group(function () {
             // Dashboard principal dos horários
             Route::get('/', [HorarioFuncionamentoController::class, 'index'])->name('index');
 

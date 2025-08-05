@@ -609,6 +609,336 @@ class HorarioFuncionamentoController extends Controller
         }
     }
 
+    // ============= MÉTODOS SEM EMPRESA NA URL (DETECTAM AUTOMATICAMENTE) =============
+
+    /**
+     * Index sem empresa na URL - detecta automaticamente
+     */
+    public function indexSemEmpresa(Request $request)
+    {
+        try {
+            $user = auth('comerciante')->user();
+
+            // Obter empresa do usuário
+            $empresaId = $this->getEmpresaId();
+
+            // Verificar se tem permissão
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            // Redirecionar para a rota específica da empresa
+            return redirect()->route('comerciantes.empresas.horarios.index', $empresaId);
+        } catch (\Exception $e) {
+            Log::error('Erro ao acessar horários: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao acessar horários: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Horários padrão sem empresa na URL
+     */
+    public function horariosPadraoSemEmpresa(Request $request)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return redirect()->route('comerciantes.empresas.horarios.padrao.index', $empresaId);
+        } catch (\Exception $e) {
+            Log::error('Erro ao acessar horários padrão: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao acessar horários padrão: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Criar horário padrão sem empresa na URL
+     */
+    public function createPadraoSemEmpresa()
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return redirect()->route('comerciantes.empresas.horarios.padrao.create', $empresaId);
+        } catch (\Exception $e) {
+            Log::error('Erro ao criar horário padrão: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao criar horário padrão: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Salvar horário padrão sem empresa na URL
+     */
+    public function storePadraoSemEmpresa(Request $request)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return $this->storePadrao($request, $empresaId);
+        } catch (\Exception $e) {
+            Log::error('Erro ao salvar horário padrão: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao salvar horário padrão: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Editar horário padrão sem empresa na URL
+     */
+    public function editPadraoSemEmpresa($id)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return redirect()->route('comerciantes.empresas.horarios.padrao.edit', [$empresaId, $id]);
+        } catch (\Exception $e) {
+            Log::error('Erro ao editar horário padrão: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao editar horário padrão: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Atualizar horário padrão sem empresa na URL
+     */
+    public function updatePadraoSemEmpresa(Request $request, $id)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return $this->updatePadrao($request, $empresaId, $id);
+        } catch (\Exception $e) {
+            Log::error('Erro ao atualizar horário padrão: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao atualizar horário padrão: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Exceções sem empresa na URL
+     */
+    public function excecoesSemEmpresa(Request $request)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return redirect()->route('comerciantes.empresas.horarios.excecoes.index', $empresaId);
+        } catch (\Exception $e) {
+            Log::error('Erro ao acessar exceções: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao acessar exceções: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Criar exceção sem empresa na URL
+     */
+    public function createExcecaoSemEmpresa()
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return redirect()->route('comerciantes.empresas.horarios.excecoes.create', $empresaId);
+        } catch (\Exception $e) {
+            Log::error('Erro ao criar exceção: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao criar exceção: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Salvar exceção sem empresa na URL
+     */
+    public function storeExcecaoSemEmpresa(Request $request)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return $this->storeExcecao($request, $empresaId);
+        } catch (\Exception $e) {
+            Log::error('Erro ao salvar exceção: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao salvar exceção: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Editar exceção sem empresa na URL
+     */
+    public function editExcecaoSemEmpresa($id)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return redirect()->route('comerciantes.empresas.horarios.excecoes.edit', [$empresaId, $id]);
+        } catch (\Exception $e) {
+            Log::error('Erro ao editar exceção: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao editar exceção: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Atualizar exceção sem empresa na URL
+     */
+    public function updateExcecaoSemEmpresa(Request $request, $id)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return $this->updateExcecao($request, $empresaId, $id);
+        } catch (\Exception $e) {
+            Log::error('Erro ao atualizar exceção: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao atualizar exceção: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Deletar sem empresa na URL
+     */
+    public function destroySemEmpresa($id)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return $this->destroy($empresaId, $id);
+        } catch (\Exception $e) {
+            Log::error('Erro ao deletar: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao deletar: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * API Status sem empresa na URL
+     */
+    public function apiStatusSemEmpresa(Request $request)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return response()->json(['error' => 'Sem permissão'], 403);
+            }
+
+            return $this->apiStatus($request, $empresaId);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+    /**
+     * API Próximo aberto sem empresa na URL
+     */
+    public function apiProximoAbertoSemEmpresa(Request $request)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return response()->json(['error' => 'Sem permissão'], 403);
+            }
+
+            return $this->apiProximoAberto($request, $empresaId);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+    /**
+     * Relatório sem empresa na URL
+     */
+    public function relatorioSemEmpresa(Request $request)
+    {
+        try {
+            $user = auth('comerciante')->user();
+            $empresaId = $this->getEmpresaId();
+
+            if (!$user->temPermissaoEmpresa($empresaId)) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', 'Você não tem permissão para acessar esta empresa.');
+            }
+
+            return $this->relatorio($request, $empresaId);
+        } catch (\Exception $e) {
+            Log::error('Erro ao gerar relatório: ' . $e->getMessage());
+            return redirect()->route('comerciantes.dashboard')
+                ->with('erro', 'Erro ao gerar relatório: ' . $e->getMessage());
+        }
+    }
+
     // ============= MÉTODOS AUXILIARES =============
 
     /**
