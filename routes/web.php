@@ -28,6 +28,9 @@ Route::get('/teste-estatisticas', function () {
     return view('admin.notificacoes.estatisticas-simples');
 })->name('teste.estatisticas');
 
+// ROTAS DO MÓDULO COMERCIANTE
+require __DIR__ . '/comerciante.php';
+
 // ROTA DE TESTE - Config Simples
 Route::get('/teste-config', function () {
     $controller = new App\Http\Controllers\Admin\ConfigController();

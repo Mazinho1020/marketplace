@@ -1,0 +1,270 @@
+/**
+ * PADRÃO DE CORES DO MARKETPLACE - PAINEL DO COMERCIANTE
+ * Sistema de cores responsivo com suporte para modo claro e escuro
+ */
+
+/* ===== MODO CLARO (Padrão) ===== */
+:root,
+:root[data-theme="light"] {
+  /* === CORES PRIMÁRIAS === */
+  --primary: #2ECC71;           /* Verde principal */
+  --primary-dark: #27AE60;      /* Verde escuro (hover, ações) */
+  --primary-light: #A8E6CF;     /* Verde claro (backgrounds suaves) */
+  --primary-hover: #229954;     /* Verde para hover */
+  
+  /* === CORES SECUNDÁRIAS === */
+  --secondary-blue: #3498DB;     /* Azul informativo */
+  --secondary-orange: #F39C12;   /* Laranja para atenção/warning */
+  --secondary-red: #E74C3C;      /* Vermelho para erro/perigo */
+  --secondary-purple: #9B59B6;   /* Roxo para categorias especiais */
+  
+  /* === CORES DE STATUS === */
+  --success: var(--primary);     /* Verde para sucesso */
+  --warning: var(--secondary-orange);  /* Laranja para avisos */
+  --danger: var(--secondary-red);      /* Vermelho para perigo */
+  --info: var(--secondary-blue);       /* Azul para informações */
+  
+  /* === CORES NEUTRAS === */
+  --text-primary: #2C3E50;       /* Texto principal (escuro) */
+  --text-secondary: #7F8C8D;     /* Texto secundário (médio) */
+  --text-muted: #95A5A6;         /* Texto suave (claro) */
+  --text-white: #FFFFFF;         /* Texto branco */
+  
+  /* === BACKGROUNDS === */
+  --background: #F8F9FA;         /* Background principal */
+  --background-alt: #FFFFFF;     /* Background alternativo */
+  --surface: #FFFFFF;            /* Superfície de cards */
+  --surface-hover: #F1F2F6;      /* Superfície em hover */
+  
+  /* === BORDAS E LINHAS === */
+  --border: #ECF0F1;             /* Bordas padrão */
+  --border-dark: #BDC3C7;        /* Bordas escuras */
+  --divider: #E5E7EB;            /* Divisores */
+  
+  /* === SOMBRAS === */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  
+  /* === GRADIENTES === */
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  --gradient-success: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+  --gradient-info: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
+  --gradient-warning: linear-gradient(135deg, #F39C12 0%, #E67E22 100%);
+}
+
+/* ===== MODO ESCURO ===== */
+:root[data-theme="dark"] {
+  /* === CORES PRIMÁRIAS === */
+  --primary: #27AE60;           /* Verde médio para melhor contraste */
+  --primary-dark: #145A32;      /* Verde muito escuro */
+  --primary-light: #6FCF97;     /* Verde claro para destaque */
+  --primary-hover: #2ECC71;     /* Verde claro para hover */
+  
+  /* === CORES SECUNDÁRIAS === */
+  --secondary-blue: #5DADE2;     /* Azul mais claro */
+  --secondary-orange: #F8C471;   /* Laranja mais suave */
+  --secondary-red: #F1948A;      /* Vermelho mais suave */
+  --secondary-purple: #BB8FCE;   /* Roxo mais suave */
+  
+  /* === CORES DE STATUS === */
+  --success: #6FCF97;           /* Verde claro para sucesso */
+  --warning: #F8C471;           /* Laranja suave para avisos */
+  --danger: #F1948A;            /* Vermelho suave para perigo */
+  --info: #5DADE2;              /* Azul claro para informações */
+  
+  /* === CORES NEUTRAS === */
+  --text-primary: #ECF0F1;       /* Texto principal (claro) */
+  --text-secondary: #BDC3C7;     /* Texto secundário */
+  --text-muted: #7F8C8D;         /* Texto suave */
+  --text-white: #FFFFFF;         /* Texto branco */
+  
+  /* === BACKGROUNDS === */
+  --background: #181A1B;         /* Background principal escuro */
+  --background-alt: #2C3E50;     /* Background alternativo */
+  --surface: #34495E;            /* Superfície de cards */
+  --surface-hover: #3E525F;      /* Superfície em hover */
+  
+  /* === BORDAS E LINHAS === */
+  --border: #4A5A6A;             /* Bordas mais visíveis no escuro */
+  --border-dark: #5D6D7E;        /* Bordas escuras */
+  --divider: #566573;            /* Divisores */
+  
+  /* === SOMBRAS === */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.3);
+  
+  /* === GRADIENTES === */
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  --gradient-success: linear-gradient(135deg, #6FCF97 0%, #27AE60 100%);
+  --gradient-info: linear-gradient(135deg, #5DADE2 0%, #3498DB 100%);
+  --gradient-warning: linear-gradient(135deg, #F8C471 0%, #F39C12 100%);
+}
+
+/* ===== CLASSES UTILITÁRIAS DE CORES ===== */
+
+/* Cores de texto */
+.text-primary { color: var(--primary) !important; }
+.text-success { color: var(--success) !important; }
+.text-warning { color: var(--warning) !important; }
+.text-danger { color: var(--danger) !important; }
+.text-info { color: var(--info) !important; }
+.text-muted { color: var(--text-muted) !important; }
+
+/* Cores de background */
+.bg-primary { background-color: var(--primary) !important; }
+.bg-success { background-color: var(--success) !important; }
+.bg-warning { background-color: var(--warning) !important; }
+.bg-danger { background-color: var(--danger) !important; }
+.bg-info { background-color: var(--info) !important; }
+.bg-surface { background-color: var(--surface) !important; }
+
+/* Gradientes */
+.bg-gradient-primary { background: var(--gradient-primary) !important; }
+.bg-gradient-success { background: var(--gradient-success) !important; }
+.bg-gradient-info { background: var(--gradient-info) !important; }
+.bg-gradient-warning { background: var(--gradient-warning) !important; }
+
+/* Bordas coloridas (para cards destacados) */
+.border-left-primary { border-left: 4px solid var(--primary) !important; }
+.border-left-success { border-left: 4px solid var(--success) !important; }
+.border-left-warning { border-left: 4px solid var(--warning) !important; }
+.border-left-danger { border-left: 4px solid var(--danger) !important; }
+.border-left-info { border-left: 4px solid var(--info) !important; }
+
+/* Sombras */
+.shadow-sm { box-shadow: var(--shadow-sm) !important; }
+.shadow-md { box-shadow: var(--shadow-md) !important; }
+.shadow-lg { box-shadow: var(--shadow-lg) !important; }
+.shadow-xl { box-shadow: var(--shadow-xl) !important; }
+
+/* ===== TRANSIÇÕES SUAVES PARA ALTERNÂNCIA DE TEMA ===== */
+* {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+/* Desabilita transições durante mudança de tema para evitar flash */
+.theme-transition-disabled * {
+  transition: none !important;
+}
+
+/* ===== BOTÃO DE ALTERNÂNCIA DE TEMA ===== */
+.theme-toggle {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary);
+}
+
+.theme-toggle i {
+  font-size: 16px;
+}
+
+/* ===== ADAPTAÇÕES PARA COMPONENTES ESPECÍFICOS ===== */
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+/* Navbar */
+.navbar-comerciante {
+  background: var(--primary) !important;
+  border-bottom: 1px solid var(--primary-dark);
+}
+
+/* Sidebar */
+.sidebar-comerciante {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+/* Botões */
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.btn-success {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.btn-warning {
+  background: var(--warning);
+  border-color: var(--warning);
+}
+
+.btn-danger {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.btn-info {
+  background: var(--info);
+  border-color: var(--info);
+}
+
+/* Formulários */
+.form-control {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 0.2rem rgba(46, 204, 113, 0.25);
+}
+
+/* Alertas */
+.alert-success {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.alert-warning {
+  background: var(--warning);
+  border-color: var(--warning);
+  color: white;
+}
+
+.alert-danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: white;
+}
+
+.alert-info {
+  background: var(--info);
+  border-color: var(--info);
+  color: white;
+}
