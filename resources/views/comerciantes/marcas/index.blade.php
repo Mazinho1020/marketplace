@@ -50,19 +50,19 @@
                         
                         <!-- Descrição -->
                         @if($marca->descricao)
-                            <p class="text-muted small mb-3">{{ Str::limit($marca->descricao, 100) }}</p>
+                            <p class="text-muted small mb-3">{{ Str::limit($marca->descricao ?? '', 100) }}</p>
                         @endif
                         
                         <!-- Estatísticas -->
                         <div class="row text-center mb-3">
                             <div class="col-6">
                                 <div class="border-end">
-                                    <h6 class="mb-0 text-primary">{{ $marca->empresas->count() }}</h6>
+                                    <h6 class="mb-0 text-primary">-</h6>
                                     <small class="text-muted">Empresas</small>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <h6 class="mb-0 text-success">{{ $marca->empresas->where('status', 'ativa')->count() }}</h6>
+                                <h6 class="mb-0 text-success">-</h6>
                                 <small class="text-muted">Ativas</small>
                             </div>
                         </div>

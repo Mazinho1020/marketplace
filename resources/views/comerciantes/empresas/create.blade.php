@@ -37,11 +37,11 @@
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="mb-3">
-                                    <label for="nome" class="form-label">Nome da Empresa *</label>
-                                    <input type="text" class="form-control @error('nome') is-invalid @enderror" 
-                                           id="nome" name="nome" value="{{ old('nome') }}" 
+                                    <label for="nome_fantasia" class="form-label">Nome da Empresa *</label>
+                                    <input type="text" class="form-control @error('nome_fantasia') is-invalid @enderror" 
+                                           id="nome_fantasia" name="nome_fantasia" value="{{ old('nome_fantasia') }}" 
                                            placeholder="Ex: Pizzaria Tradição Concórdia" required>
-                                    @error('nome')
+                                    @error('nome_fantasia')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -52,12 +52,16 @@
                                     <select class="form-select @error('marca_id') is-invalid @enderror" 
                                             id="marca_id" name="marca_id">
                                         <option value="">Selecione uma marca</option>
-                                        @foreach($marcas as $marca)
-                                            <option value="{{ $marca->id }}" 
-                                                    {{ old('marca_id') == $marca->id ? 'selected' : '' }}>
-                                                {{ $marca->nome }}
-                                            </option>
-                                        @endforeach
+                                        @if(isset($marcas) && $marcas->count() > 0)
+                                            @foreach($marcas as $marca)
+                                                <option value="{{ $marca->id }}" 
+                                                        {{ old('marca_id') == $marca->id ? 'selected' : '' }}>
+                                                    {{ $marca->nome }}
+                                                </option>
+                                            @endforeach
+                                        @else
+                                            <option value="" disabled>Nenhuma marca disponível</option>
+                                        @endif
                                     </select>
                                     @error('marca_id')
                                         <div class="invalid-feedback">{{ $message }}</div>

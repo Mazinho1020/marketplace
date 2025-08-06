@@ -23,7 +23,7 @@
                             @php
                                 $empresaAtual = $user->todas_empresas->firstWhere('id', session('empresa_atual_id'));
                             @endphp
-                            {{ $empresaAtual ? Str::limit($empresaAtual->nome, 20) : 'Todas as Empresas' }}
+                            {{ $empresaAtual ? Str::limit(($empresaAtual->nome_fantasia ?: $empresaAtual->razao_social) ?? 'Empresa', 20) : 'Todas as Empresas' }}
                         @else
                             Todas as Empresas
                         @endif
@@ -42,7 +42,7 @@
                                 <a class="dropdown-item {{ session('empresa_atual_id') == $empresa->id ? 'active' : '' }}" 
                                    href="{{ route('comerciantes.dashboard.empresa', $empresa->id) }}">
                                     <i class="fas fa-building me-2"></i>
-                                    {{ Str::limit($empresa->nome, 30) }}
+                                    {{ Str::limit(($empresa->nome_fantasia ?: $empresa->razao_social) ?? 'Empresa', 30) }}
                                     <span class="badge badge-{{ $empresa->status == 'ativa' ? 'ativa' : 'inativa' }} ms-2">
                                         {{ ucfirst($empresa->status) }}
                                     </span>
@@ -322,7 +322,7 @@
                                     </div>
                                     
                                     @if($marca->descricao)
-                                        <p class="text-muted small mb-3">{{ Str::limit($marca->descricao, 80) }}</p>
+                                        <p class="text-muted small mb-3">{{ Str::limit($marca->descricao ?? '', 80) }}</p>
                                     @endif
                                     
                                     <div class="d-flex gap-2">

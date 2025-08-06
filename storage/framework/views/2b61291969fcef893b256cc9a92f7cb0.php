@@ -21,7 +21,7 @@
                             <?php
                                 $empresaAtual = $user->todas_empresas->firstWhere('id', session('empresa_atual_id'));
                             ?>
-                            <?php echo e($empresaAtual ? Str::limit($empresaAtual->nome, 20) : 'Todas as Empresas'); ?>
+                            <?php echo e($empresaAtual ? Str::limit(($empresaAtual->nome_fantasia ?: $empresaAtual->razao_social) ?? 'Empresa', 20) : 'Todas as Empresas'); ?>
 
                         <?php else: ?>
                             Todas as Empresas
@@ -41,7 +41,7 @@
                                 <a class="dropdown-item <?php echo e(session('empresa_atual_id') == $empresa->id ? 'active' : ''); ?>" 
                                    href="<?php echo e(route('comerciantes.dashboard.empresa', $empresa->id)); ?>">
                                     <i class="fas fa-building me-2"></i>
-                                    <?php echo e(Str::limit($empresa->nome, 30)); ?>
+                                    <?php echo e(Str::limit(($empresa->nome_fantasia ?: $empresa->razao_social) ?? 'Empresa', 30)); ?>
 
                                     <span class="badge badge-<?php echo e($empresa->status == 'ativa' ? 'ativa' : 'inativa'); ?> ms-2">
                                         <?php echo e(ucfirst($empresa->status)); ?>
@@ -324,7 +324,7 @@
                                     </div>
                                     
                                     <?php if($marca->descricao): ?>
-                                        <p class="text-muted small mb-3"><?php echo e(Str::limit($marca->descricao, 80)); ?></p>
+                                        <p class="text-muted small mb-3"><?php echo e(Str::limit($marca->descricao ?? '', 80)); ?></p>
                                     <?php endif; ?>
                                     
                                     <div class="d-flex gap-2">

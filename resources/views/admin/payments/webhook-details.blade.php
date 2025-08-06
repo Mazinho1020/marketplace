@@ -117,7 +117,7 @@
                                 @if($webhook->gateway_signature)
                                 <tr>
                                     <td><strong>Assinatura:</strong></td>
-                                    <td><code class="small">{{ Str::limit($webhook->gateway_signature, 30) }}</code></td>
+                                    <td><code class="small">{{ Str::limit($webhook->gateway_signature ?? '', 30) }}</code></td>
                                 </tr>
                                 @endif
                             </table>
@@ -249,7 +249,7 @@
                     @if($webhook->user_agent)
                     <div class="mb-3">
                         <small class="text-muted">User Agent:</small>
-                        <div class="small">{{ Str::limit($webhook->user_agent, 50) }}</div>
+                        <div class="small">{{ Str::limit($webhook->user_agent ?? '', 50) }}</div>
                     </div>
                     @endif
                     

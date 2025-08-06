@@ -8,6 +8,8 @@ use App\Comerciantes\Controllers\MarcaController;
 use App\Comerciantes\Controllers\EmpresaController;
 use App\Comerciantes\Controllers\HorarioController;
 
+use function Laravel\Prompts\alert;
+
 /**
  * Rotas do módulo de comerciantes
  * Usa a tabela empresa_usuarios para autenticação
@@ -62,6 +64,8 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
         Route::prefix('empresas/{empresa}')->name('empresas.')->group(function () {
             Route::get('/usuarios', [EmpresaController::class, 'usuarios'])->name('usuarios.index');
             Route::post('/usuarios', [EmpresaController::class, 'adicionarUsuario'])->name('usuarios.store');
+            Route::post('/usuarios/criar', [EmpresaController::class, 'criarEVincularUsuario'])->name('usuarios.create');
+            Route::get('/usuarios/{user}', [EmpresaController::class, 'mostrarUsuario'])->name('usuarios.show');
             Route::put('/usuarios/{user}', [EmpresaController::class, 'editarUsuario'])->name('usuarios.update');
             Route::delete('/usuarios/{user}', [EmpresaController::class, 'removerUsuario'])->name('usuarios.destroy');
         });
@@ -70,8 +74,8 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
          * HORÁRIOS DE FUNCIONAMENTO
          * Rotas organizadas por empresa
          */
-        Route::prefix('empresas/{empresa}/horarios')->name('horarios.')->group(function () {
 
+        Route::prefix('empresas/{empresa}/horarios')->name('horarios.')->group(function () {
             // Dashboard principal
             Route::get('/', [HorarioController::class, 'index'])->name('index');
 

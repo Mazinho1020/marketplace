@@ -8,9 +8,270 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\DashboardController;
+use App\Comerciantes\Models\Empresa;
+use App\Comerciantes\Models\EmpresaUsuario;
 
 Route::get('/', function () {
     return redirect('/admin');
+});
+
+// Incluir rota de debug específico
+require_once __DIR__ . '/../debug_route.php';
+
+// ROTA DE TESTE - Testar views de empresa (sem autenticação)
+Route::get('/test-empresa-views', function () {
+    try {
+        $output = "<h2>Teste das Views de Empresa</h2>";
+
+        // 1. Testar se existem marcas
+        $marcas = \App\Comerciantes\Models\Marca::orderBy('nome')->get();
+        $output .= "<h3>1. Marcas Disponíveis: {$marcas->count()}</h3>";
+
+        if ($marcas->count() > 0) {
+            $output .= "<ul>";
+            foreach ($marcas as $marca) {
+                $output .= "<li>ID: {$marca->id} - Nome: {$marca->nome}</li>";
+            }
+            $output .= "</ul>";
+        } else {
+            $output .= "<p>Nenhuma marca encontrada no banco de dados.</p>";
+        }
+
+        // 2. Testar se existe empresa
+        $empresa = \App\Comerciantes\Models\Empresa::first();
+        $output .= "<h3>2. Primeira Empresa:</h3>";
+
+        if ($empresa) {
+            $output .= "<p>ID: {$empresa->id} - Nome: {$empresa->nome_fantasia}</p>";
+
+            // 3. Simular dados para view de edição
+            $output .= "<h3>3. Teste da View de Edição:</h3>";
+            try {
+                $view = view('comerciantes.empresas.edit', compact('empresa', 'marcas'))->render();
+                $output .= "<p>✅ View de edição carregada com sucesso!</p>";
+            } catch (\Exception $e) {
+                $output .= "<p style='color: red;'>❌ Erro na view de edição: {$e->getMessage()}</p>";
+            }
+
+            // 4. Teste da view de criação
+            $output .= "<h3>4. Teste da View de Criação:</h3>";
+            try {
+                $view = view('comerciantes.empresas.create', compact('marcas'))->render();
+                $output .= "<p>✅ View de criação carregada com sucesso!</p>";
+            } catch (\Exception $e) {
+                $output .= "<p style='color: red;'>❌ Erro na view de criação: {$e->getMessage()}</p>";
+            }
+        } else {
+            $output .= "<p>Nenhuma empresa encontrada.</p>";
+        }
+
+        return $output;
+    } catch (\Exception $e) {
+        return "<div style='color: red;'>";
+        $content = "<h3>Erro geral:</h3>";
+        $content .= "<p>Mensagem: " . $e->getMessage() . "</p>";
+        $content .= "<p>Linha: " . $e->getLine() . "</p>";
+        $content .= "<p>Arquivo: " . $e->getFile() . "</p>";
+        $content .= "</div>";
+        return $content;
+    }
+});
+
+// ROTA DE TESTE - Verificar campos da tabela empresa_usuarios
+Route::get('/debug-campos-usuarios', function () {
+    try {
+        $output = "<h2>Debug: Campos da Tabela empresa_usuarios</h2>";
+
+        // 1. Estrutura da tabela
+        $columns = DB::select("DESCRIBE empresa_usuarios");
+        $output .= "<h3>Estrutura da Tabela:</h3>";
+        $output .= "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+        $output .= "<tr><th>Campo</th><th>Tipo</th><th>Nulo</th><th>Chave</th><th>Padrão</th></tr>";
+
+        foreach ($columns as $column) {
+            $output .= "<tr>";
+            $output .= "<td><strong>{$column->Field}</strong></td>";
+            $output .= "<td>{$column->Type}</td>";
+            $output .= "<td>{$column->Null}</td>";
+            $output .= "<td>{$column->Key}</td>";
+            $output .= "<td>{$column->Default}</td>";
+            $output .= "</tr>";
+        }
+        $output .= "</table><br>";
+
+        // 2. Dados reais
+        $usuarios = DB::select("SELECT * FROM empresa_usuarios LIMIT 2");
+        $output .= "<h3>Dados Reais dos Usuários:</h3>";
+
+        if (count($usuarios) > 0) {
+            foreach ($usuarios as $index => $usuario) {
+                $output .= "<h4>Usuário " . ($index + 1) . ":</h4>";
+                $output .= "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+                foreach ((array)$usuario as $campo => $valor) {
+                    $output .= "<tr>";
+                    $output .= "<td><strong>$campo</strong></td>";
+                    $output .= "<td>" . ($valor ?? 'NULL') . "</td>";
+                    $output .= "</tr>";
+                }
+                $output .= "</table><br>";
+            }
+        }
+
+        // 3. Testar relacionamento
+        $output .= "<h3>Teste do Relacionamento:</h3>";
+        $empresa = Empresa::with(['usuariosVinculados' => function ($query) {
+            $query->withPivot(['perfil', 'status', 'permissoes', 'data_vinculo']);
+        }])->find(2);
+
+        if ($empresa && $empresa->usuariosVinculados->count() > 0) {
+            $output .= "<h4>Primeiro usuário do relacionamento:</h4>";
+            $primeiroUsuario = $empresa->usuariosVinculados->first();
+            $output .= "<pre>" . print_r($primeiroUsuario->toArray(), true) . "</pre>";
+        } else {
+            $output .= "Nenhum usuário encontrado no relacionamento.";
+        }
+
+        return $output;
+    } catch (\Exception $e) {
+        return "<div style='color: red;'>";
+        $content = "<h3>Erro:</h3>";
+        $content .= "<p>Mensagem: " . $e->getMessage() . "</p>";
+        $content .= "<p>Linha: " . $e->getLine() . "</p>";
+        $content .= "<p>Arquivo: " . $e->getFile() . "</p>";
+        $content .= "</div>";
+        return $content;
+    }
+});
+
+// ROTA DE TESTE - Teste da view usuarios ORIGINAL CORRIGIDA
+Route::get('/test-usuarios-view', function () {
+    try {
+        // Buscar empresa com usuários vinculados
+        $empresa = Empresa::with(['usuariosVinculados' => function ($query) {
+            $query->withPivot(['perfil', 'status', 'permissoes', 'data_vinculo']);
+        }])->find(2);
+
+        if (!$empresa) {
+            return "Empresa ID 2 não encontrada.";
+        }
+
+        // Simular dados para a view
+        $usuariosDisponiveis = collect();
+
+        // Renderizar a view ORIGINAL corrigida
+        return view('comerciantes.empresas.usuarios', compact('empresa', 'usuariosDisponiveis'));
+    } catch (\Exception $e) {
+        return "<div style='color: red;'>";
+        $content = "<h3>Erro na view:</h3>";
+        $content .= "<p>Mensagem: " . $e->getMessage() . "</p>";
+        $content .= "<p>Linha: " . $e->getLine() . "</p>";
+        $content .= "<p>Arquivo: " . $e->getFile() . "</p>";
+        $content .= "<pre>" . $e->getTraceAsString() . "</pre>";
+        $content .= "</div>";
+        return $content;
+    }
+});
+
+// ROTA DE TESTE - Estrutura da tabela empresa_usuarios
+Route::get('/test-table-structure', function () {
+    $output = "<h2>Estrutura da Tabela empresa_usuarios</h2>";
+
+    try {
+        // Verificar estrutura da tabela
+        $columns = DB::select("DESCRIBE empresa_usuarios");
+        $output .= "<h3>Colunas da tabela empresa_usuarios:</h3>";
+        $output .= "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+        $output .= "<tr><th>Campo</th><th>Tipo</th><th>Nulo</th><th>Chave</th><th>Padrão</th><th>Extra</th></tr>";
+
+        foreach ($columns as $column) {
+            $output .= "<tr>";
+            $output .= "<td>{$column->Field}</td>";
+            $output .= "<td>{$column->Type}</td>";
+            $output .= "<td>{$column->Null}</td>";
+            $output .= "<td>{$column->Key}</td>";
+            $output .= "<td>{$column->Default}</td>";
+            $output .= "<td>{$column->Extra}</td>";
+            $output .= "</tr>";
+        }
+        $output .= "</table><br>";
+
+        // Verificar dados reais
+        $usuarios = DB::select("SELECT * FROM empresa_usuarios LIMIT 3");
+        $output .= "<h3>Primeiros 3 registros:</h3>";
+
+        if (count($usuarios) > 0) {
+            $output .= "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+            $firstUser = $usuarios[0];
+            $headers = array_keys((array)$firstUser);
+            $output .= "<tr>";
+            foreach ($headers as $header) {
+                $output .= "<th>$header</th>";
+            }
+            $output .= "</tr>";
+
+            foreach ($usuarios as $user) {
+                $output .= "<tr>";
+                foreach ((array)$user as $value) {
+                    $output .= "<td>" . ($value ?? 'NULL') . "</td>";
+                }
+                $output .= "</tr>";
+            }
+            $output .= "</table>";
+        } else {
+            $output .= "Nenhum registro encontrado.";
+        }
+    } catch (\Exception $e) {
+        $output .= "<div style='color: red;'>";
+        $output .= "<h3>Erro:</h3>";
+        $output .= "<p>Mensagem: " . $e->getMessage() . "</p>";
+        $output .= "</div>";
+    }
+
+    return $output;
+});
+
+// ROTA DE TESTE - Relacionamento Empresas/Usuários
+Route::get('/test-relationship', function () {
+    $output = "<h2>Teste de Relacionamento Laravel</h2>";
+
+    try {
+        // Testar empresa ID 2 (que vimos no debug)
+        $empresa = Empresa::with('usuariosVinculados')->find(2);
+
+        if ($empresa) {
+            $output .= "<h3>Empresa encontrada:</h3>";
+            $output .= "ID: {$empresa->id}<br>";
+            $output .= "Nome: {$empresa->nome_fantasia}<br><br>";
+
+            $usuarios = $empresa->usuariosVinculados;
+            $output .= "<h3>Usuários vinculados: {$usuarios->count()}</h3>";
+
+            if ($usuarios->count() > 0) {
+                $output .= "<table border='1' style='border-collapse: collapse; width: 100%;'>";
+                $output .= "<tr><th>ID</th><th>Todos os Campos</th><th>Pivot</th></tr>";
+
+                foreach ($usuarios as $usuario) {
+                    $output .= "<tr>";
+                    $output .= "<td>{$usuario->id}</td>";
+                    $output .= "<td><pre>" . print_r($usuario->toArray(), true) . "</pre></td>";
+                    $output .= "<td><pre>" . print_r($usuario->pivot ? $usuario->pivot->toArray() : 'Sem pivot', true) . "</pre></td>";
+                    $output .= "</tr>";
+                }
+                $output .= "</table>";
+            }
+        } else {
+            $output .= "Empresa ID 2 não encontrada.";
+        }
+    } catch (\Exception $e) {
+        $output .= "<div style='color: red;'>";
+        $output .= "<h3>Erro:</h3>";
+        $output .= "<p>Mensagem: " . $e->getMessage() . "</p>";
+        $output .= "<p>Linha: " . $e->getLine() . "</p>";
+        $output .= "<p>Arquivo: " . $e->getFile() . "</p>";
+        $output .= "</div>";
+    }
+
+    return $output;
 });
 
 // ROTA DE TESTE - Layout
@@ -1201,7 +1462,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // Route::delete('fidelidade/deletar-permanente', [App\Http\Controllers\Admin\FidelidadeAdminController::class, 'deletarPermanente'])->name('fidelidade.deletar-permanente');
 });
 
-// COMERCIANTE - Rotas para comerciantes
+// COMERCIANTE - Rotas para comerciantes (TEMPORARIAMENTE DESABILITADAS - CONFLITO)
+/*
 Route::prefix('comerciante')->name('comerciante.')->middleware(['auth'])->group(function () {
     Route::get('/', function () {
         return view('comerciante.dashboard');
@@ -1216,6 +1478,7 @@ Route::prefix('comerciante')->name('comerciante.')->middleware(['auth'])->group(
         return view('admin.temp', ['module' => 'Pedidos - Comerciante']);
     })->name('pedidos.index');
 });
+*/
 
 // CLIENTE - Rotas para clientes
 Route::prefix('cliente')->name('cliente.')->middleware(['auth'])->group(function () {
@@ -1270,4 +1533,204 @@ Route::get('/test-debugbar', function () {
             <p>APP_DEBUG: ' . (config('app.debug') ? 'true' : 'false') . '</p>
             <p>DEBUGBAR_ENABLED: ' . (config('debugbar.enabled') ? 'true' : 'false') . '</p>
             <p>Veja a barra de debug no final da página se estiver funcionando.</p>';
+});
+
+// ROTA DE DEBUG TEMPORÁRIA - USUÁRIOS VINCULADOS
+Route::get('/debug/usuarios', function () {
+    try {
+        echo "<h1>DEBUG: Relacionamento Usuários</h1>";
+
+        // 1. Verificar se a tabela existe
+        echo "<h3>1. Verificando tabela empresa_user_vinculos</h3>";
+        $vinculos = DB::table('empresa_user_vinculos')->get();
+        echo "Total de vínculos na tabela: " . $vinculos->count() . "<br>";
+
+        if ($vinculos->count() > 0) {
+            echo "<h4>Dados na tabela:</h4>";
+            foreach ($vinculos as $vinculo) {
+                echo "ID: {$vinculo->id}, Empresa: {$vinculo->empresa_id}, User: {$vinculo->user_id}, Perfil: {$vinculo->perfil}<br>";
+            }
+        }
+
+        // 2. Testar empresa específica (ID 2 do seu SQL)
+        echo "<h3>2. Testando empresa ID 2</h3>";
+        $empresa = \App\Comerciantes\Models\Empresa::find(2);
+
+        if ($empresa) {
+            echo "Empresa encontrada: {$empresa->nome_fantasia}<br>";
+
+            // Carregar usuários vinculados
+            $empresa->load('usuariosVinculados');
+            echo "Usuários vinculados (count): " . $empresa->usuariosVinculados->count() . "<br>";
+
+            if ($empresa->usuariosVinculados->count() > 0) {
+                echo "<h4>Usuários encontrados:</h4>";
+                foreach ($empresa->usuariosVinculados as $usuario) {
+                    echo "- Nome: " . ($usuario->nome ?? 'SEM NOME') .
+                        ", Email: " . ($usuario->email ?? 'SEM EMAIL') .
+                        ", Perfil: " . ($usuario->pivot->perfil ?? 'SEM PERFIL') . "<br>";
+                }
+            } else {
+                echo "❌ Nenhum usuário vinculado encontrado!<br>";
+
+                // Debug da query
+                echo "<h4>Debug da Query:</h4>";
+                $query = $empresa->usuariosVinculados()->toSql();
+                echo "SQL: " . $query . "<br>";
+
+                // Verificar se o usuário existe
+                $usuario = \App\Comerciantes\Models\EmpresaUsuario::find(3);
+                if ($usuario) {
+                    echo "Usuário ID 3 existe: {$usuario->nome} ({$usuario->email})<br>";
+                } else {
+                    echo "❌ Usuário ID 3 não encontrado!<br>";
+                }
+            }
+        } else {
+            echo "❌ Empresa ID 2 não encontrada!<br>";
+
+            // Listar todas as empresas
+            $empresas = \App\Comerciantes\Models\Empresa::all();
+            echo "Empresas disponíveis:<br>";
+            foreach ($empresas as $emp) {
+                echo "- ID: {$emp->id}, Nome: {$emp->nome_fantasia}<br>";
+            }
+        }
+
+        // 3. Testar query direta
+        echo "<h3>3. Query direta com JOIN</h3>";
+        $resultado = DB::table('empresa_user_vinculos as euv')
+            ->join('empresa_usuarios as eu', 'euv.user_id', '=', 'eu.id')
+            ->join('empresas as e', 'euv.empresa_id', '=', 'e.id')
+            ->where('euv.empresa_id', 2)
+            ->select('eu.nome', 'eu.email', 'euv.perfil', 'e.nome_fantasia')
+            ->get();
+
+        echo "Resultado do JOIN: " . $resultado->count() . " registros<br>";
+        foreach ($resultado as $row) {
+            echo "- {$row->nome} ({$row->email}) na empresa {$row->nome_fantasia}<br>";
+        }
+    } catch (Exception $e) {
+        echo "<h3>❌ ERRO:</h3>";
+        echo "Mensagem: " . $e->getMessage() . "<br>";
+        echo "Arquivo: " . $e->getFile() . ":" . $e->getLine() . "<br>";
+    }
+});
+
+// DEBUG SIMPLES
+Route::get('/debug/usuarios-simple', function () {
+    echo "<h1>DEBUG SIMPLES - Usuários</h1>";
+
+    try {
+        // 1. Testar conexão básica
+        echo "<h3>1. Testando conexão com banco</h3>";
+        $databases = DB::select('SHOW DATABASES');
+        echo "Conexão OK. Bancos disponíveis: " . count($databases) . "<br>";
+
+        // 2. Verificar banco atual
+        $currentDb = DB::select('SELECT DATABASE() as db')[0]->db;
+        echo "Banco atual: {$currentDb}<br>";
+
+        // 3. Verificar tabelas
+        echo "<h3>2. Verificando tabelas</h3>";
+        $tables = DB::select('SHOW TABLES');
+        $tableNames = array_map(function ($table) use ($currentDb) {
+            return $table->{"Tables_in_{$currentDb}"};
+        }, $tables);
+
+        echo "Tabelas encontradas:<br>";
+        foreach ($tableNames as $table) {
+            echo "- {$table}<br>";
+        }
+
+        // 4. Verificar especificamente as tabelas que precisamos
+        $requiredTables = ['empresas', 'empresa_usuarios', 'empresa_user_vinculos'];
+        echo "<h3>3. Verificando tabelas necessárias</h3>";
+
+        foreach ($requiredTables as $table) {
+            if (in_array($table, $tableNames)) {
+                $count = DB::table($table)->count();
+                echo "✅ {$table}: {$count} registros<br>";
+            } else {
+                echo "❌ {$table}: não encontrada<br>";
+            }
+        }
+
+        // 5. Dados específicos da empresa 2
+        echo "<h3>4. Dados da empresa ID 2</h3>";
+
+        $empresa = DB::table('empresas')->where('id', 2)->first();
+        if ($empresa) {
+            echo "✅ Empresa encontrada: {$empresa->nome_fantasia}<br>";
+
+            $vinculos = DB::table('empresa_user_vinculos')->where('empresa_id', 2)->get();
+            echo "Vínculos para empresa 2: {$vinculos->count()}<br>";
+
+            foreach ($vinculos as $vinculo) {
+                $usuario = DB::table('empresa_usuarios')->where('id', $vinculo->user_id)->first();
+                echo "- User ID {$vinculo->user_id}: " . ($usuario->nome ?? 'NOME NULL') . " ({$vinculo->perfil})<br>";
+            }
+        } else {
+            echo "❌ Empresa ID 2 não encontrada<br>";
+        }
+    } catch (Exception $e) {
+        echo "❌ ERRO: " . $e->getMessage() . "<br>";
+        echo "Linha: " . $e->getLine() . " Arquivo: " . $e->getFile() . "<br>";
+    }
+
+    echo "<br><br><a href='/comerciantes/empresas/2/usuarios'>← Voltar para página de usuários</a>";
+});
+
+// DEBUG SEM AUTENTICAÇÃO
+Route::get('/debug/empresa/{id}/usuarios', function ($id) {
+    echo "<h1>DEBUG EMPRESA {$id} - SEM AUTENTICAÇÃO</h1>";
+
+    try {
+        $empresa = \App\Comerciantes\Models\Empresa::find($id);
+
+        if (!$empresa) {
+            echo "❌ Empresa não encontrada<br>";
+            return;
+        }
+
+        echo "✅ Empresa: {$empresa->nome_fantasia}<br>";
+
+        // Testar relacionamento
+        echo "<h3>Testando relacionamento usuariosVinculados</h3>";
+        $usuarios = $empresa->usuariosVinculados;
+        echo "Count: {$usuarios->count()}<br>";
+
+        if ($usuarios->count() > 0) {
+            echo "<h4>Usuários:</h4>";
+            foreach ($usuarios as $usuario) {
+                echo "- ID: {$usuario->id}<br>";
+                echo "- Nome: " . ($usuario->nome ?? 'NULL') . "<br>";
+                echo "- Email: " . ($usuario->email ?? 'NULL') . "<br>";
+                echo "- Username: " . ($usuario->username ?? 'NULL') . "<br>";
+                echo "- Pivot perfil: " . ($usuario->pivot->perfil ?? 'NULL') . "<br>";
+                echo "- Pivot status: " . ($usuario->pivot->status ?? 'NULL') . "<br>";
+                echo "<br>";
+            }
+        } else {
+            echo "❌ Nenhum usuário vinculado encontrado via relacionamento<br>";
+
+            // Query direta
+            echo "<h4>Query direta na tabela pivot:</h4>";
+            $vinculos = \DB::table('empresa_user_vinculos')->where('empresa_id', $id)->get();
+            echo "Vínculos encontrados: {$vinculos->count()}<br>";
+
+            foreach ($vinculos as $vinculo) {
+                $usuario = \DB::table('empresa_usuarios')->where('id', $vinculo->user_id)->first();
+                echo "- Vínculo: empresa {$vinculo->empresa_id} + user {$vinculo->user_id} = {$vinculo->perfil}<br>";
+                echo "- Usuário: " . ($usuario->nome ?? 'NULL') . " ({$usuario->email})<br>";
+            }
+        }
+    } catch (Exception $e) {
+        echo "❌ ERRO: " . $e->getMessage() . "<br>";
+    }
+});
+
+// DEBUG WEB DIRETO
+Route::get('/debug/web-usuarios', function () {
+    include base_path('debug_web_usuarios.php');
 });

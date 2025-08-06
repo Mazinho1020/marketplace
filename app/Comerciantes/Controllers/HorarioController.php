@@ -4,10 +4,11 @@ namespace App\Comerciantes\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\HorarioFuncionamento;
-use App\Models\Empresa;
+use App\Comerciantes\Models\Empresa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class HorarioController extends Controller
 {
@@ -19,7 +20,19 @@ class HorarioController extends Controller
         $user = auth('comerciante')->user();
 
         if (!$user) {
-            abort(403, 'Acesso negado.');
+            return redirect()->route('comerciantes.login')
+                ->with('erro', 'Você precisa estar logado para acessar esta página.');
+        }
+
+        // Verificar se o usuário tem acesso à empresa
+        $temAcesso = DB::table('empresa_user_vinculos')
+            ->where('user_id', $user->id)
+            ->where('empresa_id', $empresaId)
+            ->exists();
+
+        if (!$temAcesso) {
+            return redirect()->route('comerciantes.empresas.index')
+                ->with('erro', 'Você não tem permissão para acessar esta empresa.');
         }
 
         return true;
@@ -33,22 +46,25 @@ class HorarioController extends Controller
         try {
             $this->verificarAcesso($empresaId);
 
-            $empresa = Empresa::findOrFail($empresaId);
+            // Verificar se a empresa existe
+            $empresa = Empresa::find($empresaId);
+            if (!$empresa) {
+                return redirect()->route('comerciantes.empresas.index')
+                    ->with('erro', "Empresa com ID {$empresaId} não foi encontrada. Verifique se a empresa existe no sistema.");
+            }
 
             // Buscar horários padrão
             $horariosPadrao = HorarioFuncionamento::porEmpresa($empresaId)
                 ->padrao()
-                ->ativos()
-                ->orderBy('dia_semana')
+                ->orderBy('dia_semana_id')
                 ->get();
 
             // Buscar próximas exceções (próximos 30 dias)
             $proximasExcecoes = HorarioFuncionamento::porEmpresa($empresaId)
                 ->excecoes()
-                ->where('data_especifica', '>=', now()->toDateString())
-                ->where('data_especifica', '<=', now()->addDays(30)->toDateString())
-                ->ativos()
-                ->orderBy('data_especifica')
+                ->where('data_excecao', '>=', now()->toDateString())
+                ->where('data_excecao', '<=', now()->addDays(30)->toDateString())
+                ->orderBy('data_excecao')
                 ->get();
 
             // Status atual
@@ -88,19 +104,29 @@ class HorarioController extends Controller
             $horarios = HorarioFuncionamento::porEmpresa($empresaId)
                 ->padrao()
                 ->ativos()
-                ->orderBy('dia_semana')
+                ->orderBy('dia_semana_id')
                 ->orderBy('sistema')
                 ->get();
 
             $sistemas = HorarioFuncionamento::getSistemas();
             $diasSemana = HorarioFuncionamento::getDiasSemana();
 
+            // Status atual do PDV
+            $horarioAtual = HorarioFuncionamento::horarioParaHoje($empresaId, 'PDV');
+            $statusPDV = [
+                'aberto' => $horarioAtual ? $horarioAtual->estaAberto() : false,
+                'mensagem' => $horarioAtual ?
+                    ($horarioAtual->estaAberto() ? 'Aberto' : 'Fechado') :
+                    'Sem horário definido'
+            ];
+
             return view('comerciantes.horarios.padrao.index', compact(
                 'empresaId',
                 'empresa',
                 'horarios',
                 'sistemas',
-                'diasSemana'
+                'diasSemana',
+                'statusPDV'
             ));
         } catch (\Exception $e) {
             Log::error('Erro ao carregar horários padrão: ' . $e->getMessage());
@@ -143,11 +169,11 @@ class HorarioController extends Controller
 
             // Validação
             $validator = Validator::make($request->all(), [
-                'dia_semana' => 'required|integer|between:1,7',
+                'dia_semana_id' => 'required|integer|between:1,7',
                 'sistema' => 'required|string|in:TODOS,PDV,ONLINE,FINANCEIRO',
-                'fechado' => 'boolean',
-                'hora_abertura' => 'required_if:fechado,false|nullable|date_format:H:i',
-                'hora_fechamento' => 'required_if:fechado,false|nullable|date_format:H:i|after:hora_abertura',
+                'aberto' => 'boolean',
+                'hora_abertura' => 'required_if:aberto,true|nullable|date_format:H:i',
+                'hora_fechamento' => 'required_if:aberto,true|nullable|date_format:H:i|after:hora_abertura',
                 'observacoes' => 'nullable|string|max:500'
             ]);
 
@@ -160,7 +186,7 @@ class HorarioController extends Controller
             // Verificar se já existe
             $existente = HorarioFuncionamento::porEmpresa($empresaId)
                 ->padrao()
-                ->porDiaSemana($request->dia_semana)
+                ->porDiaSemana($request->dia_semana_id)
                 ->porSistema($request->sistema)
                 ->ativos()
                 ->first();
@@ -174,14 +200,13 @@ class HorarioController extends Controller
             // Criar horário
             HorarioFuncionamento::create([
                 'empresa_id' => $empresaId,
-                'tipo' => 'padrao',
-                'dia_semana' => $request->dia_semana,
+                'dia_semana_id' => $request->dia_semana_id,
                 'sistema' => $request->sistema,
-                'fechado' => $request->has('fechado'),
-                'hora_abertura' => $request->has('fechado') ? null : $request->hora_abertura,
-                'hora_fechamento' => $request->has('fechado') ? null : $request->hora_fechamento,
-                'observacoes' => $request->observacoes,
-                'ativo' => true
+                'aberto' => $request->boolean('aberto', true),
+                'hora_abertura' => $request->boolean('aberto', true) ? $request->hora_abertura : null,
+                'hora_fechamento' => $request->boolean('aberto', true) ? $request->hora_fechamento : null,
+                'is_excecao' => false,
+                'observacoes' => $request->observacoes
             ]);
 
             return redirect()->route('comerciantes.horarios.padrao.index', $empresaId)
@@ -237,11 +262,11 @@ class HorarioController extends Controller
 
             // Validação
             $validator = Validator::make($request->all(), [
-                'dia_semana' => 'required|integer|between:1,7',
+                'dia_semana_id' => 'required|integer|between:1,7',
                 'sistema' => 'required|string|in:TODOS,PDV,ONLINE,FINANCEIRO',
-                'fechado' => 'boolean',
-                'hora_abertura' => 'required_if:fechado,false|nullable|date_format:H:i',
-                'hora_fechamento' => 'required_if:fechado,false|nullable|date_format:H:i|after:hora_abertura',
+                'aberto' => 'boolean',
+                'hora_abertura' => 'required_if:aberto,true|nullable|date_format:H:i',
+                'hora_fechamento' => 'required_if:aberto,true|nullable|date_format:H:i|after:hora_abertura',
                 'observacoes' => 'nullable|string|max:500'
             ]);
 
@@ -254,7 +279,7 @@ class HorarioController extends Controller
             // Verificar duplicatas (exceto o atual)
             $existente = HorarioFuncionamento::porEmpresa($empresaId)
                 ->padrao()
-                ->porDiaSemana($request->dia_semana)
+                ->porDiaSemana($request->dia_semana_id)
                 ->porSistema($request->sistema)
                 ->where('id', '!=', $id)
                 ->ativos()
@@ -268,11 +293,11 @@ class HorarioController extends Controller
 
             // Atualizar
             $horario->update([
-                'dia_semana' => $request->dia_semana,
+                'dia_semana_id' => $request->dia_semana_id,
                 'sistema' => $request->sistema,
-                'fechado' => $request->has('fechado'),
-                'hora_abertura' => $request->has('fechado') ? null : $request->hora_abertura,
-                'hora_fechamento' => $request->has('fechado') ? null : $request->hora_fechamento,
+                'aberto' => $request->boolean('aberto', true),
+                'hora_abertura' => $request->boolean('aberto', true) ? $request->hora_abertura : null,
+                'hora_fechamento' => $request->boolean('aberto', true) ? $request->hora_fechamento : null,
                 'observacoes' => $request->observacoes
             ]);
 
@@ -301,7 +326,7 @@ class HorarioController extends Controller
             $excecoes = HorarioFuncionamento::porEmpresa($empresaId)
                 ->excecoes()
                 ->ativos()
-                ->orderBy('data_especifica', 'desc')
+                ->orderBy('data_excecao', 'desc')
                 ->get();
 
             $sistemas = HorarioFuncionamento::getSistemas();
@@ -350,11 +375,12 @@ class HorarioController extends Controller
 
             // Validação
             $validator = Validator::make($request->all(), [
-                'data_especifica' => 'required|date|after_or_equal:today',
+                'data_excecao' => 'required|date|after_or_equal:today',
                 'sistema' => 'required|string|in:TODOS,PDV,ONLINE,FINANCEIRO',
-                'fechado' => 'boolean',
-                'hora_abertura' => 'required_if:fechado,false|nullable|date_format:H:i',
-                'hora_fechamento' => 'required_if:fechado,false|nullable|date_format:H:i|after:hora_abertura',
+                'aberto' => 'boolean',
+                'hora_abertura' => 'required_if:aberto,true|nullable|date_format:H:i',
+                'hora_fechamento' => 'required_if:aberto,true|nullable|date_format:H:i|after:hora_abertura',
+                'descricao_excecao' => 'nullable|string|max:100',
                 'observacoes' => 'nullable|string|max:500'
             ]);
 
@@ -367,7 +393,7 @@ class HorarioController extends Controller
             // Verificar se já existe
             $existente = HorarioFuncionamento::porEmpresa($empresaId)
                 ->excecoes()
-                ->where('data_especifica', $request->data_especifica)
+                ->where('data_excecao', $request->data_excecao)
                 ->porSistema($request->sistema)
                 ->ativos()
                 ->first();
@@ -381,14 +407,14 @@ class HorarioController extends Controller
             // Criar exceção
             HorarioFuncionamento::create([
                 'empresa_id' => $empresaId,
-                'tipo' => 'excecao',
-                'data_especifica' => $request->data_especifica,
+                'data_excecao' => $request->data_excecao,
                 'sistema' => $request->sistema,
-                'fechado' => $request->has('fechado'),
-                'hora_abertura' => $request->has('fechado') ? null : $request->hora_abertura,
-                'hora_fechamento' => $request->has('fechado') ? null : $request->hora_fechamento,
-                'observacoes' => $request->observacoes,
-                'ativo' => true
+                'aberto' => $request->boolean('aberto', true),
+                'hora_abertura' => $request->boolean('aberto', true) ? $request->hora_abertura : null,
+                'hora_fechamento' => $request->boolean('aberto', true) ? $request->hora_fechamento : null,
+                'is_excecao' => true,
+                'descricao_excecao' => $request->descricao_excecao,
+                'observacoes' => $request->observacoes
             ]);
 
             return redirect()->route('comerciantes.horarios.excecoes.index', $empresaId)
@@ -415,10 +441,10 @@ class HorarioController extends Controller
                 ->where('id', $id)
                 ->firstOrFail();
 
-            $tipo = $horario->tipo;
+            $isExcecao = $horario->is_excecao;
             $horario->delete();
 
-            $rota = $tipo === 'padrao' ? 'comerciantes.horarios.padrao.index' : 'comerciantes.horarios.excecoes.index';
+            $rota = $isExcecao ? 'comerciantes.horarios.excecoes.index' : 'comerciantes.horarios.padrao.index';
 
             return redirect()->route($rota, $empresaId)
                 ->with('sucesso', 'Horário removido com sucesso!');
@@ -445,9 +471,9 @@ class HorarioController extends Controller
                 'empresa_id' => $empresaId,
                 'data_hora' => now()->toDateTimeString(),
                 'horario_atual' => $horarioAtual ? [
-                    'tipo' => $horarioAtual->tipo,
+                    'is_excecao' => $horarioAtual->is_excecao,
                     'sistema' => $horarioAtual->sistema,
-                    'fechado' => $horarioAtual->fechado,
+                    'aberto' => $horarioAtual->aberto,
                     'horario_formatado' => $horarioAtual->horario_formatado,
                     'esta_aberto' => $horarioAtual->estaAberto(),
                 ] : null,

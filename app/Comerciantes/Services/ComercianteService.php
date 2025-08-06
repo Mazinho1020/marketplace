@@ -34,7 +34,7 @@ class ComercianteService
         // Marcas recentes (últimas 5)
         $marcasRecentes = $user->marcasProprietario()
             ->with(['empresas' => function ($query) {
-                $query->select('id', 'marca_id', 'nome', 'status');
+                $query->select('id', 'marca_id', 'nome_fantasia', 'status');
             }])
             ->latest()
             ->limit(5)

@@ -1,6 +1,6 @@
-@extends('comerciantes.layouts.app')
+@extends('comerciantes.layout')
 
-@section('title', $empresa->nome)
+@section('title', $empresa->razao_social ?: $empresa->nome_fantasia ?: 'Empresa')
 
 @section('content')
 <div class="container-fluid">
@@ -9,13 +9,9 @@
         <div>
             <h1 class="h3 mb-0 text-gray-800">
                 <i class="fas fa-building me-2"></i>
-                {{ $empresa->nome }}
+                {{ $empresa->razao_social ?: $empresa->nome_fantasia ?: 'Empresa sem nome' }}
             </h1>
             <p class="text-muted mb-0">
-                @if($empresa->marca)
-                    <i class="fas fa-tag me-1"></i>
-                    {{ $empresa->marca->nome }}
-                @endif
                 <span class="badge bg-{{ $empresa->status == 'ativa' ? 'success' : ($empresa->status == 'inativa' ? 'secondary' : 'warning') }} ms-2">
                     {{ ucfirst($empresa->status) }}
                 </span>
@@ -68,8 +64,8 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-gray-700 mb-2">Nome da Empresa</h6>
-                            <p class="mb-3">{{ $empresa->nome }}</p>
+                            <h6 class="text-gray-700 mb-2">Razão Social</h6>
+                            <p class="mb-3">{{ $empresa->razao_social ?: 'Não informado' }}</p>
 
                             @if($empresa->nome_fantasia)
                                 <h6 class="text-gray-700 mb-2">Nome Fantasia</h6>
@@ -82,16 +78,6 @@
                             @endif
                         </div>
                         <div class="col-md-6">
-                            @if($empresa->marca)
-                                <h6 class="text-gray-700 mb-2">Marca</h6>
-                                <p class="mb-3">
-                                    <a href="{{ route('comerciantes.marcas.show', $empresa->marca) }}" 
-                                       class="text-decoration-none">
-                                        {{ $empresa->marca->nome }}
-                                    </a>
-                                </p>
-                            @endif
-
                             <h6 class="text-gray-700 mb-2">Status</h6>
                             <p class="mb-3">
                                 <span class="badge bg-{{ $empresa->status == 'ativa' ? 'success' : ($empresa->status == 'inativa' ? 'secondary' : 'warning') }}">
@@ -107,7 +93,7 @@
             </div>
 
             <!-- Endereço -->
-            @if($empresa->endereco_logradouro || $empresa->endereco_cidade)
+            @if($empresa->logradouro || $empresa->cidade)
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">
@@ -120,15 +106,15 @@
                             <div class="col-md-12">
                                 @php
                                     $endereco = collect([
-                                        $empresa->endereco_logradouro,
-                                        $empresa->endereco_numero,
-                                        $empresa->endereco_complemento
+                                        $empresa->logradouro,
+                                        $empresa->numero,
+                                        $empresa->complemento
                                     ])->filter()->implode(', ');
                                     
                                     $localidade = collect([
-                                        $empresa->endereco_bairro,
-                                        $empresa->endereco_cidade,
-                                        $empresa->endereco_estado
+                                        $empresa->bairro,
+                                        $empresa->cidade,
+                                        $empresa->uf
                                     ])->filter()->implode(', ');
                                 @endphp
 
@@ -144,9 +130,9 @@
                                     </p>
                                 @endif
 
-                                @if($empresa->endereco_cep)
+                                @if($empresa->cep)
                                     <p class="mb-2">
-                                        <strong>CEP:</strong> {{ $empresa->endereco_cep }}
+                                        <strong>CEP:</strong> {{ $empresa->cep }}
                                     </p>
                                 @endif
                             </div>
@@ -156,7 +142,7 @@
             @endif
 
             <!-- Contato -->
-            @if($empresa->telefone || $empresa->email || $empresa->website)
+            @if($empresa->telefone || $empresa->email || $empresa->site)
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">
@@ -188,12 +174,12 @@
                                 </div>
                             @endif
 
-                            @if($empresa->website)
+                            @if($empresa->site)
                                 <div class="col-md-4">
                                     <h6 class="text-gray-700 mb-2">Website</h6>
                                     <p class="mb-3">
-                                        <a href="{{ $empresa->website }}" target="_blank" class="text-decoration-none">
-                                            {{ $empresa->website }}
+                                        <a href="{{ $empresa->site }}" target="_blank" class="text-decoration-none">
+                                            {{ $empresa->site }}
                                             <i class="fas fa-external-link-alt ms-1"></i>
                                         </a>
                                     </p>
@@ -322,23 +308,31 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar me-3">
-                            @if($empresa->proprietario->avatar)
-                                <img src="{{ $empresa->proprietario->avatar }}" alt="Avatar" 
-                                     class="rounded-circle" width="50" height="50">
-                            @else
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                     style="width: 50px; height: 50px;">
-                                    {{ substr($empresa->proprietario->nome, 0, 1) }}
-                                </div>
-                            @endif
+                    @if($empresa->proprietario && $empresa->proprietario->isNotEmpty())
+                        @php $prop = $empresa->proprietario->first(); @endphp
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3">
+                                @if($prop->avatar)
+                                    <img src="{{ $prop->avatar }}" alt="Avatar" 
+                                         class="rounded-circle" width="50" height="50">
+                                @else
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                         style="width: 50px; height: 50px;">
+                                        {{ substr($prop->nome, 0, 1) }}
+                                    </div>
+                                @endif
+                            </div>
+                            <div>
+                                <h6 class="mb-1">{{ $prop->nome }}</h6>
+                                <p class="text-muted mb-0 small">{{ $prop->email }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h6 class="mb-1">{{ $empresa->proprietario->nome }}</h6>
-                            <p class="text-muted mb-0 small">{{ $empresa->proprietario->email }}</p>
+                    @else
+                        <div class="text-center text-muted">
+                            <i class="fas fa-user-times fa-2x mb-2"></i>
+                            <p class="mb-0">Nenhum proprietário definido</p>
                         </div>
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -364,7 +358,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Tem certeza que deseja excluir a empresa <strong>{{ $empresa->nome }}</strong>?</p>
+                <p>Tem certeza que deseja excluir a empresa <strong>{{ $empresa->razao_social ?: $empresa->nome_fantasia ?: 'Esta empresa' }}</strong>?</p>
                 <p class="text-danger">
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     Esta ação não pode ser desfeita!

@@ -179,7 +179,7 @@
                                     </td>
                                     <td>{{ $horario->horario_formatado }}</td>
                                     <td>
-                                        @if($horario->fechado)
+                                        @if(!$horario->aberto)
                                             <span class="badge bg-danger">Fechado</span>
                                         @else
                                             <span class="badge bg-success">Aberto</span>
@@ -196,52 +196,7 @@
     </div>
     @endif
 
-    <!-- Próximas Exceções -->
-    @if($proximasExcecoes->count() > 0)
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-calendar-alt"></i> Próximas Exceções
-                    </h5>
-                    <a href="{{ route('comerciantes.horarios.excecoes.index', $empresaId) }}" 
-                       class="btn btn-sm btn-outline-warning">
-                        Ver Todas
-                    </a>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Sistema</th>
-                                    <th>Horário</th>
-                                    <th>Observações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($proximasExcecoes->take(5) as $excecao)
-                                <tr>
-                                    <td><strong>{{ $excecao->data_especifica->format('d/m/Y') }}</strong></td>
-                                    <td>
-                                        <span class="badge bg-warning">{{ $excecao->sistema }}</span>
-                                    </td>
-                                    <td>{{ $excecao->horario_formatado }}</td>
-                                    <td>
-                                        <small class="text-muted">{{ $excecao->observacoes ?? '-' }}</small>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
+    
 </div>
 @endsection
 

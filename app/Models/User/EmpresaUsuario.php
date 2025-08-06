@@ -12,10 +12,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Business\Business;
+use App\Traits\HasPermissions;
 
 class EmpresaUsuario extends Authenticatable
 {
-    use HasFactory, SoftDeletes, Notifiable;
+    use HasFactory, SoftDeletes, Notifiable, HasPermissions;
 
     // 1. CONFIGURAÇÕES DA TABELA
     protected $table = 'empresa_usuarios';
@@ -123,6 +124,25 @@ class EmpresaUsuario extends Authenticatable
     public function tiposAtivos()
     {
         return $this->tipos()->with('tipo')->whereNull('deleted_at');
+    }
+
+    /**
+     * RELACIONAMENTOS PARA PERMISSÕES
+     */
+
+    public function permissoesDirectas(): HasMany
+    {
+        return $this->hasMany(\App\Models\Permission\EmpresaUsuarioPermissao::class, 'usuario_id');
+    }
+
+    public function papeis(): HasMany
+    {
+        return $this->hasMany(\App\Models\Permission\EmpresaUsuarioPapel::class, 'usuario_id');
+    }
+
+    public function logsPermissoes(): HasMany
+    {
+        return $this->hasMany(\App\Models\Permission\EmpresaLogPermissao::class, 'usuario_id');
     }
 
     // 4. SCOPES

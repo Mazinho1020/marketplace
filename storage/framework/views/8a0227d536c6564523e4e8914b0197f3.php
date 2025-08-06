@@ -1,4 +1,4 @@
-<?php $__env->startSection('title', $empresa->nome); ?>
+<?php $__env->startSection('title', $empresa->razao_social ?: $empresa->nome_fantasia ?: 'Empresa'); ?>
 
 <?php $__env->startSection('content'); ?>
 <div class="container-fluid">
@@ -7,15 +7,10 @@
         <div>
             <h1 class="h3 mb-0 text-gray-800">
                 <i class="fas fa-building me-2"></i>
-                <?php echo e($empresa->nome); ?>
+                <?php echo e($empresa->razao_social ?: $empresa->nome_fantasia ?: 'Empresa sem nome'); ?>
 
             </h1>
             <p class="text-muted mb-0">
-                <?php if($empresa->marca): ?>
-                    <i class="fas fa-tag me-1"></i>
-                    <?php echo e($empresa->marca->nome); ?>
-
-                <?php endif; ?>
                 <span class="badge bg-<?php echo e($empresa->status == 'ativa' ? 'success' : ($empresa->status == 'inativa' ? 'secondary' : 'warning')); ?> ms-2">
                     <?php echo e(ucfirst($empresa->status)); ?>
 
@@ -69,8 +64,8 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-gray-700 mb-2">Nome da Empresa</h6>
-                            <p class="mb-3"><?php echo e($empresa->nome); ?></p>
+                            <h6 class="text-gray-700 mb-2">Razão Social</h6>
+                            <p class="mb-3"><?php echo e($empresa->razao_social ?: 'Não informado'); ?></p>
 
                             <?php if($empresa->nome_fantasia): ?>
                                 <h6 class="text-gray-700 mb-2">Nome Fantasia</h6>
@@ -83,17 +78,6 @@
                             <?php endif; ?>
                         </div>
                         <div class="col-md-6">
-                            <?php if($empresa->marca): ?>
-                                <h6 class="text-gray-700 mb-2">Marca</h6>
-                                <p class="mb-3">
-                                    <a href="<?php echo e(route('comerciantes.marcas.show', $empresa->marca)); ?>" 
-                                       class="text-decoration-none">
-                                        <?php echo e($empresa->marca->nome); ?>
-
-                                    </a>
-                                </p>
-                            <?php endif; ?>
-
                             <h6 class="text-gray-700 mb-2">Status</h6>
                             <p class="mb-3">
                                 <span class="badge bg-<?php echo e($empresa->status == 'ativa' ? 'success' : ($empresa->status == 'inativa' ? 'secondary' : 'warning')); ?>">
@@ -110,7 +94,7 @@
             </div>
 
             <!-- Endereço -->
-            <?php if($empresa->endereco_logradouro || $empresa->endereco_cidade): ?>
+            <?php if($empresa->logradouro || $empresa->cidade): ?>
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">
@@ -123,15 +107,15 @@
                             <div class="col-md-12">
                                 <?php
                                     $endereco = collect([
-                                        $empresa->endereco_logradouro,
-                                        $empresa->endereco_numero,
-                                        $empresa->endereco_complemento
+                                        $empresa->logradouro,
+                                        $empresa->numero,
+                                        $empresa->complemento
                                     ])->filter()->implode(', ');
                                     
                                     $localidade = collect([
-                                        $empresa->endereco_bairro,
-                                        $empresa->endereco_cidade,
-                                        $empresa->endereco_estado
+                                        $empresa->bairro,
+                                        $empresa->cidade,
+                                        $empresa->uf
                                     ])->filter()->implode(', ');
                                 ?>
 
@@ -149,9 +133,9 @@
                                     </p>
                                 <?php endif; ?>
 
-                                <?php if($empresa->endereco_cep): ?>
+                                <?php if($empresa->cep): ?>
                                     <p class="mb-2">
-                                        <strong>CEP:</strong> <?php echo e($empresa->endereco_cep); ?>
+                                        <strong>CEP:</strong> <?php echo e($empresa->cep); ?>
 
                                     </p>
                                 <?php endif; ?>
@@ -162,7 +146,7 @@
             <?php endif; ?>
 
             <!-- Contato -->
-            <?php if($empresa->telefone || $empresa->email || $empresa->website): ?>
+            <?php if($empresa->telefone || $empresa->email || $empresa->site): ?>
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">
@@ -196,12 +180,12 @@
                                 </div>
                             <?php endif; ?>
 
-                            <?php if($empresa->website): ?>
+                            <?php if($empresa->site): ?>
                                 <div class="col-md-4">
                                     <h6 class="text-gray-700 mb-2">Website</h6>
                                     <p class="mb-3">
-                                        <a href="<?php echo e($empresa->website); ?>" target="_blank" class="text-decoration-none">
-                                            <?php echo e($empresa->website); ?>
+                                        <a href="<?php echo e($empresa->site); ?>" target="_blank" class="text-decoration-none">
+                                            <?php echo e($empresa->site); ?>
 
                                             <i class="fas fa-external-link-alt ms-1"></i>
                                         </a>
@@ -332,24 +316,32 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar me-3">
-                            <?php if($empresa->proprietario->avatar): ?>
-                                <img src="<?php echo e($empresa->proprietario->avatar); ?>" alt="Avatar" 
-                                     class="rounded-circle" width="50" height="50">
-                            <?php else: ?>
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                     style="width: 50px; height: 50px;">
-                                    <?php echo e(substr($empresa->proprietario->nome, 0, 1)); ?>
+                    <?php if($empresa->proprietario && $empresa->proprietario->isNotEmpty()): ?>
+                        <?php $prop = $empresa->proprietario->first(); ?>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar me-3">
+                                <?php if($prop->avatar): ?>
+                                    <img src="<?php echo e($prop->avatar); ?>" alt="Avatar" 
+                                         class="rounded-circle" width="50" height="50">
+                                <?php else: ?>
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                         style="width: 50px; height: 50px;">
+                                        <?php echo e(substr($prop->nome, 0, 1)); ?>
 
-                                </div>
-                            <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <div>
+                                <h6 class="mb-1"><?php echo e($prop->nome); ?></h6>
+                                <p class="text-muted mb-0 small"><?php echo e($prop->email); ?></p>
+                            </div>
                         </div>
-                        <div>
-                            <h6 class="mb-1"><?php echo e($empresa->proprietario->nome); ?></h6>
-                            <p class="text-muted mb-0 small"><?php echo e($empresa->proprietario->email); ?></p>
+                    <?php else: ?>
+                        <div class="text-center text-muted">
+                            <i class="fas fa-user-times fa-2x mb-2"></i>
+                            <p class="mb-0">Nenhum proprietário definido</p>
                         </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -375,7 +367,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Tem certeza que deseja excluir a empresa <strong><?php echo e($empresa->nome); ?></strong>?</p>
+                <p>Tem certeza que deseja excluir a empresa <strong><?php echo e($empresa->razao_social ?: $empresa->nome_fantasia ?: 'Esta empresa'); ?></strong>?</p>
                 <p class="text-danger">
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     Esta ação não pode ser desfeita!
@@ -431,4 +423,4 @@ function confirmarExclusao() {
 <?php $__env->stopPush(); ?>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('comerciantes.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/comerciantes/empresas/show.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('comerciantes.layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/comerciantes/empresas/show.blade.php ENDPATH**/ ?>

@@ -17,34 +17,25 @@ class Empresa extends Model
 {
     use HasFactory;
 
-    protected $table = 'empresas_marketplace';
+    protected $table = 'empresas';
 
     protected $fillable = [
-        'nome',                    // "Pizzaria Tradição Concórdia"
-        'nome_fantasia',           // Nome fantasia se diferente
-        'cnpj',                    // CNPJ da unidade
-        'slug',                    // "pizzaria-tradicao-concordia"
-        'marca_id',                // ID da marca (marcas.id)
-        'proprietario_id',         // ID do proprietário (empresa_usuarios.id)
-
-        // Endereço
-        'endereco_cep',
-        'endereco_logradouro',
-        'endereco_numero',
-        'endereco_complemento',
-        'endereco_bairro',
-        'endereco_cidade',
-        'endereco_estado',
-
-        // Contato
+        'marca_id',
+        'razao_social',
+        'nome_fantasia',
+        'cnpj',
         'telefone',
+        'celular',
         'email',
-        'website',
-
-        // Status e configurações
-        'status',                  // ativa, inativa, suspensa
-        'configuracoes',           // JSON com configurações específicas
-        'horario_funcionamento'    // JSON com horários
+        'site',
+        'cep',
+        'logradouro',
+        'numero',
+        'complemento',
+        'bairro',
+        'cidade',
+        'uf',
+        'status'
     ];
 
     protected $casts = [
@@ -62,7 +53,7 @@ class Empresa extends Model
         // Gera automaticamente o slug baseado no nome
         static::creating(function ($empresa) {
             if (empty($empresa->slug)) {
-                $empresa->slug = Str::slug($empresa->nome);
+                $empresa->slug = Str::slug($empresa->nome_fantasia ?: $empresa->razao_social);
             }
         });
     }
@@ -72,19 +63,11 @@ class Empresa extends Model
      */
 
     /**
-     * Marca à qual esta empresa pertence
+     * Marca à qual esta empresa pertence (se houver)
      */
     public function marca(): BelongsTo
     {
         return $this->belongsTo(Marca::class);
-    }
-
-    /**
-     * Proprietário da empresa (pessoa física)
-     */
-    public function proprietario(): BelongsTo
-    {
-        return $this->belongsTo(EmpresaUsuario::class, 'proprietario_id');
     }
 
     /**
@@ -106,23 +89,28 @@ class Empresa extends Model
     }
 
     /**
+     * Proprietário da empresa (usuário com perfil proprietario)
+     */
+    public function proprietario(): BelongsToMany
+    {
+        return $this->usuariosVinculados()->wherePivot('perfil', 'proprietario');
+    }
+
+    /**
      * SCOPES (filtros de query)
      */
 
     public function scopeAtivas($query)
     {
-        return $query->where('status', 'ativa');
+        return $query->where('status', 'ativo');
     }
 
+    /*
     public function scopeByMarca($query, $marcaId)
     {
         return $query->where('marca_id', $marcaId);
     }
-
-    public function scopeByProprietario($query, $proprietarioId)
-    {
-        return $query->where('proprietario_id', $proprietarioId);
-    }
+    */
 
     /**
      * MÉTODOS AUXILIARES

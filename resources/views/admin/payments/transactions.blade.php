@@ -136,7 +136,7 @@
                                 <div>
                                     <code>#{{ $transaction->codigo_transacao ?? $transaction->id }}</code>
                                     @if($transaction->descricao)
-                                        <br><small class="text-muted">{{ Str::limit($transaction->descricao, 30) }}</small>
+                                        <br><small class="text-muted">{{ Str::limit($transaction->descricao ?? '', 30) }}</small>
                                     @endif
                                 </div>
                             </td>

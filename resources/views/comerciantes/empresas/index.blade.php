@@ -23,24 +23,12 @@
     <div class="card shadow mb-4">
         <div class="card-body">
             <form method="GET" action="{{ route('comerciantes.empresas.index') }}" class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label for="busca" class="form-label">Buscar empresa</label>
                     <input type="text" class="form-control" id="busca" name="busca" 
                            value="{{ request('busca') }}" placeholder="Nome, CNPJ ou cidade">
                 </div>
                 <div class="col-md-3">
-                    <label for="marca_id" class="form-label">Marca</label>
-                    <select class="form-select" id="marca_id" name="marca_id">
-                        <option value="">Todas as marcas</option>
-                        @foreach($marcas as $marca)
-                            <option value="{{ $marca->id }}" 
-                                    {{ request('marca_id') == $marca->id ? 'selected' : '' }}>
-                                {{ $marca->nome }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
                     <label for="status" class="form-label">Status</label>
                     <select class="form-select" id="status" name="status">
                         <option value="">Todos</option>
@@ -76,29 +64,13 @@
                     </div>
 
                     <div class="card-body">
-                        <!-- Logo da marca (se houver) -->
-                        @if($empresa->marca && $empresa->marca->logo_url)
-                            <div class="text-center mb-3">
-                                <img src="{{ $empresa->marca->logo_url }}" alt="Logo {{ $empresa->marca->nome }}" 
-                                     class="img-fluid rounded" style="max-height: 60px;">
-                            </div>
-                        @endif
-
                         <!-- Nome da empresa -->
                         <h5 class="card-title mb-2">
                             <a href="{{ route('comerciantes.empresas.show', $empresa) }}" 
                                class="text-decoration-none text-primary">
-                                {{ $empresa->nome }}
+                                {{ $empresa->razao_social ?: $empresa->nome_fantasia ?: 'Empresa sem nome' }}
                             </a>
                         </h5>
-
-                        <!-- Marca -->
-                        @if($empresa->marca)
-                            <p class="text-muted small mb-2">
-                                <i class="fas fa-tag me-1"></i>
-                                {{ $empresa->marca->nome }}
-                            </p>
-                        @endif
 
                         <!-- Informações básicas -->
                         <div class="empresa-info">
@@ -109,10 +81,10 @@
                                 </p>
                             @endif
 
-                            @if($empresa->endereco_cidade && $empresa->endereco_estado)
+                            @if($empresa->cidade && $empresa->uf)
                                 <p class="mb-1 small">
                                     <i class="fas fa-map-marker-alt me-2 text-muted"></i>
-                                    <strong>Local:</strong> {{ $empresa->endereco_cidade }}/{{ $empresa->endereco_estado }}
+                                    <strong>Local:</strong> {{ $empresa->cidade }}/{{ $empresa->uf }}
                                 </p>
                             @endif
 
@@ -210,7 +182,7 @@
                         <i class="fas fa-building fa-3x text-muted mb-3"></i>
                         <h5 class="text-muted">Nenhuma empresa encontrada</h5>
                         <p class="text-muted mb-4">
-                            @if(request()->hasAny(['busca', 'marca_id', 'status']))
+                            @if(request()->hasAny(['busca', 'status']))
                                 Tente ajustar os filtros ou criar uma nova empresa.
                             @else
                                 Comece criando sua primeira empresa.
@@ -278,7 +250,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-submit do formulário quando alterar filtros
-    const filtros = document.querySelectorAll('#marca_id, #status');
+    const filtros = document.querySelectorAll('#status');
     filtros.forEach(filtro => {
         filtro.addEventListener('change', function() {
             this.form.submit();

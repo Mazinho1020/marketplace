@@ -5,6 +5,7 @@ namespace App\Comerciantes\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Comerciantes\Models\Empresa;
 use App\Comerciantes\Models\EmpresaUsuario;
 use App\Comerciantes\Models\Marca;
@@ -23,20 +24,17 @@ class EmpresaController extends Controller
         $user = Auth::guard('comerciante')->user();
 
         // Base query - empresas que o usuário é proprietário
-        $query = $user->empresasProprietario()->with(['marca']);
+        $query = $user->empresasProprietario();
 
         // Filtros
         if ($request->filled('busca')) {
             $busca = $request->busca;
             $query->where(function ($q) use ($busca) {
-                $q->where('nome', 'like', "%{$busca}%")
+                $q->where('razao_social', 'like', "%{$busca}%")
+                    ->orWhere('nome_fantasia', 'like', "%{$busca}%")
                     ->orWhere('cnpj', 'like', "%{$busca}%")
-                    ->orWhere('endereco_cidade', 'like', "%{$busca}%");
+                    ->orWhere('cidade', 'like', "%{$busca}%");
             });
-        }
-
-        if ($request->filled('marca_id')) {
-            $query->where('marca_id', $request->marca_id);
         }
 
         if ($request->filled('status')) {
@@ -46,10 +44,7 @@ class EmpresaController extends Controller
         // Paginação
         $empresas = $query->latest()->paginate(12);
 
-        // Marcas para o filtro
-        $marcas = $user->marcasProprietario()->where('status', 'ativa')->get();
-
-        return view('comerciantes.empresas.index', compact('empresas', 'marcas'));
+        return view('comerciantes.empresas.index', compact('empresas'));
     }
 
     /**
@@ -57,11 +52,8 @@ class EmpresaController extends Controller
      */
     public function create()
     {
-        /** @var EmpresaUsuario $user */
-        $user = Auth::guard('comerciante')->user();
-
-        // Busca as marcas do usuário para selecionar
-        $marcas = $user->marcasProprietario()->where('status', 'ativa')->get();
+        // Buscar todas as marcas disponíveis
+        $marcas = Marca::orderBy('nome')->get();
 
         return view('comerciantes.empresas.create', compact('marcas'));
     }
@@ -75,36 +67,34 @@ class EmpresaController extends Controller
         $user = Auth::guard('comerciante')->user();
 
         $request->validate([
-            'nome' => 'required|string|max:200',
-            'nome_fantasia' => 'nullable|string|max:200',
+            'razao_social' => 'required|string|max:255',
+            'nome_fantasia' => 'nullable|string|max:255',
             'cnpj' => 'nullable|string|max:18|unique:empresas,cnpj',
-            'marca_id' => 'nullable|exists:marcas,id',
             'telefone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:150',
-            'website' => 'nullable|url|max:300',
+            'email' => 'nullable|email|max:255',
+            'site' => 'nullable|url|max:255',
 
             // Endereço
-            'endereco_cep' => 'nullable|string|max:9',
-            'endereco_logradouro' => 'nullable|string|max:300',
-            'endereco_numero' => 'nullable|string|max:20',
-            'endereco_complemento' => 'nullable|string|max:100',
-            'endereco_bairro' => 'nullable|string|max:100',
-            'endereco_cidade' => 'nullable|string|max:100',
-            'endereco_estado' => 'nullable|string|max:2',
+            'cep' => 'nullable|string|max:10',
+            'logradouro' => 'nullable|string|max:255',
+            'numero' => 'nullable|string|max:20',
+            'complemento' => 'nullable|string|max:255',
+            'bairro' => 'nullable|string|max:255',
+            'cidade' => 'nullable|string|max:255',
+            'uf' => 'nullable|string|max:2',
         ]);
 
-        // Verifica se a marca pertence ao usuário
-        if ($request->marca_id) {
-            $marca = $user->marcasProprietario()->find($request->marca_id);
-            if (!$marca) {
-                return back()->withErrors(['marca_id' => 'Marca não encontrada ou não pertence a você.']);
-            }
-        }
-
         $dadosEmpresa = $request->except(['_token']);
-        $dadosEmpresa['proprietario_id'] = $user->id;
 
         $empresa = Empresa::create($dadosEmpresa);
+
+        // Criar vínculo do usuário atual como proprietário da empresa
+        $empresa->usuariosVinculados()->attach($user->id, [
+            'perfil' => 'proprietario',
+            'status' => 'ativo',
+            'permissoes' => json_encode([]),
+            'data_vinculo' => now(),
+        ]);
 
         return redirect()->route('comerciantes.empresas.show', $empresa)
             ->with('success', 'Empresa criada com sucesso!');
@@ -123,7 +113,8 @@ class EmpresaController extends Controller
             abort(403, 'Acesso negado a esta empresa.');
         }
 
-        $empresa->load(['marca', 'proprietario', 'usuariosVinculados']);
+        // Carrega relacionamentos disponíveis neste modelo
+        $empresa->load(['usuariosVinculados']);
 
         return view('comerciantes.empresas.show', compact('empresa'));
     }
@@ -141,8 +132,8 @@ class EmpresaController extends Controller
             abort(403, 'Acesso negado a esta empresa.');
         }
 
-        // Busca as marcas do usuário para selecionar
-        $marcas = $user->marcasProprietario()->where('status', 'ativa')->get();
+        // Buscar todas as marcas disponíveis
+        $marcas = Marca::orderBy('nome')->get();
 
         return view('comerciantes.empresas.edit', compact('empresa', 'marcas'));
     }
@@ -161,52 +152,25 @@ class EmpresaController extends Controller
         }
 
         $request->validate([
-            'nome' => 'required|string|max:200',
+            'razao_social' => 'required|string|max:200',
             'nome_fantasia' => 'nullable|string|max:200',
-            'cnpj' => 'nullable|string|max:18|unique:empresas_marketplace,cnpj,' . $empresa->id,
-            'slug' => 'required|string|max:200|unique:empresas_marketplace,slug,' . $empresa->id,
-            'marca_id' => 'nullable|exists:marcas,id',
+            'cnpj' => 'nullable|string|max:18|unique:empresas,cnpj,' . $empresa->id,
             'telefone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:150',
-            'website' => 'nullable|url|max:300',
-            'status' => 'required|in:ativa,inativa,suspensa',
+            'site' => 'nullable|url|max:300',
+            'status' => 'required|in:ativo,inativo,suspenso',
 
             // Endereço
-            'endereco_cep' => 'nullable|string|max:9',
-            'endereco_logradouro' => 'nullable|string|max:300',
-            'endereco_numero' => 'nullable|string|max:20',
-            'endereco_complemento' => 'nullable|string|max:100',
-            'endereco_bairro' => 'nullable|string|max:100',
-            'endereco_cidade' => 'nullable|string|max:100',
-            'endereco_estado' => 'nullable|string|max:2',
+            'cep' => 'nullable|string|max:9',
+            'logradouro' => 'nullable|string|max:300',
+            'numero' => 'nullable|string|max:20',
+            'complemento' => 'nullable|string|max:100',
+            'bairro' => 'nullable|string|max:100',
+            'cidade' => 'nullable|string|max:100',
+            'uf' => 'nullable|string|max:2',
         ]);
 
-        // Verifica se a marca pertence ao usuário
-        if ($request->marca_id) {
-            $marca = $user->marcasProprietario()->find($request->marca_id);
-            if (!$marca) {
-                return back()->withErrors(['marca_id' => 'Marca não encontrada ou não pertence a você.']);
-            }
-        }
-
-        $dadosEmpresa = $request->except(['_token', '_method', 'horario']);
-
-        // Processa horário de funcionamento
-        if ($request->has('horario')) {
-            $horarioFuncionamento = [];
-            foreach ($request->horario as $dia => $dados) {
-                if (isset($dados['fechado']) && $dados['fechado']) {
-                    $horarioFuncionamento[$dia] = ['fechado' => true];
-                } elseif (!empty($dados['abertura']) && !empty($dados['fechamento'])) {
-                    $horarioFuncionamento[$dia] = [
-                        'abertura' => $dados['abertura'],
-                        'fechamento' => $dados['fechamento'],
-                        'fechado' => false
-                    ];
-                }
-            }
-            $dadosEmpresa['horario_funcionamento'] = json_encode($horarioFuncionamento);
-        }
+        $dadosEmpresa = $request->except(['_token', '_method']);
 
         $empresa->update($dadosEmpresa);
 
@@ -246,7 +210,25 @@ class EmpresaController extends Controller
             abort(403, 'Acesso negado para gerenciar usuários desta empresa.');
         }
 
-        $empresa->load(['usuariosVinculados', 'proprietario', 'marca']);
+        // Carrega a relação com dados do pivot
+        $empresa->load(['usuariosVinculados' => function ($query) {
+            $query->withPivot(['perfil', 'status', 'permissoes', 'data_vinculo']);
+        }, 'proprietario', 'marca']);
+
+        // Debug: Se solicitado, mostrar informações detalhadas
+        if (request()->has('debug')) {
+            dd([
+                'empresa_id' => $empresa->id,
+                'empresa_nome' => $empresa->nome_fantasia,
+                'usuariosVinculados_loaded' => $empresa->relationLoaded('usuariosVinculados'),
+                'usuariosVinculados_count' => $empresa->usuariosVinculados ? $empresa->usuariosVinculados->count() : 0,
+                'usuariosVinculados_data' => $empresa->usuariosVinculados ? $empresa->usuariosVinculados->toArray() : [],
+                'raw_query' => $empresa->usuariosVinculados()->toSql(),
+                'raw_bindings' => $empresa->usuariosVinculados()->getBindings(),
+                'pivot_table_exists' => DB::select("SHOW TABLES LIKE 'empresa_user_vinculos'"),
+                'raw_data' => DB::select("SELECT * FROM empresa_user_vinculos WHERE empresa_id = ?", [$empresa->id])
+            ]);
+        }
 
         return view('comerciantes.empresas.usuarios', compact('empresa'));
     }
@@ -291,10 +273,118 @@ class EmpresaController extends Controller
     /**
      * Edita um usuário vinculado
      */
-    public function editarUsuario(Request $request, Empresa $empresa, EmpresaUsuario $user)
+    public function editarUsuario(Request $request, Empresa $empresa, EmpresaUsuario $userVinculado)
     {
-        // Implementar edição de usuário vinculado
-        return back()->with('info', 'Funcionalidade em desenvolvimento.');
+        /** @var EmpresaUsuario $user */
+        $user = Auth::guard('comerciante')->user();
+
+        // Verifica permissão
+        if (!$user->temPermissaoEmpresa($empresa->id)) {
+            abort(403, 'Acesso negado.');
+        }
+
+        $request->validate([
+            'perfil' => 'required|in:administrador,gerente,colaborador',
+            'permissoes' => 'nullable|array',
+            'status' => 'required|in:ativo,inativo',
+        ]);
+
+        // Não pode alterar o perfil do proprietário
+        $vinculo = $empresa->usuariosVinculados()->where('user_id', $userVinculado->id)->first();
+
+        if (!$vinculo) {
+            return back()->withErrors(['error' => 'Usuário não está vinculado a esta empresa.']);
+        }
+
+        if ($vinculo->pivot->perfil === 'proprietario') {
+            return back()->withErrors(['error' => 'Não é possível alterar o perfil do proprietário.']);
+        }
+
+        // Atualizar o vínculo
+        $empresa->usuariosVinculados()->updateExistingPivot($userVinculado->id, [
+            'perfil' => $request->perfil,
+            'permissoes' => json_encode($request->permissoes ?: []),
+            'status' => $request->status,
+        ]);
+
+        return back()->with('success', 'Usuário atualizado com sucesso!');
+    }
+
+    /**
+     * Mostra os dados de um usuário vinculado para edição (via AJAX)
+     */
+    public function mostrarUsuario(Empresa $empresa, EmpresaUsuario $userVinculado)
+    {
+        /** @var EmpresaUsuario $user */
+        $user = Auth::guard('comerciante')->user();
+
+        // Verifica permissão
+        if (!$user->temPermissaoEmpresa($empresa->id)) {
+            abort(403, 'Acesso negado.');
+        }
+
+        $vinculo = $empresa->usuariosVinculados()->where('user_id', $userVinculado->id)->first();
+
+        if (!$vinculo) {
+            return response()->json(['error' => 'Usuário não encontrado'], 404);
+        }
+
+        return response()->json([
+            'id' => $userVinculado->id,
+            'nome' => $userVinculado->nome ?? $userVinculado->username,
+            'email' => $userVinculado->email,
+            'perfil' => $vinculo->pivot->perfil,
+            'status' => $vinculo->pivot->status,
+            'permissoes' => json_decode($vinculo->pivot->permissoes ?? '[]', true),
+            'data_vinculo' => $vinculo->pivot->data_vinculo,
+        ]);
+    }
+
+    /**
+     * Cria um novo usuário e o vincula à empresa
+     */
+    public function criarEVincularUsuario(Request $request, Empresa $empresa)
+    {
+        /** @var EmpresaUsuario $user */
+        $user = Auth::guard('comerciante')->user();
+
+        // Verifica permissão
+        if (!$user->temPermissaoEmpresa($empresa->id)) {
+            abort(403, 'Acesso negado.');
+        }
+
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'email' => 'required|email|unique:empresa_usuarios,email',
+            'username' => 'required|string|max:100|unique:empresa_usuarios,username',
+            'senha' => 'required|string|min:6|confirmed',
+            'perfil' => 'required|in:administrador,gerente,colaborador',
+            'permissoes' => 'nullable|array',
+            'telefone' => 'nullable|string|max:20',
+            'cargo' => 'nullable|string|max:100',
+        ]);
+
+        // Criar o usuário
+        $novoUsuario = EmpresaUsuario::create([
+            'uuid' => \Illuminate\Support\Str::uuid(),
+            'nome' => $request->nome,
+            'username' => $request->username,
+            'email' => $request->email,
+            'senha' => bcrypt($request->senha),
+            'telefone' => $request->telefone,
+            'cargo' => $request->cargo,
+            'status' => 'ativo',
+        ]);
+
+        // Vincular à empresa
+        $empresa->usuariosVinculados()->attach($novoUsuario->id, [
+            'perfil' => $request->perfil,
+            'permissoes' => json_encode($request->permissoes ?: []),
+            'status' => 'ativo',
+            'data_vinculo' => now(),
+        ]);
+
+        return back()->with('success', 'Usuário criado e vinculado com sucesso!');
     }
 
     /**

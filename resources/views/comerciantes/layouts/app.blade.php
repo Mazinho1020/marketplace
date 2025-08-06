@@ -288,7 +288,7 @@
                     @if($empresaAtual)
                         <div class="empresa-atual me-3">
                             <i class="fas fa-building"></i>
-                            <span>{{ Str::limit($empresaAtual->nome, 20) }}</span>
+                            <span>{{ Str::limit($empresaAtual->nome_fantasia ?: $empresaAtual->razao_social ?: 'Empresa', 20) }}</span>
                         </div>
                     @endif
                 @endif

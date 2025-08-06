@@ -1,10 +1,10 @@
-<?php $__env->startSection('title', 'Editar Empresa - ' . $empresa->nome); ?>
+<?php $__env->startSection('title', 'Editar Empresa - ' . ($empresa->nome_fantasia ?: $empresa->razao_social)); ?>
 
 <?php $__env->startSection('content'); ?>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="h3 mb-0">Editar Empresa</h1>
-        <p class="text-muted mb-0"><?php echo e($empresa->nome); ?></p>
+        <p class="text-muted mb-0"><?php echo e($empresa->nome_fantasia ?: $empresa->razao_social); ?></p>
     </div>
     <div class="d-flex gap-2">
         <a href="<?php echo e(route('comerciantes.empresas.show', $empresa)); ?>" class="btn btn-outline-secondary">
@@ -46,9 +46,9 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-8 mb-3">
-                            <label for="nome" class="form-label">Nome da Empresa <span class="text-danger">*</span></label>
+                            <label for="nome_fantasia" class="form-label">Nome da Empresa <span class="text-danger">*</span></label>
                             <input type="text" 
-                                   class="form-control <?php $__errorArgs = ['nome'];
+                                   class="form-control <?php $__errorArgs = ['nome_fantasia'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -56,11 +56,11 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                   id="nome" 
-                                   name="nome" 
-                                   value="<?php echo e(old('nome', $empresa->nome)); ?>" 
+                                   id="nome_fantasia" 
+                                   name="nome_fantasia" 
+                                   value="<?php echo e(old('nome_fantasia', $empresa->nome_fantasia)); ?>" 
                                    required>
-                            <?php $__errorArgs = ['nome'];
+                            <?php $__errorArgs = ['nome_fantasia'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -82,12 +82,16 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" id="marca_id" name="marca_id">
                                 <option value="">Selecione uma marca</option>
-                                <?php $__currentLoopData = $marcas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $marca): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($marca->id); ?>" <?php echo e(old('marca_id', $empresa->marca_id) == $marca->id ? 'selected' : ''); ?>>
-                                        <?php echo e($marca->nome); ?>
+                                <?php if(isset($marcas) && $marcas->count() > 0): ?>
+                                    <?php $__currentLoopData = $marcas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $marca): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($marca->id); ?>" <?php echo e(old('marca_id', $empresa->marca_id) == $marca->id ? 'selected' : ''); ?>>
+                                            <?php echo e($marca->nome); ?>
 
-                                    </option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php else: ?>
+                                    <option value="" disabled>Nenhuma marca disponível</option>
+                                <?php endif; ?>
                             </select>
                             <?php $__errorArgs = ['marca_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -574,9 +578,9 @@ unset($__errorArgs, $__bag); ?>
                         <div class="d-flex align-items-center">
                             <i class="fas fa-info-circle text-primary me-2"></i>
                             <div>
-                                <small class="text-primary fw-medium">Sistema Avançado Disponível</small>
+                                <small class="text-primary fw-medium">Sistema Avançado de Horários</small>
                                 <div class="small text-muted mt-1">
-                                    Configure horários por sistema (PDV, Online, Financeiro) e exceções especiais.
+                                    Configure horários por sistema (PDV, Online, Financeiro) e exceções especiais através do módulo especializado.
                                 </div>
                                 <a href="<?php echo e(route('comerciantes.horarios.index', $empresa->id)); ?>" 
                                    class="btn btn-sm btn-primary mt-2">
@@ -586,53 +590,6 @@ unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
                     </div>
-
-                    <?php
-                        $horarios = $empresa->horario_funcionamento ? json_decode($empresa->horario_funcionamento, true) : [];
-                        $diasSemana = [
-                            'segunda' => 'Segunda-feira',
-                            'terca' => 'Terça-feira',
-                            'quarta' => 'Quarta-feira',
-                            'quinta' => 'Quinta-feira',
-                            'sexta' => 'Sexta-feira',
-                            'sabado' => 'Sábado',
-                            'domingo' => 'Domingo'
-                        ];
-                    ?>
-
-                    <h6 class="small text-muted mb-3 mt-3">Horários Básicos (Compatibilidade)</h6>
-
-                    <?php $__currentLoopData = $diasSemana; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dia => $nome): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="mb-3">
-                            <label class="form-label small fw-medium"><?php echo e($nome); ?></label>
-                            <div class="row g-2">
-                                <div class="col-5">
-                                    <input type="time" 
-                                           class="form-control form-control-sm" 
-                                           name="horario[<?php echo e($dia); ?>][abertura]" 
-                                           value="<?php echo e(old("horario.{$dia}.abertura", $horarios[$dia]['abertura'] ?? '')); ?>"
-                                           placeholder="Abertura">
-                                </div>
-                                <div class="col-5">
-                                    <input type="time" 
-                                           class="form-control form-control-sm" 
-                                           name="horario[<?php echo e($dia); ?>][fechamento]" 
-                                           value="<?php echo e(old("horario.{$dia}.fechamento", $horarios[$dia]['fechamento'] ?? '')); ?>"
-                                           placeholder="Fechamento">
-                                </div>
-                                <div class="col-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" 
-                                               type="checkbox" 
-                                               name="horario[<?php echo e($dia); ?>][fechado]" 
-                                               value="1"
-                                               <?php echo e(old("horario.{$dia}.fechado", $horarios[$dia]['fechado'] ?? false) ? 'checked' : ''); ?>>
-                                    </div>
-                                </div>
-                            </div>
-                            <small class="text-muted">Marque a caixa se fechado</small>
-                        </div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
 

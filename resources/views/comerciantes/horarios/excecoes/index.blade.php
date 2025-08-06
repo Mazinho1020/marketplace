@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('comerciantes.layout')
 
 @section('title', 'Exceções de Horário')
 
@@ -78,12 +78,12 @@
                                 <tbody>
                                     @foreach($excecoes as $excecao)
                                     @php
-                                        $isPast = $excecao->data_especifica < now()->toDateString();
-                                        $isToday = $excecao->data_especifica == now()->toDateString();
+                                        $isPast = $excecao->data_excecao < now()->toDateString();
+                                        $isToday = $excecao->data_excecao == now()->toDateString();
                                     @endphp
                                     <tr class="{{ $isPast ? 'table-secondary' : ($isToday ? 'table-warning' : '') }}">
                                         <td>
-                                            <strong>{{ $excecao->data_especifica->format('d/m/Y') }}</strong>
+                                            <strong>{{ $excecao->data_excecao ? $excecao->data_excecao->format('d/m/Y') : 'N/A' }}</strong>
                                             @if($isToday)
                                                 <span class="badge bg-warning text-dark ms-2">HOJE</span>
                                             @elseif($isPast)
@@ -91,7 +91,7 @@
                                             @endif
                                         </td>
                                         <td>
-                                            {{ $excecao->data_especifica->translatedFormat('l') }}
+                                            {{ $excecao->data_excecao ? $excecao->data_excecao->translatedFormat('l') : 'N/A' }}
                                         </td>
                                         <td>
                                             <span class="badge bg-warning text-dark">
@@ -115,7 +115,7 @@
                                         <td>
                                             @if($excecao->observacoes)
                                                 <small class="text-muted" title="{{ $excecao->observacoes }}">
-                                                    {{ Str::limit($excecao->observacoes, 40) }}
+                                                    {{ Str::limit($excecao->observacoes ?? '', 40) }}
                                                 </small>
                                             @else
                                                 <small class="text-muted">-</small>

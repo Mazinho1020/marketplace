@@ -173,7 +173,27 @@ class Empresa extends Model
      */
     public function horarios()
     {
-        return $this->hasMany(HorarioFuncionamento::class);
+        return $this->hasMany(HorarioFuncionamento::class, 'empresa_id');
+    }
+
+    /**
+     * Relacionamento com horários padrão
+     */
+    public function horariosPadrao()
+    {
+        return $this->hasMany(HorarioFuncionamento::class, 'empresa_id')
+            ->where('is_excecao', false)
+            ->orderBy('dia_semana_id');
+    }
+
+    /**
+     * Relacionamento com exceções
+     */
+    public function horariosExcecoes()
+    {
+        return $this->hasMany(HorarioFuncionamento::class, 'empresa_id')
+            ->where('is_excecao', true)
+            ->orderBy('data_excecao');
     }
 
     // Para estatísticas (se tiver tabelas relacionadas)

@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('comerciantes.layout')
 
 @section('title', 'Nova Exceção de Horário')
 
@@ -47,15 +47,15 @@
 
                         <!-- Data Específica -->
                         <div class="form-group mb-3">
-                            <label for="data_especifica" class="form-label required">Data da Exceção</label>
+                            <label for="data_excecao" class="form-label required">Data da Exceção</label>
                             <input type="date" 
-                                   class="form-control @error('data_especifica') is-invalid @enderror" 
-                                   id="data_especifica" 
-                                   name="data_especifica" 
-                                   value="{{ old('data_especifica') }}"
+                                   class="form-control @error('data_excecao') is-invalid @enderror" 
+                                   id="data_excecao" 
+                                   name="data_excecao" 
+                                   value="{{ old('data_excecao') }}"
                                    min="{{ now()->toDateString() }}"
                                    required>
-                            @error('data_especifica')
+                            @error('data_excecao')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <small class="form-text text-muted">

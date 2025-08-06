@@ -22,9 +22,6 @@ class MarcaController extends Controller
         $user = Auth::guard('comerciante')->user();
 
         $marcas = $user->marcasProprietario()
-            ->with(['empresas' => function ($query) {
-                $query->select('id', 'marca_id', 'nome', 'status');
-            }])
             ->latest()
             ->paginate(12);
 
@@ -87,7 +84,7 @@ class MarcaController extends Controller
             abort(403, 'Acesso negado a esta marca.');
         }
 
-        $marca->load(['empresas', 'proprietario']);
+        $marca->load(['proprietario']);
 
         return view('comerciantes.marcas.show', compact('marca'));
     }
@@ -155,9 +152,7 @@ class MarcaController extends Controller
             abort(403, 'Acesso negado a esta marca.');
         }
 
-        if ($marca->empresas()->count() > 0) {
-            return back()->with('error', 'Não é possível excluir uma marca que possui empresas.');
-        }
+        // TODO: Verificar se existem empresas vinculadas quando implementar relação
 
         $marca->delete();
 

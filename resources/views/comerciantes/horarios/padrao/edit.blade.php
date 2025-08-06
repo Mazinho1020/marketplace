@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('comerciantes.layout')
 
 @section('title', 'Editar Horário Padrão')
 

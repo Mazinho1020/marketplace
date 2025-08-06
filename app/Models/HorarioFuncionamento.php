@@ -10,25 +10,28 @@ class HorarioFuncionamento extends Model
 {
     use HasFactory;
 
-    protected $table = 'horarios_funcionamento';
+    /**
+     * Nome da tabela no banco
+     */
+    protected $table = 'empresa_horarios_funcionamento';
 
     protected $fillable = [
         'empresa_id',
-        'tipo',
-        'dia_semana',
-        'data_especifica',
+        'dia_semana_id',
+        'sistema',
+        'aberto',
         'hora_abertura',
         'hora_fechamento',
-        'fechado',
-        'sistema',
-        'observacoes',
-        'ativo'
+        'is_excecao',
+        'data_excecao',
+        'descricao_excecao',
+        'observacoes'
     ];
 
     protected $casts = [
-        'data_especifica' => 'date',
-        'fechado' => 'boolean',
-        'ativo' => 'boolean',
+        'data_excecao' => 'date',
+        'aberto' => 'boolean',
+        'is_excecao' => 'boolean',
     ];
 
     // ============= RELACIONAMENTOS =============
@@ -56,7 +59,7 @@ class HorarioFuncionamento extends Model
      */
     public function scopePadrao($query)
     {
-        return $query->where('tipo', 'padrao');
+        return $query->where('is_excecao', false);
     }
 
     /**
@@ -64,7 +67,7 @@ class HorarioFuncionamento extends Model
      */
     public function scopeExcecoes($query)
     {
-        return $query->where('tipo', 'excecao');
+        return $query->where('is_excecao', true);
     }
 
     /**
@@ -80,15 +83,15 @@ class HorarioFuncionamento extends Model
      */
     public function scopePorDiaSemana($query, $diaSemana)
     {
-        return $query->where('dia_semana', $diaSemana);
+        return $query->where('dia_semana_id', $diaSemana);
     }
 
     /**
-     * Scope para horários ativos
+     * Scope para horários ativos (aberto = true)
      */
     public function scopeAtivos($query)
     {
-        return $query->where('ativo', true);
+        return $query->where('aberto', true);
     }
 
     // ============= MÉTODOS AUXILIARES =============
@@ -116,7 +119,7 @@ class HorarioFuncionamento extends Model
      */
     public function getHorarioFormatadoAttribute()
     {
-        if ($this->fechado) {
+        if (!$this->aberto) {
             return 'Fechado';
         }
 
@@ -132,7 +135,7 @@ class HorarioFuncionamento extends Model
      */
     public function estaAberto($agora = null)
     {
-        if ($this->fechado) {
+        if (!$this->aberto) {
             return false;
         }
 
@@ -183,9 +186,9 @@ class HorarioFuncionamento extends Model
         // Primeiro verifica se há exceção para hoje
         $excecao = self::porEmpresa($empresaId)
             ->excecoes()
-            ->where('data_especifica', $hoje->toDateString())
+            ->where('data_excecao', $hoje->toDateString())
             ->porSistema($sistema)
-            ->ativo()
+            ->ativos()
             ->first();
 
         if ($excecao) {
@@ -197,7 +200,7 @@ class HorarioFuncionamento extends Model
             ->padrao()
             ->porDiaSemana($diaSemana)
             ->porSistema($sistema)
-            ->ativo()
+            ->ativos()
             ->first();
     }
 }

@@ -25,7 +25,7 @@ class ConfigAdminController extends Controller
             foreach ($empresas as $empresa) {
                 $clients[] = [
                     'id' => $empresa->id,
-                    'nome' => $empresa->nome,
+                    'nome' => $empresa->nome_fantasia ?: $empresa->razao_social,
                     'config' => client_config($empresa->id)
                 ];
             }

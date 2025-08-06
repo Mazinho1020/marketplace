@@ -21,25 +21,12 @@
     <div class="card shadow mb-4">
         <div class="card-body">
             <form method="GET" action="<?php echo e(route('comerciantes.empresas.index')); ?>" class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label for="busca" class="form-label">Buscar empresa</label>
                     <input type="text" class="form-control" id="busca" name="busca" 
                            value="<?php echo e(request('busca')); ?>" placeholder="Nome, CNPJ ou cidade">
                 </div>
                 <div class="col-md-3">
-                    <label for="marca_id" class="form-label">Marca</label>
-                    <select class="form-select" id="marca_id" name="marca_id">
-                        <option value="">Todas as marcas</option>
-                        <?php $__currentLoopData = $marcas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $marca): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($marca->id); ?>" 
-                                    <?php echo e(request('marca_id') == $marca->id ? 'selected' : ''); ?>>
-                                <?php echo e($marca->nome); ?>
-
-                            </option>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    </select>
-                </div>
-                <div class="col-md-2">
                     <label for="status" class="form-label">Status</label>
                     <select class="form-select" id="status" name="status">
                         <option value="">Todos</option>
@@ -76,31 +63,14 @@
                     </div>
 
                     <div class="card-body">
-                        <!-- Logo da marca (se houver) -->
-                        <?php if($empresa->marca && $empresa->marca->logo_url): ?>
-                            <div class="text-center mb-3">
-                                <img src="<?php echo e($empresa->marca->logo_url); ?>" alt="Logo <?php echo e($empresa->marca->nome); ?>" 
-                                     class="img-fluid rounded" style="max-height: 60px;">
-                            </div>
-                        <?php endif; ?>
-
                         <!-- Nome da empresa -->
                         <h5 class="card-title mb-2">
                             <a href="<?php echo e(route('comerciantes.empresas.show', $empresa)); ?>" 
                                class="text-decoration-none text-primary">
-                                <?php echo e($empresa->nome); ?>
+                                <?php echo e($empresa->razao_social ?: $empresa->nome_fantasia ?: 'Empresa sem nome'); ?>
 
                             </a>
                         </h5>
-
-                        <!-- Marca -->
-                        <?php if($empresa->marca): ?>
-                            <p class="text-muted small mb-2">
-                                <i class="fas fa-tag me-1"></i>
-                                <?php echo e($empresa->marca->nome); ?>
-
-                            </p>
-                        <?php endif; ?>
 
                         <!-- Informações básicas -->
                         <div class="empresa-info">
@@ -112,10 +82,10 @@
                                 </p>
                             <?php endif; ?>
 
-                            <?php if($empresa->endereco_cidade && $empresa->endereco_estado): ?>
+                            <?php if($empresa->cidade && $empresa->uf): ?>
                                 <p class="mb-1 small">
                                     <i class="fas fa-map-marker-alt me-2 text-muted"></i>
-                                    <strong>Local:</strong> <?php echo e($empresa->endereco_cidade); ?>/<?php echo e($empresa->endereco_estado); ?>
+                                    <strong>Local:</strong> <?php echo e($empresa->cidade); ?>/<?php echo e($empresa->uf); ?>
 
                                 </p>
                             <?php endif; ?>
@@ -216,7 +186,7 @@
                         <i class="fas fa-building fa-3x text-muted mb-3"></i>
                         <h5 class="text-muted">Nenhuma empresa encontrada</h5>
                         <p class="text-muted mb-4">
-                            <?php if(request()->hasAny(['busca', 'marca_id', 'status'])): ?>
+                            <?php if(request()->hasAny(['busca', 'status'])): ?>
                                 Tente ajustar os filtros ou criar uma nova empresa.
                             <?php else: ?>
                                 Comece criando sua primeira empresa.
@@ -285,7 +255,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-submit do formulário quando alterar filtros
-    const filtros = document.querySelectorAll('#marca_id, #status');
+    const filtros = document.querySelectorAll('#status');
     filtros.forEach(filtro => {
         filtro.addEventListener('change', function() {
             this.form.submit();

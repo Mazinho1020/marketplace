@@ -288,7 +288,7 @@
                     <?php if($empresaAtual): ?>
                         <div class="empresa-atual me-3">
                             <i class="fas fa-building"></i>
-                            <span><?php echo e(Str::limit($empresaAtual->nome, 20)); ?></span>
+                            <span><?php echo e(Str::limit($empresaAtual->nome_fantasia ?: $empresaAtual->razao_social ?: 'Empresa', 20)); ?></span>
                         </div>
                     <?php endif; ?>
                 <?php endif; ?>
