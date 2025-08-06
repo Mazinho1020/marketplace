@@ -1,4 +1,4 @@
-@extends('comerciantes.layout')
+@extends('comerciantes.layouts.app')
 
 @section('title', 'Horários de Funcionamento')
 
@@ -9,336 +9,255 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2><i class="fas fa-clock mr-2"></i>Horários de Funcionamento</h2>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-clock text-primary"></i>
+                        Horários de Funcionamento
+                    </h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ route('comerciantes.dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('comerciantes.empresas.show', $empresaId) }}">Empresa</a></li>
                             <li class="breadcrumb-item active">Horários</li>
                         </ol>
                     </nav>
                 </div>
                 <div>
-                    <a href="{{ route('comerciantes.horarios.padrao.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Novo Horário
-                    </a>
-                    <a href="{{ route('comerciantes.horarios.excecoes.create') }}" class="btn btn-outline-warning">
-                        <i class="fas fa-calendar-alt"></i> Nova Exceção
+                    <a href="{{ route('comerciantes.empresas.show', $empresaId) }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Voltar
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Status Atual dos Sistemas -->
+    <!-- Alertas -->
+    @if(session('sucesso'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> {{ session('sucesso') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if(session('erro'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> {{ session('erro') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    <!-- Status Atual -->
     <div class="row mb-4">
-        @foreach($relatorioStatus as $sistema => $dados)
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="card border-left-{{ $dados['status_hoje']['aberto'] ? 'success' : 'danger' }}">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Status Atual
+                    </h5>
+                </div>
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-uppercase mb-1">
-                                {{ $sistema }}
+                    @if($horarioAtual)
+                        <div class="d-flex align-items-center">
+                            @if($horarioAtual->estaAberto())
+                                <span class="badge bg-success fs-6 me-3">
+                                    <i class="fas fa-clock"></i> ABERTO
+                                </span>
+                            @else
+                                <span class="badge bg-danger fs-6 me-3">
+                                    <i class="fas fa-times-circle"></i> FECHADO
+                                </span>
+                            @endif
+                            <div>
+                                <strong>{{ $horarioAtual->horario_formatado }}</strong>
+                                <div class="small text-muted">Sistema: {{ $horarioAtual->sistema }}</div>
                             </div>
-                            <div class="h6 mb-0 font-weight-bold {{ $dados['status_hoje']['aberto'] ? 'text-success' : 'text-danger' }}">
-                                <i class="fas {{ $dados['status_hoje']['aberto'] ? 'fa-unlock' : 'fa-lock' }} mr-1"></i>
-                                {{ $dados['status_hoje']['aberto'] ? 'Aberto' : 'Fechado' }}
-                            </div>
-                            <small class="text-muted">{{ $dados['status_hoje']['mensagem'] }}</small>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-{{ $sistema === 'PDV' ? 'cash-register' : ($sistema === 'ONLINE' ? 'globe' : ($sistema === 'FINANCEIRO' ? 'chart-line' : 'building')) }} fa-2x text-gray-300"></i>
+                    @else
+                        <div class="text-center text-muted">
+                            <i class="fas fa-question-circle fa-2x mb-2"></i>
+                            <p>Nenhum horário configurado para hoje</p>
                         </div>
-                    </div>
-                    @if($dados['proximo_funcionamento'])
-                    <small class="text-info">
-                        <i class="fas fa-clock"></i> Próximo: {{ $dados['proximo_funcionamento']['mensagem'] }}
-                    </small>
                     @endif
                 </div>
             </div>
         </div>
-        @endforeach
-    </div>
-
-    <!-- Filtros -->
-    <div class="row mb-4">
-        <div class="col-12">
+        <div class="col-md-6">
             <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> Resumo
+                    </h5>
+                </div>
                 <div class="card-body">
-                    <form method="GET" class="form-inline">
-                        <label class="mr-2">Filtrar por sistema:</label>
-                        <div class="btn-group mr-3" role="group">
-                            <a href="{{ route('comerciantes.horarios.index') }}" 
-                               class="btn btn-sm btn-outline-primary {{ !$sistema ? 'active' : '' }}">
-                                Todos
-                            </a>
-                            @foreach($sistemas as $sist)
-                            <a href="{{ route('comerciantes.horarios.index', ['sistema' => $sist]) }}" 
-                               class="btn btn-sm btn-outline-primary {{ $sistema === $sist ? 'active' : '' }}">
-                                {{ $sist }}
-                            </a>
-                            @endforeach
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="h4 text-primary mb-1">{{ $horariosPadrao->count() }}</div>
+                            <small class="text-muted">Horários Padrão</small>
                         </div>
-                        
-                        <div class="btn-group" role="group">
-                            <a href="{{ route('comerciantes.horarios.padrao') }}" class="btn btn-sm btn-outline-info">
-                                <i class="fas fa-calendar-week"></i> Horários Padrão
-                            </a>
-                            <a href="{{ route('comerciantes.horarios.excecoes') }}" class="btn btn-sm btn-outline-warning">
-                                <i class="fas fa-calendar-alt"></i> Exceções
-                            </a>
-                            <a href="{{ route('comerciantes.horarios.relatorio') }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="fas fa-chart-bar"></i> Relatório
-                            </a>
+                        <div class="col-4">
+                            <div class="h4 text-warning mb-1">{{ $proximasExcecoes->count() }}</div>
+                            <small class="text-muted">Próximas Exceções</small>
                         </div>
-                    </form>
+                        <div class="col-4">
+                            <div class="h4 text-info mb-1">{{ count($sistemas) }}</div>
+                            <small class="text-muted">Sistemas</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Horários Padrão -->
+    <!-- Menu de Ações -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{{ route('comerciantes.horarios.padrao.index', $empresaId) }}" 
+                               class="btn btn-outline-primary w-100 p-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-calendar-week fa-2x me-3"></i>
+                                    <div class="text-start">
+                                        <h6 class="mb-1">Horários Padrão</h6>
+                                        <small class="text-muted">Configure horários da semana</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{{ route('comerciantes.horarios.excecoes.index', $empresaId) }}" 
+                               class="btn btn-outline-warning w-100 p-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-calendar-alt fa-2x me-3"></i>
+                                    <div class="text-start">
+                                        <h6 class="mb-1">Exceções</h6>
+                                        <small class="text-muted">Feriados e datas especiais</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Horários Padrão (Resumo) -->
+    @if($horariosPadrao->count() > 0)
     <div class="row mb-4">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="fas fa-calendar-week"></i> Horários Padrão da Semana
-                        @if($sistema)
-                            - Sistema: {{ $sistema }}
-                        @endif
+                        <i class="fas fa-calendar-week"></i> Horários da Semana
                     </h5>
-                    <a href="{{ route('comerciantes.horarios.padrao') }}" class="btn btn-sm btn-outline-primary">
+                    <a href="{{ route('comerciantes.horarios.padrao.index', $empresaId) }}" 
+                       class="btn btn-sm btn-outline-primary">
                         Ver Todos
                     </a>
                 </div>
                 <div class="card-body">
-                    @if($horariosPadrao->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Sistema</th>
-                                        <th>Dia da Semana</th>
-                                        <th>Status</th>
-                                        <th>Horário</th>
-                                        <th>Observações</th>
-                                        <th width="120">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($horariosPadrao->take(10) as $horario)
-                                    <tr>
-                                        <td>
-                                            <span class="badge badge-{{ $horario->sistema === 'TODOS' ? 'primary' : 'secondary' }}">
-                                                {{ $horario->sistema }}
-                                            </span>
-                                        </td>
-                                        <td>{{ $horario->diaSemana->nome }}</td>
-                                        <td>
-                                            @if($horario->aberto)
-                                                <span class="badge badge-success">
-                                                    <i class="fas fa-unlock"></i> Aberto
-                                                </span>
-                                            @else
-                                                <span class="badge badge-danger">
-                                                    <i class="fas fa-lock"></i> Fechado
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if($horario->aberto)
-                                                {{ \Carbon\Carbon::parse($horario->hora_abertura)->format('H:i') }} às 
-                                                {{ \Carbon\Carbon::parse($horario->hora_fechamento)->format('H:i') }}
-                                            @else
-                                                <span class="text-muted">-</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if($horario->observacoes)
-                                                <small title="{{ $horario->observacoes }}">
-                                                    {{ Str::limit($horario->observacoes, 30) }}
-                                                </small>
-                                            @else
-                                                <span class="text-muted">-</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ route('comerciantes.horarios.padrao.edit', $horario->id) }}" 
-                                                   class="btn btn-sm btn-outline-primary" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-outline-danger" 
-                                                        onclick="confirmarExclusao({{ $horario->id }}, 'horário')"
-                                                        title="Excluir">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        @if($horariosPadrao->count() > 10)
-                            <div class="text-center">
-                                <a href="{{ route('comerciantes.horarios.padrao') }}" class="btn btn-outline-primary">
-                                    Ver todos os {{ $horariosPadrao->count() }} horários padrão
-                                </a>
-                            </div>
-                        @endif
-                    @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-calendar-week fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Nenhum horário padrão configurado</h5>
-                            <p class="text-muted">Configure os horários de funcionamento da sua empresa.</p>
-                            <a href="{{ route('comerciantes.horarios.padrao.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Criar Primeiro Horário
-                            </a>
-                        </div>
-                    @endif
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Dia</th>
+                                    <th>Sistema</th>
+                                    <th>Horário</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($horariosPadrao->take(7) as $horario)
+                                <tr>
+                                    <td><strong>{{ $horario->nome_dia_semana }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-{{ $horario->sistema === 'TODOS' ? 'primary' : 'secondary' }}">
+                                            {{ $horario->sistema }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $horario->horario_formatado }}</td>
+                                    <td>
+                                        @if($horario->fechado)
+                                            <span class="badge bg-danger">Fechado</span>
+                                        @else
+                                            <span class="badge bg-success">Aberto</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    @endif
 
-    <!-- Exceções Futuras -->
+    <!-- Próximas Exceções -->
+    @if($proximasExcecoes->count() > 0)
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         <i class="fas fa-calendar-alt"></i> Próximas Exceções
-                        @if($sistema)
-                            - Sistema: {{ $sistema }}
-                        @endif
                     </h5>
-                    <a href="{{ route('comerciantes.horarios.excecoes') }}" class="btn btn-sm btn-outline-warning">
+                    <a href="{{ route('comerciantes.horarios.excecoes.index', $empresaId) }}" 
+                       class="btn btn-sm btn-outline-warning">
                         Ver Todas
                     </a>
                 </div>
                 <div class="card-body">
-                    @if($excecoesFuturas->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Sistema</th>
-                                        <th>Data</th>
-                                        <th>Status</th>
-                                        <th>Horário</th>
-                                        <th>Descrição</th>
-                                        <th width="120">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($excecoesFuturas as $excecao)
-                                    <tr>
-                                        <td>
-                                            <span class="badge badge-warning">{{ $excecao->sistema }}</span>
-                                        </td>
-                                        <td>{{ $excecao->data_excecao->format('d/m/Y') }}</td>
-                                        <td>
-                                            @if($excecao->aberto)
-                                                <span class="badge badge-success">
-                                                    <i class="fas fa-unlock"></i> Aberto
-                                                </span>
-                                            @else
-                                                <span class="badge badge-danger">
-                                                    <i class="fas fa-lock"></i> Fechado
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if($excecao->aberto)
-                                                {{ \Carbon\Carbon::parse($excecao->hora_abertura)->format('H:i') }} às 
-                                                {{ \Carbon\Carbon::parse($excecao->hora_fechamento)->format('H:i') }}
-                                            @else
-                                                <span class="text-muted">-</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <small>{{ $excecao->descricao_excecao }}</small>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ route('comerciantes.horarios.excecoes.edit', $excecao->id) }}" 
-                                                   class="btn btn-sm btn-outline-primary" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-outline-danger" 
-                                                        onclick="confirmarExclusao({{ $excecao->id }}, 'exceção')"
-                                                        title="Excluir">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Nenhuma exceção programada</h5>
-                            <p class="text-muted">Configure exceções para feriados ou eventos especiais.</p>
-                            <a href="{{ route('comerciantes.horarios.excecoes.create') }}" class="btn btn-warning">
-                                <i class="fas fa-plus"></i> Criar Primeira Exceção
-                            </a>
-                        </div>
-                    @endif
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Sistema</th>
+                                    <th>Horário</th>
+                                    <th>Observações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($proximasExcecoes->take(5) as $excecao)
+                                <tr>
+                                    <td><strong>{{ $excecao->data_especifica->format('d/m/Y') }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-warning">{{ $excecao->sistema }}</span>
+                                    </td>
+                                    <td>{{ $excecao->horario_formatado }}</td>
+                                    <td>
+                                        <small class="text-muted">{{ $excecao->observacoes ?? '-' }}</small>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<!-- Modal de Confirmação -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirmar Exclusão</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Tem certeza que deseja excluir este <span id="tipoItem"></span>?</p>
-                <p class="text-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Esta ação não poderá ser desfeita.
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <form id="deleteForm" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Excluir</button>
-                </form>
-            </div>
-        </div>
-    </div>
+    @endif
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
-function confirmarExclusao(id, tipo) {
-    $('#tipoItem').text(tipo);
-    $('#deleteForm').attr('action', '/comerciantes/horarios/' + id);
-    $('#confirmDeleteModal').modal('show');
-}
-
-// Auto-refresh do status a cada 60 segundos
-setInterval(function() {
-    location.reload();
-}, 60000);
+$(document).ready(function() {
+    // Auto-atualizar status a cada 5 minutos
+    setInterval(function() {
+        fetch('{{ route("comerciantes.horarios.api.status", $empresaId) }}')
+            .then(response => response.json())
+            .then(data => {
+                // Atualizar status na tela se necessário
+                console.log('Status atualizado:', data);
+            })
+            .catch(error => console.error('Erro ao atualizar status:', error));
+    }, 300000); // 5 minutos
+});
 </script>
-@endsection
+@endpush

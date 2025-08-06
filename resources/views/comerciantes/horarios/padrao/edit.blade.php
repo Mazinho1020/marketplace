@@ -1,6 +1,6 @@
 @extends('comerciantes.layouts.app')
 
-@section('title', 'Novo Horário Padrão')
+@section('title', 'Editar Horário Padrão')
 
 @section('content')
 <div class="container-fluid">
@@ -10,15 +10,15 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h1 class="h3 mb-0">
-                        <i class="fas fa-plus text-primary"></i>
-                        Novo Horário Padrão
+                        <i class="fas fa-edit text-primary"></i>
+                        Editar Horário Padrão
                     </h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ route('comerciantes.dashboard') }}">Dashboard</a></li>
                             <li class="breadcrumb-item"><a href="{{ route('comerciantes.horarios.index', $empresaId) }}">Horários</a></li>
                             <li class="breadcrumb-item"><a href="{{ route('comerciantes.horarios.padrao.index', $empresaId) }}">Padrão</a></li>
-                            <li class="breadcrumb-item active">Novo</li>
+                            <li class="breadcrumb-item active">Editar</li>
                         </ol>
                     </nav>
                 </div>
@@ -38,12 +38,13 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-calendar-week"></i> Configurar Horário
+                        <i class="fas fa-calendar-week"></i> Editar Horário
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('comerciantes.horarios.padrao.store', $empresaId) }}">
+                    <form method="POST" action="{{ route('comerciantes.horarios.padrao.update', [$empresaId, $horario->id]) }}">
                         @csrf
+                        @method('PUT')
 
                         <!-- Dia da Semana -->
                         <div class="form-group mb-3">
@@ -52,7 +53,8 @@
                                     id="dia_semana" name="dia_semana" required>
                                 <option value="">Selecione o dia da semana</option>
                                 @foreach($diasSemana as $numero => $nome)
-                                    <option value="{{ $numero }}" {{ old('dia_semana') == $numero ? 'selected' : '' }}>
+                                    <option value="{{ $numero }}" 
+                                            {{ (old('dia_semana') ?? $horario->dia_semana) == $numero ? 'selected' : '' }}>
                                         {{ $nome }}
                                     </option>
                                 @endforeach
@@ -69,7 +71,8 @@
                                     id="sistema" name="sistema" required>
                                 <option value="">Selecione o sistema</option>
                                 @foreach($sistemas as $sistema)
-                                    <option value="{{ $sistema }}" {{ old('sistema') == $sistema ? 'selected' : '' }}>
+                                    <option value="{{ $sistema }}" 
+                                            {{ (old('sistema') ?? $horario->sistema) == $sistema ? 'selected' : '' }}>
                                         {{ $sistema }}
                                     </option>
                                 @endforeach
@@ -86,7 +89,8 @@
                         <div class="form-group mb-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="fechado" name="fechado" 
-                                       onchange="toggleHorarios()" {{ old('fechado') ? 'checked' : '' }}>
+                                       onchange="toggleHorarios()" 
+                                       {{ (old('fechado') ?? $horario->fechado) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="fechado">
                                     Empresa fechada neste dia
                                 </label>
@@ -106,7 +110,7 @@
                                                class="form-control @error('hora_abertura') is-invalid @enderror" 
                                                id="hora_abertura" 
                                                name="hora_abertura" 
-                                               value="{{ old('hora_abertura') }}"
+                                               value="{{ old('hora_abertura') ?? $horario->hora_abertura }}"
                                                required>
                                         @error('hora_abertura')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -120,7 +124,7 @@
                                                class="form-control @error('hora_fechamento') is-invalid @enderror" 
                                                id="hora_fechamento" 
                                                name="hora_fechamento" 
-                                               value="{{ old('hora_fechamento') }}"
+                                               value="{{ old('hora_fechamento') ?? $horario->hora_fechamento }}"
                                                required>
                                         @error('hora_fechamento')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -137,7 +141,7 @@
                                       id="observacoes" 
                                       name="observacoes" 
                                       rows="3"
-                                      placeholder="Observações sobre este horário (opcional)">{{ old('observacoes') }}</textarea>
+                                      placeholder="Observações sobre este horário (opcional)">{{ old('observacoes') ?? $horario->observacoes }}</textarea>
                             @error('observacoes')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -150,7 +154,7 @@
                                 <i class="fas fa-times"></i> Cancelar
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Salvar Horário
+                                <i class="fas fa-save"></i> Atualizar Horário
                             </button>
                         </div>
                     </form>
@@ -158,32 +162,34 @@
             </div>
         </div>
 
-        <!-- Ajuda -->
+        <!-- Informações do Horário -->
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
                     <h6 class="mb-0">
-                        <i class="fas fa-question-circle"></i> Ajuda
+                        <i class="fas fa-info-circle"></i> Informações
                     </h6>
                 </div>
                 <div class="card-body">
-                    <h6>Como configurar:</h6>
-                    <ol class="small">
-                        <li>Escolha o <strong>dia da semana</strong></li>
-                        <li>Selecione o <strong>sistema</strong> (TODOS é o mais comum)</li>
-                        <li>Se a empresa funciona, defina os <strong>horários</strong></li>
-                        <li>Se não funciona, marque como <strong>Fechado</strong></li>
-                    </ol>
+                    <h6>Horário Atual:</h6>
+                    <p class="text-muted">
+                        <strong>{{ $horario->nome_dia_semana }}</strong><br>
+                        Sistema: {{ $horario->sistema }}<br>
+                        Status: {{ $horario->fechado ? 'Fechado' : 'Aberto' }}<br>
+                        @if(!$horario->fechado)
+                            Horário: {{ $horario->horario_formatado }}
+                        @endif
+                    </p>
 
                     <hr>
 
-                    <h6>Sistemas:</h6>
-                    <ul class="small">
-                        <li><strong>TODOS:</strong> Horário geral da empresa</li>
-                        <li><strong>PDV:</strong> Horário do atendimento presencial</li>
-                        <li><strong>ONLINE:</strong> Horário da loja virtual</li>
-                        <li><strong>FINANCEIRO:</strong> Horário do departamento financeiro</li>
-                    </ul>
+                    <h6>Últimas Alterações:</h6>
+                    <small class="text-muted">
+                        Criado em: {{ $horario->created_at->format('d/m/Y H:i') }}<br>
+                        @if($horario->updated_at != $horario->created_at)
+                            Atualizado em: {{ $horario->updated_at->format('d/m/Y H:i') }}
+                        @endif
+                    </small>
                 </div>
             </div>
         </div>

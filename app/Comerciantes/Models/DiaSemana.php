@@ -24,10 +24,11 @@ class DiaSemana extends Model
 
     // ============= RELACIONAMENTOS =============
 
-    public function horarios(): HasMany
-    {
-        return $this->hasMany(HorarioFuncionamento::class, 'dia_semana_id');
-    }
+    // HORÁRIOS REMOVIDOS TEMPORARIAMENTE
+    // public function horarios(): HasMany
+    // {
+    //     return $this->hasMany(HorarioFuncionamento::class, 'dia_semana_id');
+    // }
 
     // ============= SCOPES =============
 

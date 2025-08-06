@@ -168,6 +168,14 @@ class Empresa extends Model
         return $this->hasMany(\App\Models\User::class, 'empresa_id');
     }
 
+    /**
+     * Relacionamento com horários de funcionamento
+     */
+    public function horarios()
+    {
+        return $this->hasMany(HorarioFuncionamento::class);
+    }
+
     // Para estatísticas (se tiver tabelas relacionadas)
     public function getQuantidadeUsuariosAttribute()
     {

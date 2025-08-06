@@ -18,6 +18,17 @@ Route::get('/teste-layout', function () {
     return view('teste-layout');
 })->name('teste.layout');
 
+// ROTA DE TESTE - DEBUG HORÁRIOS (sem autenticação)
+Route::get('/teste-horarios-debug/{empresa}', function ($empresa) {
+    return response("
+        <h1>TESTE DEBUG - HORÁRIOS</h1>
+        <p>Empresa: $empresa</p>
+        <p>Se você está vendo esta mensagem, a rota funciona!</p>
+        <p>Timestamp: " . now() . "</p>
+        <p><a href='/comerciantes/empresas/$empresa/horarios'>Tentar rota original</a></p>
+    ");
+})->name('teste.horarios.debug');
+
 // ROTA DE TESTE - Gráfico
 Route::get('/teste-grafico', function () {
     return view('admin.notificacoes.teste-grafico');

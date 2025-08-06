@@ -243,6 +243,8 @@
                                 </a>
                             </li>
 
+                            {{-- HORÁRIOS REMOVIDOS TEMPORARIAMENTE --}}
+                            {{-- 
                             <li class="nav-item">
                                 <a class="nav-link {{ request()->routeIs('comerciantes.horarios.*') ? 'active' : '' }}" 
                                    href="{{ route('comerciantes.empresas.index') }}">
@@ -250,6 +252,7 @@
                                     Horários de Funcionamento
                                 </a>
                             </li>
+                            --}}
 
                             <hr class="border-light border-opacity-25 my-3">
                             

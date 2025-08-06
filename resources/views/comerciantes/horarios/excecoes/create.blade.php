@@ -1,6 +1,6 @@
 @extends('comerciantes.layouts.app')
 
-@section('title', 'Novo Horário Padrão')
+@section('title', 'Nova Exceção de Horário')
 
 @section('content')
 <div class="container-fluid">
@@ -10,20 +10,20 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h1 class="h3 mb-0">
-                        <i class="fas fa-plus text-primary"></i>
-                        Novo Horário Padrão
+                        <i class="fas fa-plus text-warning"></i>
+                        Nova Exceção de Horário
                     </h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ route('comerciantes.dashboard') }}">Dashboard</a></li>
                             <li class="breadcrumb-item"><a href="{{ route('comerciantes.horarios.index', $empresaId) }}">Horários</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('comerciantes.horarios.padrao.index', $empresaId) }}">Padrão</a></li>
-                            <li class="breadcrumb-item active">Novo</li>
+                            <li class="breadcrumb-item"><a href="{{ route('comerciantes.horarios.excecoes.index', $empresaId) }}">Exceções</a></li>
+                            <li class="breadcrumb-item active">Nova</li>
                         </ol>
                     </nav>
                 </div>
                 <div>
-                    <a href="{{ route('comerciantes.horarios.padrao.index', $empresaId) }}" 
+                    <a href="{{ route('comerciantes.horarios.excecoes.index', $empresaId) }}" 
                        class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Voltar
                     </a>
@@ -38,28 +38,29 @@
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-calendar-week"></i> Configurar Horário
+                        <i class="fas fa-calendar-alt"></i> Configurar Exceção
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('comerciantes.horarios.padrao.store', $empresaId) }}">
+                    <form method="POST" action="{{ route('comerciantes.horarios.excecoes.store', $empresaId) }}">
                         @csrf
 
-                        <!-- Dia da Semana -->
+                        <!-- Data Específica -->
                         <div class="form-group mb-3">
-                            <label for="dia_semana" class="form-label required">Dia da Semana</label>
-                            <select class="form-control @error('dia_semana') is-invalid @enderror" 
-                                    id="dia_semana" name="dia_semana" required>
-                                <option value="">Selecione o dia da semana</option>
-                                @foreach($diasSemana as $numero => $nome)
-                                    <option value="{{ $numero }}" {{ old('dia_semana') == $numero ? 'selected' : '' }}>
-                                        {{ $nome }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('dia_semana')
+                            <label for="data_especifica" class="form-label required">Data da Exceção</label>
+                            <input type="date" 
+                                   class="form-control @error('data_especifica') is-invalid @enderror" 
+                                   id="data_especifica" 
+                                   name="data_especifica" 
+                                   value="{{ old('data_especifica') }}"
+                                   min="{{ now()->toDateString() }}"
+                                   required>
+                            @error('data_especifica')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                            <small class="form-text text-muted">
+                                Selecione a data específica para esta exceção
+                            </small>
                         </div>
 
                         <!-- Sistema -->
@@ -88,11 +89,11 @@
                                 <input class="form-check-input" type="checkbox" id="fechado" name="fechado" 
                                        onchange="toggleHorarios()" {{ old('fechado') ? 'checked' : '' }}>
                                 <label class="form-check-label" for="fechado">
-                                    Empresa fechada neste dia
+                                    Empresa fechada nesta data
                                 </label>
                             </div>
                             <small class="form-text text-muted">
-                                Marque se a empresa não funciona neste dia
+                                Marque se a empresa não funcionará nesta data (ex: feriado)
                             </small>
                         </div>
 
@@ -137,7 +138,7 @@
                                       id="observacoes" 
                                       name="observacoes" 
                                       rows="3"
-                                      placeholder="Observações sobre este horário (opcional)">{{ old('observacoes') }}</textarea>
+                                      placeholder="Motivo da exceção (ex: Natal, Ano Novo, Evento especial, etc.)">{{ old('observacoes') }}</textarea>
                             @error('observacoes')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -145,12 +146,12 @@
 
                         <!-- Botões -->
                         <div class="d-flex justify-content-between">
-                            <a href="{{ route('comerciantes.horarios.padrao.index', $empresaId) }}" 
+                            <a href="{{ route('comerciantes.horarios.excecoes.index', $empresaId) }}" 
                                class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Cancelar
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Salvar Horário
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save"></i> Salvar Exceção
                             </button>
                         </div>
                     </form>
@@ -163,27 +164,57 @@
             <div class="card">
                 <div class="card-header">
                     <h6 class="mb-0">
-                        <i class="fas fa-question-circle"></i> Ajuda
+                        <i class="fas fa-question-circle"></i> Sobre Exceções
                     </h6>
                 </div>
                 <div class="card-body">
-                    <h6>Como configurar:</h6>
-                    <ol class="small">
-                        <li>Escolha o <strong>dia da semana</strong></li>
-                        <li>Selecione o <strong>sistema</strong> (TODOS é o mais comum)</li>
-                        <li>Se a empresa funciona, defina os <strong>horários</strong></li>
-                        <li>Se não funciona, marque como <strong>Fechado</strong></li>
-                    </ol>
+                    <h6>O que são exceções?</h6>
+                    <p class="small text-muted">
+                        Exceções são horários especiais que <strong>substituem</strong> temporariamente 
+                        os horários padrão em datas específicas.
+                    </p>
 
-                    <hr>
-
-                    <h6>Sistemas:</h6>
+                    <h6>Exemplos de uso:</h6>
                     <ul class="small">
-                        <li><strong>TODOS:</strong> Horário geral da empresa</li>
-                        <li><strong>PDV:</strong> Horário do atendimento presencial</li>
-                        <li><strong>ONLINE:</strong> Horário da loja virtual</li>
-                        <li><strong>FINANCEIRO:</strong> Horário do departamento financeiro</li>
+                        <li><strong>Feriados:</strong> Natal, Ano Novo, etc.</li>
+                        <li><strong>Eventos:</strong> Black Friday com horário estendido</li>
+                        <li><strong>Manutenção:</strong> Fechamento para reformas</li>
+                        <li><strong>Horários especiais:</strong> Finais de semana diferenciados</li>
                     </ul>
+
+                    <div class="alert alert-info small">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Importante:</strong> As exceções sempre têm prioridade sobre os horários padrão.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exemplos de Exceções Comuns -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-calendar"></i> Exemplos Comuns
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="small">
+                        <strong>Natal (25/12):</strong><br>
+                        Sistema: TODOS<br>
+                        Status: Fechado<br>
+                        Obs: Feriado Nacional
+                        <hr>
+                        
+                        <strong>Black Friday:</strong><br>
+                        Sistema: ONLINE<br>
+                        Horário: 00:00 às 23:59<br>
+                        Obs: Promoção especial
+                        <hr>
+                        
+                        <strong>Véspera de Ano Novo:</strong><br>
+                        Sistema: TODOS<br>
+                        Horário: 08:00 às 14:00<br>
+                        Obs: Meio expediente
+                    </div>
                 </div>
             </div>
         </div>
