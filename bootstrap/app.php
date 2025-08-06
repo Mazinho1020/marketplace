@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.simple' => \App\Http\Middleware\AuthMiddleware::class,
             'auth.comerciante' => \App\Http\Middleware\ComercianteAuthMiddleware::class,
             'permission' => \App\Http\Middleware\CheckPermission::class,
+            'auto.permission' => \App\Http\Middleware\AutoPermissionCheck::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

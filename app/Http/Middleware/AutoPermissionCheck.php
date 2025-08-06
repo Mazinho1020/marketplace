@@ -107,12 +107,12 @@ class AutoPermissionCheck
 
         // Mapear rotas para recursos
         $resourceMap = [
-            'empresas' => 'empresa',
-            'usuarios' => 'usuario',
-            'marcas' => 'marca',
+            'empresas' => 'empresas',
+            'usuarios' => 'usuarios',
+            'marcas' => 'marcas',
             'dashboard' => 'dashboard',
-            'relatorios' => 'relatorio',
-            'configuracoes' => 'configuracao',
+            'relatorios' => 'relatorios',
+            'configuracoes' => 'configuracoes',
         ];
 
         foreach ($resourceMap as $route => $resource) {

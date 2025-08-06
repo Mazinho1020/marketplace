@@ -48,14 +48,14 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-8 mb-3">
-                            <label for="nome_fantasia" class="form-label">Nome da Empresa <span class="text-danger">*</span></label>
+                            <label for="razao_social" class="form-label">Razão Social <span class="text-danger">*</span></label>
                             <input type="text" 
-                                   class="form-control @error('nome_fantasia') is-invalid @enderror" 
-                                   id="nome_fantasia" 
-                                   name="nome_fantasia" 
-                                   value="{{ old('nome_fantasia', $empresa->nome_fantasia) }}" 
+                                   class="form-control @error('razao_social') is-invalid @enderror" 
+                                   id="razao_social" 
+                                   name="razao_social" 
+                                   value="{{ old('razao_social', $empresa->razao_social) }}" 
                                    required>
-                            @error('nome_fantasia')
+                            @error('razao_social')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -103,23 +103,19 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="slug" class="form-label">URL Amigável <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text">{{ url('/') }}/loja/</span>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="inscricao_estadual" class="form-label">Inscrição Estadual</label>
                             <input type="text" 
-                                   class="form-control @error('slug') is-invalid @enderror" 
-                                   id="slug" 
-                                   name="slug" 
-                                   value="{{ old('slug', $empresa->slug) }}" 
-                                   required>
+                                   class="form-control @error('inscricao_estadual') is-invalid @enderror" 
+                                   id="inscricao_estadual" 
+                                   name="inscricao_estadual" 
+                                   value="{{ old('inscricao_estadual', $empresa->inscricao_estadual) }}"
+                                   placeholder="000.000.000.000">
+                            @error('inscricao_estadual')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div class="form-text">URL única para sua loja online. Use apenas letras, números e hífens.</div>
-                        @error('slug')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
                     </div>
                 </div>
             </div>
@@ -135,38 +131,38 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <label for="endereco_cep" class="form-label">CEP</label>
+                            <label for="cep" class="form-label">CEP</label>
                             <input type="text" 
-                                   class="form-control @error('endereco_cep') is-invalid @enderror" 
-                                   id="endereco_cep" 
-                                   name="endereco_cep" 
-                                   value="{{ old('endereco_cep', $empresa->endereco_cep) }}"
+                                   class="form-control @error('cep') is-invalid @enderror" 
+                                   id="cep" 
+                                   name="cep" 
+                                   value="{{ old('cep', $empresa->cep) }}"
                                    placeholder="00000-000">
-                            @error('endereco_cep')
+                            @error('cep')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="endereco_logradouro" class="form-label">Logradouro</label>
+                            <label for="logradouro" class="form-label">Logradouro</label>
                             <input type="text" 
-                                   class="form-control @error('endereco_logradouro') is-invalid @enderror" 
-                                   id="endereco_logradouro" 
-                                   name="endereco_logradouro" 
-                                   value="{{ old('endereco_logradouro', $empresa->endereco_logradouro) }}"
+                                   class="form-control @error('logradouro') is-invalid @enderror" 
+                                   id="logradouro" 
+                                   name="logradouro" 
+                                   value="{{ old('logradouro', $empresa->logradouro) }}"
                                    placeholder="Rua, Avenida, etc.">
-                            @error('endereco_logradouro')
+                            @error('logradouro')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label for="endereco_numero" class="form-label">Número</label>
+                            <label for="numero" class="form-label">Número</label>
                             <input type="text" 
-                                   class="form-control @error('endereco_numero') is-invalid @enderror" 
-                                   id="endereco_numero" 
-                                   name="endereco_numero" 
-                                   value="{{ old('endereco_numero', $empresa->endereco_numero) }}"
+                                   class="form-control @error('numero') is-invalid @enderror" 
+                                   id="numero" 
+                                   name="numero" 
+                                   value="{{ old('numero', $empresa->numero) }}"
                                    placeholder="123">
-                            @error('endereco_numero')
+                            @error('numero')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -174,25 +170,25 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="endereco_complemento" class="form-label">Complemento</label>
+                            <label for="complemento" class="form-label">Complemento</label>
                             <input type="text" 
-                                   class="form-control @error('endereco_complemento') is-invalid @enderror" 
-                                   id="endereco_complemento" 
-                                   name="endereco_complemento" 
-                                   value="{{ old('endereco_complemento', $empresa->endereco_complemento) }}"
+                                   class="form-control @error('complemento') is-invalid @enderror" 
+                                   id="complemento" 
+                                   name="complemento" 
+                                   value="{{ old('complemento', $empresa->complemento) }}"
                                    placeholder="Apartamento, Sala, etc.">
-                            @error('endereco_complemento')
+                            @error('complemento')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="endereco_bairro" class="form-label">Bairro</label>
+                            <label for="bairro" class="form-label">Bairro</label>
                             <input type="text" 
-                                   class="form-control @error('endereco_bairro') is-invalid @enderror" 
-                                   id="endereco_bairro" 
-                                   name="endereco_bairro" 
-                                   value="{{ old('endereco_bairro', $empresa->endereco_bairro) }}">
-                            @error('endereco_bairro')
+                                   class="form-control @error('bairro') is-invalid @enderror" 
+                                   id="bairro" 
+                                   name="bairro" 
+                                   value="{{ old('bairro', $empresa->bairro) }}">
+                            @error('bairro')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -200,49 +196,49 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="endereco_cidade" class="form-label">Cidade</label>
+                            <label for="cidade" class="form-label">Cidade</label>
                             <input type="text" 
-                                   class="form-control @error('endereco_cidade') is-invalid @enderror" 
-                                   id="endereco_cidade" 
-                                   name="endereco_cidade" 
-                                   value="{{ old('endereco_cidade', $empresa->endereco_cidade) }}">
-                            @error('endereco_cidade')
+                                   class="form-control @error('cidade') is-invalid @enderror" 
+                                   id="cidade" 
+                                   name="cidade" 
+                                   value="{{ old('cidade', $empresa->cidade) }}">
+                            @error('cidade')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="endereco_estado" class="form-label">Estado</label>
-                            <select class="form-select @error('endereco_estado') is-invalid @enderror" id="endereco_estado" name="endereco_estado">
+                            <label for="uf" class="form-label">Estado</label>
+                            <select class="form-select @error('uf') is-invalid @enderror" id="uf" name="uf">
                                 <option value="">Selecione o estado</option>
-                                <option value="AC" {{ old('endereco_estado', $empresa->endereco_estado) == 'AC' ? 'selected' : '' }}>Acre</option>
-                                <option value="AL" {{ old('endereco_estado', $empresa->endereco_estado) == 'AL' ? 'selected' : '' }}>Alagoas</option>
-                                <option value="AP" {{ old('endereco_estado', $empresa->endereco_estado) == 'AP' ? 'selected' : '' }}>Amapá</option>
-                                <option value="AM" {{ old('endereco_estado', $empresa->endereco_estado) == 'AM' ? 'selected' : '' }}>Amazonas</option>
-                                <option value="BA" {{ old('endereco_estado', $empresa->endereco_estado) == 'BA' ? 'selected' : '' }}>Bahia</option>
-                                <option value="CE" {{ old('endereco_estado', $empresa->endereco_estado) == 'CE' ? 'selected' : '' }}>Ceará</option>
-                                <option value="DF" {{ old('endereco_estado', $empresa->endereco_estado) == 'DF' ? 'selected' : '' }}>Distrito Federal</option>
-                                <option value="ES" {{ old('endereco_estado', $empresa->endereco_estado) == 'ES' ? 'selected' : '' }}>Espírito Santo</option>
-                                <option value="GO" {{ old('endereco_estado', $empresa->endereco_estado) == 'GO' ? 'selected' : '' }}>Goiás</option>
-                                <option value="MA" {{ old('endereco_estado', $empresa->endereco_estado) == 'MA' ? 'selected' : '' }}>Maranhão</option>
-                                <option value="MT" {{ old('endereco_estado', $empresa->endereco_estado) == 'MT' ? 'selected' : '' }}>Mato Grosso</option>
-                                <option value="MS" {{ old('endereco_estado', $empresa->endereco_estado) == 'MS' ? 'selected' : '' }}>Mato Grosso do Sul</option>
-                                <option value="MG" {{ old('endereco_estado', $empresa->endereco_estado) == 'MG' ? 'selected' : '' }}>Minas Gerais</option>
-                                <option value="PA" {{ old('endereco_estado', $empresa->endereco_estado) == 'PA' ? 'selected' : '' }}>Pará</option>
-                                <option value="PB" {{ old('endereco_estado', $empresa->endereco_estado) == 'PB' ? 'selected' : '' }}>Paraíba</option>
-                                <option value="PR" {{ old('endereco_estado', $empresa->endereco_estado) == 'PR' ? 'selected' : '' }}>Paraná</option>
-                                <option value="PE" {{ old('endereco_estado', $empresa->endereco_estado) == 'PE' ? 'selected' : '' }}>Pernambuco</option>
-                                <option value="PI" {{ old('endereco_estado', $empresa->endereco_estado) == 'PI' ? 'selected' : '' }}>Piauí</option>
-                                <option value="RJ" {{ old('endereco_estado', $empresa->endereco_estado) == 'RJ' ? 'selected' : '' }}>Rio de Janeiro</option>
-                                <option value="RN" {{ old('endereco_estado', $empresa->endereco_estado) == 'RN' ? 'selected' : '' }}>Rio Grande do Norte</option>
-                                <option value="RS" {{ old('endereco_estado', $empresa->endereco_estado) == 'RS' ? 'selected' : '' }}>Rio Grande do Sul</option>
-                                <option value="RO" {{ old('endereco_estado', $empresa->endereco_estado) == 'RO' ? 'selected' : '' }}>Rondônia</option>
-                                <option value="RR" {{ old('endereco_estado', $empresa->endereco_estado) == 'RR' ? 'selected' : '' }}>Roraima</option>
-                                <option value="SC" {{ old('endereco_estado', $empresa->endereco_estado) == 'SC' ? 'selected' : '' }}>Santa Catarina</option>
-                                <option value="SP" {{ old('endereco_estado', $empresa->endereco_estado) == 'SP' ? 'selected' : '' }}>São Paulo</option>
-                                <option value="SE" {{ old('endereco_estado', $empresa->endereco_estado) == 'SE' ? 'selected' : '' }}>Sergipe</option>
-                                <option value="TO" {{ old('endereco_estado', $empresa->endereco_estado) == 'TO' ? 'selected' : '' }}>Tocantins</option>
+                                <option value="AC" {{ old('uf', $empresa->uf) == 'AC' ? 'selected' : '' }}>Acre</option>
+                                <option value="AL" {{ old('uf', $empresa->uf) == 'AL' ? 'selected' : '' }}>Alagoas</option>
+                                <option value="AP" {{ old('uf', $empresa->uf) == 'AP' ? 'selected' : '' }}>Amapá</option>
+                                <option value="AM" {{ old('uf', $empresa->uf) == 'AM' ? 'selected' : '' }}>Amazonas</option>
+                                <option value="BA" {{ old('uf', $empresa->uf) == 'BA' ? 'selected' : '' }}>Bahia</option>
+                                <option value="CE" {{ old('uf', $empresa->uf) == 'CE' ? 'selected' : '' }}>Ceará</option>
+                                <option value="DF" {{ old('uf', $empresa->uf) == 'DF' ? 'selected' : '' }}>Distrito Federal</option>
+                                <option value="ES" {{ old('uf', $empresa->uf) == 'ES' ? 'selected' : '' }}>Espírito Santo</option>
+                                <option value="GO" {{ old('uf', $empresa->uf) == 'GO' ? 'selected' : '' }}>Goiás</option>
+                                <option value="MA" {{ old('uf', $empresa->uf) == 'MA' ? 'selected' : '' }}>Maranhão</option>
+                                <option value="MT" {{ old('uf', $empresa->uf) == 'MT' ? 'selected' : '' }}>Mato Grosso</option>
+                                <option value="MS" {{ old('uf', $empresa->uf) == 'MS' ? 'selected' : '' }}>Mato Grosso do Sul</option>
+                                <option value="MG" {{ old('uf', $empresa->uf) == 'MG' ? 'selected' : '' }}>Minas Gerais</option>
+                                <option value="PA" {{ old('uf', $empresa->uf) == 'PA' ? 'selected' : '' }}>Pará</option>
+                                <option value="PB" {{ old('uf', $empresa->uf) == 'PB' ? 'selected' : '' }}>Paraíba</option>
+                                <option value="PR" {{ old('uf', $empresa->uf) == 'PR' ? 'selected' : '' }}>Paraná</option>
+                                <option value="PE" {{ old('uf', $empresa->uf) == 'PE' ? 'selected' : '' }}>Pernambuco</option>
+                                <option value="PI" {{ old('uf', $empresa->uf) == 'PI' ? 'selected' : '' }}>Piauí</option>
+                                <option value="RJ" {{ old('uf', $empresa->uf) == 'RJ' ? 'selected' : '' }}>Rio de Janeiro</option>
+                                <option value="RN" {{ old('uf', $empresa->uf) == 'RN' ? 'selected' : '' }}>Rio Grande do Norte</option>
+                                <option value="RS" {{ old('uf', $empresa->uf) == 'RS' ? 'selected' : '' }}>Rio Grande do Sul</option>
+                                <option value="RO" {{ old('uf', $empresa->uf) == 'RO' ? 'selected' : '' }}>Rondônia</option>
+                                <option value="RR" {{ old('uf', $empresa->uf) == 'RR' ? 'selected' : '' }}>Roraima</option>
+                                <option value="SC" {{ old('uf', $empresa->uf) == 'SC' ? 'selected' : '' }}>Santa Catarina</option>
+                                <option value="SP" {{ old('uf', $empresa->uf) == 'SP' ? 'selected' : '' }}>São Paulo</option>
+                                <option value="SE" {{ old('uf', $empresa->uf) == 'SE' ? 'selected' : '' }}>Sergipe</option>
+                                <option value="TO" {{ old('uf', $empresa->uf) == 'TO' ? 'selected' : '' }}>Tocantins</option>
                             </select>
-                            @error('endereco_estado')
+                            @error('uf')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -272,6 +268,19 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="celular" class="form-label">Celular</label>
+                            <input type="text" 
+                                   class="form-control @error('celular') is-invalid @enderror" 
+                                   id="celular" 
+                                   name="celular" 
+                                   value="{{ old('celular', $empresa->celular) }}"
+                                   placeholder="(00) 90000-0000">
+                            @error('celular')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
                         <div class="col-md-4 mb-3">
                             <label for="email" class="form-label">E-mail</label>
                             <input type="email" 
@@ -285,14 +294,14 @@
                             @enderror
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="website" class="form-label">Website</label>
+                            <label for="site" class="form-label">Website</label>
                             <input type="url" 
-                                   class="form-control @error('website') is-invalid @enderror" 
-                                   id="website" 
-                                   name="website" 
-                                   value="{{ old('website', $empresa->website) }}"
+                                   class="form-control @error('site') is-invalid @enderror" 
+                                   id="site" 
+                                   name="site" 
+                                   value="{{ old('site', $empresa->site) }}"
                                    placeholder="https://www.empresa.com">
-                            @error('website')
+                            @error('site')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -315,9 +324,10 @@
                     <div class="mb-3">
                         <label for="status" class="form-label">Status</label>
                         <select class="form-select @error('status') is-invalid @enderror" id="status" name="status">
-                            <option value="ativa" {{ old('status', $empresa->status) == 'ativa' ? 'selected' : '' }}>Ativa</option>
-                            <option value="inativa" {{ old('status', $empresa->status) == 'inativa' ? 'selected' : '' }}>Inativa</option>
-                            <option value="suspensa" {{ old('status', $empresa->status) == 'suspensa' ? 'selected' : '' }}>Suspensa</option>
+                            <option value="ativo" {{ old('status', $empresa->status) == 'ativo' ? 'selected' : '' }}>Ativo</option>
+                            <option value="inativo" {{ old('status', $empresa->status) == 'inativo' ? 'selected' : '' }}>Inativo</option>
+                            <option value="suspenso" {{ old('status', $empresa->status) == 'suspenso' ? 'selected' : '' }}>Suspenso</option>
+                            <option value="bloqueado" {{ old('status', $empresa->status) == 'bloqueado' ? 'selected' : '' }}>Bloqueado</option>
                         </select>
                         @error('status')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -443,21 +453,6 @@
     }, false);
 })();
 
-// Auto-gerar slug a partir do nome
-document.getElementById('nome').addEventListener('input', function() {
-    const nome = this.value;
-    const slug = nome
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim('-');
-    
-    document.getElementById('slug').value = slug;
-});
-
 // Máscara para CNPJ
 document.getElementById('cnpj').addEventListener('input', function() {
     let value = this.value.replace(/\D/g, '');
@@ -475,6 +470,30 @@ document.getElementById('telefone').addEventListener('input', function() {
     let value = this.value.replace(/\D/g, '');
     if (value.length <= 11) {
         if (value.length <= 10) {
+            value = value.replace(/^(\d{2})(\d{4})(\d)/, '($1) $2-$3');
+        } else {
+            value = value.replace(/^(\d{2})(\d{5})(\d)/, '($1) $2-$3');
+        }
+        this.value = value;
+    }
+});
+
+// Máscara para celular
+document.getElementById('celular').addEventListener('input', function() {
+    let value = this.value.replace(/\D/g, '');
+    if (value.length <= 11) {
+        if (value.length <= 10) {
+            value = value.replace(/^(\d{2})(\d{4})(\d)/, '($1) $2-$3');
+        } else {
+            value = value.replace(/^(\d{2})(\d{5})(\d)/, '($1) $2-$3');
+        }
+        this.value = value;
+    }
+});
+document.getElementById('telefone').addEventListener('input', function() {
+    let value = this.value.replace(/\D/g, '');
+    if (value.length <= 11) {
+        if (value.length <= 10) {
             value = value.replace(/^(\d{2})(\d)/, '($1) $2');
             value = value.replace(/(\d{4})(\d)/, '$1-$2');
         } else {
@@ -486,7 +505,7 @@ document.getElementById('telefone').addEventListener('input', function() {
 });
 
 // Máscara para CEP
-document.getElementById('endereco_cep').addEventListener('input', function() {
+document.getElementById('cep').addEventListener('input', function() {
     let value = this.value.replace(/\D/g, '');
     if (value.length <= 8) {
         value = value.replace(/^(\d{5})(\d)/, '$1-$2');
@@ -495,18 +514,18 @@ document.getElementById('endereco_cep').addEventListener('input', function() {
 });
 
 // Buscar endereço pelo CEP
-document.getElementById('endereco_cep').addEventListener('blur', function() {
+document.getElementById('cep').addEventListener('blur', function() {
     const cep = this.value.replace(/\D/g, '');
     if (cep.length === 8) {
         fetch(`https://viacep.com.br/ws/${cep}/json/`)
             .then(response => response.json())
             .then(data => {
                 if (!data.erro) {
-                    document.getElementById('endereco_logradouro').value = data.logradouro;
-                    document.getElementById('endereco_bairro').value = data.bairro;
-                    document.getElementById('endereco_cidade').value = data.localidade;
-                    document.getElementById('endereco_estado').value = data.uf;
-                    document.getElementById('endereco_numero').focus();
+                    document.getElementById('logradouro').value = data.logradouro;
+                    document.getElementById('bairro').value = data.bairro;
+                    document.getElementById('cidade').value = data.localidade;
+                    document.getElementById('uf').value = data.uf;
+                    document.getElementById('numero').focus();
                 }
             })
             .catch(error => console.log('Erro ao buscar CEP:', error));

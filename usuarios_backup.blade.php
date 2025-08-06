@@ -1,4 +1,4 @@
-<?php
+@php
     // Função helper para obter o nome do usuário de forma segura
     function getNomeUsuario($usuario) {
         if (!$usuario) return 'Nome não disponível';
@@ -20,45 +20,27 @@
         $nome = getNomeUsuario($usuario);
         return strtoupper(substr($nome, 0, 1));
     }
-?>
+@endphp
 
+@extends('comerciantes.layouts.app')
 
+@section('title', 'Usuários - ' . ($empresa->nome_fantasia ?: $empresa->razao_social))
 
-<?php $__env->startSection('title', 'Usuários - ' . ($empresa->nome_fantasia ?: $empresa->razao_social)); ?>
-
-<?php $__env->startSection('content'); ?>
+@section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="h3 mb-0">Usuários</h1>
-        <p class="text-muted mb-0"><?php echo e($empresa->nome_fantasia ?: $empresa->razao_social); ?></p>
+        <p class="text-muted mb-0">{{ $empresa->nome_fantasia ?: $empresa->razao_social }}</p>
     </div>
     <div class="d-flex gap-2">
-        <a href="<?php echo e(route('comerciantes.empresas.show', $empresa)); ?>" class="btn btn-outline-secondary">
+        <a href="{{ route('comerciantes.empresas.show', $empresa) }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i>
             Voltar à Empresa
         </a>
-        <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <i class="fas fa-user-plus me-1"></i>
-                Gerenciar Usuários
-            </button>
-            <ul class="dropdown-menu">
-                <li>
-                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalVincularUsuario">
-                        <i class="fas fa-link me-1 text-info"></i>
-                        Vincular Usuário Existente
-                        <br><small class="text-muted">Para usuários já cadastrados no sistema</small>
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCriarUsuario">
-                        <i class="fas fa-plus me-1 text-success"></i>
-                        Criar Novo Usuário
-                        <br><small class="text-muted">Para criar um usuário completamente novo</small>
-                    </a>
-                </li>
-            </ul>
-        </div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAdicionarUsuario">
+            <i class="fas fa-plus me-1"></i>
+            Adicionar Usuário
+        </button>
     </div>
 </div>
 
@@ -69,31 +51,28 @@
             <div class="col-md-8">
                 <h6 class="card-title mb-3">
                     <i class="fas fa-building text-primary me-2"></i>
-                    <?php echo e($empresa->nome_fantasia ?: $empresa->razao_social); ?>
-
+                    {{ $empresa->nome_fantasia ?: $empresa->razao_social }}
                 </h6>
                 <div class="row">
                     <div class="col-sm-6">
                         <small class="text-muted">Marca:</small><br>
-                        <span class="fw-medium"><?php echo e($empresa->marca?->nome ?? 'Sem marca'); ?></span>
+                        <span class="fw-medium">{{ $empresa->marca?->nome ?? 'Sem marca' }}</span>
                     </div>
                     <div class="col-sm-6">
                         <small class="text-muted">Proprietário:</small><br>
                         <span class="fw-medium">
-                            <?php if($empresa->proprietario): ?>
-                                <?php echo e(getNomeUsuario($empresa->proprietario)); ?>
-
-                            <?php else: ?>
+                            @if($empresa->proprietario)
+                                {{ getNomeUsuario($empresa->proprietario) }}
+                            @else
                                 Sem proprietário
-                            <?php endif; ?>
+                            @endif
                         </span>
                     </div>
                 </div>
             </div>
             <div class="col-md-4 text-end">
-                <div class="badge bg-<?php echo e($empresa->status === 'ativo' ? 'success' : 'secondary'); ?> fs-6 px-3 py-2">
-                    <?php echo e(ucfirst($empresa->status)); ?>
-
+                <div class="badge bg-{{ $empresa->status === 'ativa' ? 'success' : 'secondary' }} fs-6 px-3 py-2">
+                    {{ ucfirst($empresa->status) }}
                 </div>
             </div>
         </div>
@@ -105,46 +84,34 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h6 class="card-title mb-0">
             <i class="fas fa-users me-2"></i>
-            Usuários Vinculados (<?php echo e($empresa->usuariosVinculados ? $empresa->usuariosVinculados->count() : 0); ?>)
+            Usuários Vinculados ({{ $empresa->usuariosVinculados ? $empresa->usuariosVinculados->count() : 0 }})
         </h6>
-        <div class="d-flex gap-2 flex-wrap">
-            <div class="dropdown">
-                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-user-plus me-1"></i>
-                    Adicionar Usuário
-                </button>
-                <ul class="dropdown-menu">
-                    <li>
-                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalVincularUsuario">
-                            <i class="fas fa-link me-1 text-info"></i>
-                            Vincular Existente
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCriarUsuario">
-                            <i class="fas fa-plus me-1 text-success"></i>
-                            Criar Novo
-                        </a>
-                    </li>
-                </ul>
-            </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAdicionarUsuario">
+                <i class="fas fa-user-plus me-1"></i>
+                Vincular Usuário
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCriarUsuario">
+                <i class="fas fa-plus me-1"></i>
+                Criar Novo
+            </button>
         </div>
     </div>
     <div class="card-body p-0">
-        
-        <?php if(request()->has('debug') || !isset($empresa->usuariosVinculados)): ?>
+        {{-- DEBUG: Mostrar informações quando há problemas --}}
+        @if(request()->has('debug') || !isset($empresa->usuariosVinculados))
             <div class="alert alert-info m-3">
                 <h6>DEBUG INFO:</h6>
-                <p><strong>Empresa ID:</strong> <?php echo e($empresa->id ?? 'N/A'); ?></p>
-                <p><strong>Nome:</strong> <?php echo e($empresa->nome_fantasia ?? 'N/A'); ?></p>
-                <p><strong>usuariosVinculados definido:</strong> <?php echo e(isset($empresa->usuariosVinculados) ? 'SIM' : 'NÃO'); ?></p>
-                <?php if(isset($empresa->usuariosVinculados)): ?>
-                    <p><strong>Tipo:</strong> <?php echo e(get_class($empresa->usuariosVinculados)); ?></p>
-                    <p><strong>Count:</strong> <?php echo e($empresa->usuariosVinculados->count()); ?></p>
-                <?php endif; ?>
-                <p><strong>Query SQL:</strong> <?php echo e($empresa->usuariosVinculados()->toSql() ?? 'N/A'); ?></p>
+                <p><strong>Empresa ID:</strong> {{ $empresa->id ?? 'N/A' }}</p>
+                <p><strong>Nome:</strong> {{ $empresa->nome_fantasia ?? 'N/A' }}</p>
+                <p><strong>usuariosVinculados definido:</strong> {{ isset($empresa->usuariosVinculados) ? 'SIM' : 'NÃO' }}</p>
+                @if(isset($empresa->usuariosVinculados))
+                    <p><strong>Tipo:</strong> {{ get_class($empresa->usuariosVinculados) }}</p>
+                    <p><strong>Count:</strong> {{ $empresa->usuariosVinculados->count() }}</p>
+                @endif
+                <p><strong>Query SQL:</strong> {{ $empresa->usuariosVinculados()->toSql() ?? 'N/A' }}</p>
             </div>
-        <?php endif; ?>
+        @endif
 
         <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -158,52 +125,49 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if(isset($empresa->usuariosVinculados) && is_object($empresa->usuariosVinculados)): ?>
-                        <?php $__empty_1 = true; $__currentLoopData = $empresa->usuariosVinculados; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vinculo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    @if(isset($empresa->usuariosVinculados) && is_object($empresa->usuariosVinculados))
+                        @forelse($empresa->usuariosVinculados as $vinculo)
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="avatar-circle bg-primary text-white me-3">
-                                        <?php echo e(getInicialUsuario($vinculo)); ?>
-
+                                        {{ getInicialUsuario($vinculo) }}
                                     </div>
                                     <div>
-                                        <div class="fw-medium"><?php echo e(getNomeUsuario($vinculo)); ?></div>
-                                        <small class="text-muted"><?php echo e($vinculo->email ?? 'Email não disponível'); ?></small>
+                                        <div class="fw-medium">{{ getNomeUsuario($vinculo) }}</div>
+                                        <small class="text-muted">{{ $vinculo->email ?? 'Email não disponível' }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <?php if(isset($vinculo->pivot) && isset($vinculo->pivot->perfil)): ?>
-                                    <span class="badge bg-<?php echo e($vinculo->pivot->perfil === 'proprietario' ? 'danger' : ($vinculo->pivot->perfil === 'administrador' ? 'warning' : 'info')); ?>">
-                                        <?php echo e(ucfirst($vinculo->pivot->perfil)); ?>
-
+                                @if(isset($vinculo->pivot) && isset($vinculo->pivot->perfil))
+                                    <span class="badge bg-{{ $vinculo->pivot->perfil === 'proprietario' ? 'danger' : ($vinculo->pivot->perfil === 'administrador' ? 'warning' : 'info') }}">
+                                        {{ ucfirst($vinculo->pivot->perfil) }}
                                     </span>
-                                <?php else: ?>
+                                @else
                                     <span class="badge bg-secondary">Indefinido</span>
-                                <?php endif; ?>
+                                @endif
                             </td>
                             <td>
-                                <?php if(isset($vinculo->pivot) && isset($vinculo->pivot->status)): ?>
-                                    <span class="badge bg-<?php echo e($vinculo->pivot->status === 'ativo' ? 'success' : 'secondary'); ?>">
-                                        <?php echo e(ucfirst($vinculo->pivot->status)); ?>
-
+                                @if(isset($vinculo->pivot) && isset($vinculo->pivot->status))
+                                    <span class="badge bg-{{ $vinculo->pivot->status === 'ativo' ? 'success' : 'secondary' }}">
+                                        {{ ucfirst($vinculo->pivot->status) }}
                                     </span>
-                                <?php else: ?>
+                                @else
                                     <span class="badge bg-secondary">Indefinido</span>
-                                <?php endif; ?>
+                                @endif
                             </td>
                             <td>
-                                <?php if(isset($vinculo->pivot) && isset($vinculo->pivot->data_vinculo)): ?>
-                                    <small><?php echo e(\Carbon\Carbon::parse($vinculo->pivot->data_vinculo)->format('d/m/Y H:i')); ?></small>
-                                <?php else: ?>
+                                @if(isset($vinculo->pivot) && isset($vinculo->pivot->data_vinculo))
+                                    <small>{{ \Carbon\Carbon::parse($vinculo->pivot->data_vinculo)->format('d/m/Y H:i') }}</small>
+                                @else
                                     <small class="text-muted">Data não disponível</small>
-                                <?php endif; ?>
+                                @endif
                             </td>
                             <td class="text-center">
-                                <?php if(isset($vinculo->pivot) && $vinculo->pivot->perfil !== 'proprietario'): ?>
+                                @if(isset($vinculo->pivot) && $vinculo->pivot->perfil !== 'proprietario')
                                 <div class="btn-group btn-group-sm">
-                                    <a href="<?php echo e(route('comerciantes.empresas.usuarios.edit', [$empresa, $vinculo])); ?>" 
+                                    <a href="{{ route('comerciantes.empresas.usuarios.edit', [$empresa, $vinculo]) }}" 
                                        class="btn btn-outline-primary btn-sm" 
                                        title="Editar usuário">
                                         <i class="fas fa-edit"></i>
@@ -212,26 +176,26 @@
                                     <button class="btn btn-outline-info btn-sm" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#modalEditarUsuario"
-                                            data-user-id="<?php echo e($vinculo->id ?? ''); ?>"
-                                            data-user-nome="<?php echo e(getNomeUsuario($vinculo)); ?>"
-                                            data-user-perfil="<?php echo e(isset($vinculo->pivot->perfil) ? $vinculo->pivot->perfil : ''); ?>"
-                                            data-user-status="<?php echo e(isset($vinculo->pivot->status) ? $vinculo->pivot->status : ''); ?>"
+                                            data-user-id="{{ $vinculo->id ?? '' }}"
+                                            data-user-nome="{{ getNomeUsuario($vinculo) }}"
+                                            data-user-perfil="{{ isset($vinculo->pivot->perfil) ? $vinculo->pivot->perfil : '' }}"
+                                            data-user-status="{{ isset($vinculo->pivot->status) ? $vinculo->pivot->status : '' }}"
                                             title="Configurações rápidas">
                                         <i class="fas fa-cog"></i>
                                     </button>
                                     
                                     <button class="btn btn-outline-danger btn-sm"
-                                            onclick="confirmarRemocao(<?php echo e($vinculo->id ?? 0); ?>, '<?php echo e(addslashes(getNomeUsuario($vinculo))); ?>')"
+                                            onclick="confirmarRemocao({{ $vinculo->id ?? 0 }}, '{{ addslashes(getNomeUsuario($vinculo)) }}')"
                                             title="Remover usuário">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
-                                <?php else: ?>
-                                <small class="text-muted"><?php echo e(isset($vinculo->pivot) && $vinculo->pivot->perfil === 'proprietario' ? 'Proprietário' : 'N/A'); ?></small>
-                                <?php endif; ?>
+                                @else
+                                <small class="text-muted">{{ isset($vinculo->pivot) && $vinculo->pivot->perfil === 'proprietario' ? 'Proprietário' : 'N/A' }}</small>
+                                @endif
                             </td>
                         </tr>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                        @empty
                         <tr>
                             <td colspan="5" class="text-center py-4">
                                 <i class="fas fa-users fa-2x text-muted mb-2"></i>
@@ -239,8 +203,8 @@
                                 <small class="text-muted">Clique em "Criar Novo" ou "Vincular Usuário" para adicionar usuários</small>
                             </td>
                         </tr>
-                        <?php endif; ?>
-                    <?php else: ?>
+                        @endforelse
+                    @else
                         <tr>
                             <td colspan="5" class="text-center py-4">
                                 <div class="alert alert-warning">
@@ -248,61 +212,77 @@
                                     <p class="mb-0"><strong>Problema com os dados de usuários vinculados</strong></p>
                                     <small>usuariosVinculados não está definido ou não é um objeto válido</small>
                                     <br><br>
-                                    <a href="<?php echo e(url()->current()); ?>?debug=1" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ url()->current() }}?debug=1" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-bug me-1"></i>
                                         Ver Debug
                                     </a>
                                 </div>
                             </td>
                         </tr>
-                    <?php endif; ?>
+                    @endif
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!-- Modal Vincular Usuário Existente -->
-<div class="modal fade" id="modalVincularUsuario" tabindex="-1">
+<!-- Modal Adicionar Usuário -->
+<div class="modal fade" id="modalAdicionarUsuario" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="<?php echo e(route('comerciantes.empresas.usuarios.store', $empresa)); ?>">
-                <?php echo csrf_field(); ?>
+            <form method="POST" action="{{ route('comerciantes.empresas.usuarios.store', $empresa) }}">
+                @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-link me-2 text-info"></i>
-                        Vincular Usuário Existente
-                    </h5>
+                    <h5 class="modal-title">Adicionar Usuário</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-1"></i>
-                        <strong>Vincular usuário existente:</strong> Use esta opção para adicionar um usuário que já está cadastrado no sistema.
-                    </div>
-                    
                     <div class="mb-3">
-                        <label for="user_email_vincular" class="form-label">E-mail do Usuário <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control" id="user_email_vincular" name="user_email" required>
-                        <div class="form-text">Digite o e-mail do usuário que já está cadastrado no sistema.</div>
+                        <label for="user_email" class="form-label">E-mail do Usuário</label>
+                        <input type="email" class="form-control" id="user_email" name="user_email" required>
+                        <div class="form-text">O usuário deve já estar cadastrado no sistema.</div>
                     </div>
                     <div class="mb-3">
-                        <label for="perfil_vincular" class="form-label">Perfil <span class="text-danger">*</span></label>
-                        <select class="form-select" id="perfil_vincular" name="perfil" required>
+                        <label for="perfil" class="form-label">Perfil</label>
+                        <select class="form-select" id="perfil" name="perfil" required>
                             <option value="colaborador">Colaborador</option>
                             <option value="gerente">Gerente</option>
                             <option value="administrador">Administrador</option>
                         </select>
                     </div>
-                    
-                    <?php echo $__env->make('components.permissions-list', ['prefix' => 'vincular'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                    <div class="mb-3">
+                        <label class="form-label">Permissões</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.view" id="perm_produtos_view">
+                                    <label class="form-check-label" for="perm_produtos_view">Ver Produtos</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.create" id="perm_produtos_create">
+                                    <label class="form-check-label" for="perm_produtos_create">Criar Produtos</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="vendas.view" id="perm_vendas_view">
+                                    <label class="form-check-label" for="perm_vendas_view">Ver Vendas</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="relatorios.view" id="perm_relatorios_view">
+                                    <label class="form-check-label" for="perm_relatorios_view">Ver Relatórios</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="configuracoes.edit" id="perm_config_edit">
+                                    <label class="form-check-label" for="perm_config_edit">Editar Configurações</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-info">
-                        <i class="fas fa-link me-1"></i>
-                        Vincular Usuário
-                    </button>
+                    <button type="submit" class="btn btn-primary">Adicionar Usuário</button>
                 </div>
             </form>
         </div>
@@ -313,20 +293,13 @@
 <div class="modal fade" id="modalCriarUsuario" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form method="POST" action="<?php echo e(route('comerciantes.empresas.usuarios.create', $empresa)); ?>">
-                <?php echo csrf_field(); ?>
+            <form method="POST" action="{{ route('comerciantes.empresas.usuarios.create', $empresa) }}">
+                @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-plus me-2 text-success"></i>
-                        Criar Novo Usuário
-                    </h5>
+                    <h5 class="modal-title">Criar Novo Usuário</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="alert alert-success">
-                        <i class="fas fa-plus-circle me-1"></i>
-                        <strong>Criar novo usuário:</strong> Use esta opção para criar um usuário completamente novo no sistema.
-                    </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -391,14 +364,51 @@
                         </div>
                     </div>
                     
-                    <?php echo $__env->make('components.permissions-list', ['prefix' => 'criar'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                    <div class="mb-3">
+                        <label class="form-label">Permissões</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.view" id="criar_perm_produtos_view">
+                                    <label class="form-check-label" for="criar_perm_produtos_view">Ver Produtos</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.create" id="criar_perm_produtos_create">
+                                    <label class="form-check-label" for="criar_perm_produtos_create">Criar Produtos</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.edit" id="criar_perm_produtos_edit">
+                                    <label class="form-check-label" for="criar_perm_produtos_edit">Editar Produtos</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="vendas.view" id="criar_perm_vendas_view">
+                                    <label class="form-check-label" for="criar_perm_vendas_view">Ver Vendas</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="relatorios.view" id="criar_perm_relatorios_view">
+                                    <label class="form-check-label" for="criar_perm_relatorios_view">Ver Relatórios</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="configuracoes.edit" id="criar_perm_config_edit">
+                                    <label class="form-check-label" for="criar_perm_config_edit">Editar Configurações</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="usuarios.manage" id="criar_perm_usuarios_manage">
+                                    <label class="form-check-label" for="criar_perm_usuarios_manage">Gerenciar Usuários</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="horarios.manage" id="criar_perm_horarios_manage">
+                                    <label class="form-check-label" for="criar_perm_horarios_manage">Gerenciar Horários</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-plus me-1"></i>
-                        Criar Usuário
-                    </button>
+                    <button type="submit" class="btn btn-primary">Criar Usuário</button>
                 </div>
             </form>
         </div>
@@ -410,20 +420,13 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="POST" id="formEditarUsuario">
-                <?php echo csrf_field(); ?>
-                <?php echo method_field('PUT'); ?>
+                @csrf
+                @method('PUT')
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-edit me-2 text-warning"></i>
-                        Editar Usuário
-                    </h5>
+                    <h5 class="modal-title">Editar Usuário</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <i class="fas fa-edit me-1"></i>
-                        <strong>Editar usuário vinculado:</strong> Modifique as configurações de acesso deste usuário na empresa.
-                    </div>
                     <div class="mb-3">
                         <label class="form-label">Nome</label>
                         <input type="text" class="form-control" id="edit_nome" readonly>
@@ -445,7 +448,47 @@
                         </select>
                     </div>
                     
-                    <?php echo $__env->make('components.permissions-list', ['prefix' => 'edit'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                    <div class="mb-3">
+                        <label class="form-label">Permissões</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.view" id="edit_perm_produtos_view">
+                                    <label class="form-check-label" for="edit_perm_produtos_view">Ver Produtos</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.create" id="edit_perm_produtos_create">
+                                    <label class="form-check-label" for="edit_perm_produtos_create">Criar Produtos</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.edit" id="edit_perm_produtos_edit">
+                                    <label class="form-check-label" for="edit_perm_produtos_edit">Editar Produtos</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="vendas.view" id="edit_perm_vendas_view">
+                                    <label class="form-check-label" for="edit_perm_vendas_view">Ver Vendas</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="relatorios.view" id="edit_perm_relatorios_view">
+                                    <label class="form-check-label" for="edit_perm_relatorios_view">Ver Relatórios</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="configuracoes.edit" id="edit_perm_config_edit">
+                                    <label class="form-check-label" for="edit_perm_config_edit">Editar Configurações</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="usuarios.manage" id="edit_perm_usuarios_manage">
+                                    <label class="form-check-label" for="edit_perm_usuarios_manage">Gerenciar Usuários</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="horarios.manage" id="edit_perm_horarios_manage">
+                                    <label class="form-check-label" for="edit_perm_horarios_manage">Gerenciar Horários</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -455,131 +498,9 @@
         </div>
     </div>
 </div>
+@endsection
 
-<script>
-const todasPermissoes = [
-    "atendente-acesso_sistema",
-    "caixa-abrir_caixa",
-    "caixa-acesso_pdv",
-    "caixa-excluir_item",
-    "caixa-form_pgto",
-    "caixa.abrir",
-    "caixa.fechar",
-    "caixa.relatorio",
-    "caixa.sangria",
-    "caixa.suprimento",
-    "clientes.criar",
-    "clientes.editar",
-    "clientes.excluir",
-    "clientes.listar",
-    "clientes.visualizar",
-    "configuracoes.backup",
-    "configuracoes.empresa",
-    "configuracoes.gerais",
-    "configuracoes.impressao",
-    "configuracoes.pdv",
-    "configuracoes.seguranca",
-    "configuracoes.sistema",
-    "dashboard.relatorios",
-    "dashboard.visualizar",
-    "empresas.criar",
-    "empresas.editar",
-    "empresas.excluir",
-    "empresas.listar",
-    "empresas.visualizar",
-    "estoque.ajustar",
-    "estoque.relatorios",
-    "estoque.transferir",
-    "estoque.visualizar",
-    "Finalizar venda",
-    "financeiro.contas_pagar",
-    "financeiro.contas_receber",
-    "financeiro.fluxo_caixa",
-    "financeiro.relatorios",
-    "financeiro.visualizar",
-    "horarios.criar",
-    "horarios.editar",
-    "horarios.excecoes.visualizar",
-    "horarios.excluir",
-    "horarios.listar",
-    "horarios.padrao.visualizar",
-    "horarios.visualizar",
-    "marcas.criar",
-    "marcas.editar",
-    "marcas.excluir",
-    "marcas.listar",
-    "marcas.visualizar",
-    "pdv.acessar",
-    "pdv.adicionar_item",
-    "pdv.aplicar_desconto",
-    "pdv.cancelar_venda",
-    "pdv.finalizar_venda",
-    "pdv.iniciar_venda",
-    "pdv.remover_item",
-    "produtos.criar",
-    "produtos.editar",
-    "produtos.excluir",
-    "produtos.gerenciar_estoque",
-    "produtos.importar",
-    "produtos.listar",
-    "produtos.visualizar",
-    "relatorios.avancados",
-    "relatorios.clientes",
-    "relatorios.estoque",
-    "relatorios.financeiros",
-    "relatorios.vendas",
-    "sistema.admin",
-    "sistema.logs",
-    "sistema.manutencao",
-    "usuarios.criar",
-    "usuarios.editar",
-    "usuarios.excluir",
-    "usuarios.gerenciar_papeis",
-    "usuarios.gerenciar_permissoes",
-    "usuarios.listar",
-    "usuarios.visualizar",
-    "vendas.cancelar",
-    "vendas.criar",
-    "vendas.listar",
-    "vendas.relatorios",
-    "vendas.visualizar"
-];
-
-function toggleTodasPermissoes(isAdmin) {
-    const checkboxes = document.querySelectorAll('input[name="permissoes[]"]');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = isAdmin;
-        checkbox.disabled = isAdmin;
-    });
-}
-
-// Adicionar event listener para o select de perfil
-document.addEventListener('DOMContentLoaded', function() {
-    // Função consolidada para gerenciar permissões de administrador
-    function setupAdminPermissions(modalSelector, perfilSelector) {
-        const perfilSelect = document.querySelector(modalSelector + ' ' + perfilSelector);
-        if (perfilSelect) {
-            perfilSelect.addEventListener('change', function() {
-                const isAdmin = this.value === 'administrador';
-                const modalCheckboxes = document.querySelectorAll(modalSelector + ' input[name="permissoes[]"]');
-                modalCheckboxes.forEach(checkbox => {
-                    checkbox.checked = isAdmin;
-                    checkbox.disabled = isAdmin;
-                });
-            });
-        }
-    }
-
-    // Aplicar para todos os modais
-    setupAdminPermissions('#modalVincularUsuario', 'select[name="perfil"]');
-    setupAdminPermissions('#modalCriarUsuario', 'select[name="perfil"]');
-    setupAdminPermissions('#modalEditarUsuario', 'select[name="perfil"]');
-});
-
-</script>
-<?php $__env->stopSection(); ?>
-
-<?php $__env->startPush('styles'); ?>
+@push('styles')
 <style>
 .avatar-circle {
     width: 40px;
@@ -601,9 +522,9 @@ document.addEventListener('DOMContentLoaded', function() {
     font-weight: 500;
 }
 </style>
-<?php $__env->stopPush(); ?>
+@endpush
 
-<?php $__env->startPush('scripts'); ?>
+@push('scripts')
 <script>
 // Editar usuário - carregar dados via AJAX
 document.addEventListener('DOMContentLoaded', function() {
@@ -615,7 +536,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (userId) {
             // Fazer requisição AJAX para carregar dados do usuário
-            fetch(`<?php echo e(route('comerciantes.empresas.usuarios.show', [$empresa, '__USER_ID__'])); ?>`.replace('__USER_ID__', userId))
+            fetch(`{{ route('comerciantes.empresas.usuarios.show', [$empresa, '__USER_ID__']) }}`.replace('__USER_ID__', userId))
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('edit_nome').value = data.nome || '';
@@ -636,7 +557,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Atualizar action do formulário
                     const form = document.getElementById('formEditarUsuario');
-                    form.action = `<?php echo e(route('comerciantes.empresas.usuarios.update', [$empresa, '__USER_ID__'])); ?>`.replace('__USER_ID__', userId);
+                    form.action = `{{ route('comerciantes.empresas.usuarios.update', [$empresa, '__USER_ID__']) }}`.replace('__USER_ID__', userId);
                 })
                 .catch(error => {
                     console.error('Erro ao carregar dados do usuário:', error);
@@ -651,12 +572,12 @@ function confirmarRemocao(userId, userName) {
     if (confirm(`Tem certeza que deseja remover ${userName} desta empresa?`)) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `<?php echo e(route('comerciantes.empresas.usuarios.destroy', [$empresa, '__USER_ID__'])); ?>`.replace('__USER_ID__', userId);
+        form.action = `{{ route('comerciantes.empresas.usuarios.destroy', [$empresa, '__USER_ID__']) }}`.replace('__USER_ID__', userId);
         
         const csrfField = document.createElement('input');
         csrfField.type = 'hidden';
         csrfField.name = '_token';
-        csrfField.value = '<?php echo e(csrf_token()); ?>';
+        csrfField.value = '{{ csrf_token() }}';
         
         const methodField = document.createElement('input');
         methodField.type = 'hidden';
@@ -689,6 +610,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-<?php $__env->stopPush(); ?>
-
-<?php echo $__env->make('comerciantes.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/comerciantes/empresas/usuarios.blade.php ENDPATH**/ ?>
+@endpush

@@ -37,10 +37,28 @@
             <i class="fas fa-arrow-left me-1"></i>
             Voltar à Empresa
         </a>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAdicionarUsuario">
-            <i class="fas fa-plus me-1"></i>
-            Adicionar Usuário
-        </button>
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-user-plus me-1"></i>
+                Gerenciar Usuários
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalVincularUsuario">
+                        <i class="fas fa-link me-1 text-info"></i>
+                        Vincular Usuário Existente
+                        <br><small class="text-muted">Para usuários já cadastrados no sistema</small>
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCriarUsuario">
+                        <i class="fas fa-plus me-1 text-success"></i>
+                        Criar Novo Usuário
+                        <br><small class="text-muted">Para criar um usuário completamente novo</small>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
 
@@ -71,7 +89,7 @@
                 </div>
             </div>
             <div class="col-md-4 text-end">
-                <div class="badge bg-{{ $empresa->status === 'ativa' ? 'success' : 'secondary' }} fs-6 px-3 py-2">
+                <div class="badge bg-{{ $empresa->status === 'ativo' ? 'success' : 'secondary' }} fs-6 px-3 py-2">
                     {{ ucfirst($empresa->status) }}
                 </div>
             </div>
@@ -86,15 +104,27 @@
             <i class="fas fa-users me-2"></i>
             Usuários Vinculados ({{ $empresa->usuariosVinculados ? $empresa->usuariosVinculados->count() : 0 }})
         </h6>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAdicionarUsuario">
-                <i class="fas fa-user-plus me-1"></i>
-                Vincular Usuário
-            </button>
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCriarUsuario">
-                <i class="fas fa-plus me-1"></i>
-                Criar Novo
-            </button>
+        <div class="d-flex gap-2 flex-wrap">
+            <div class="dropdown">
+                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-plus me-1"></i>
+                    Adicionar Usuário
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalVincularUsuario">
+                            <i class="fas fa-link me-1 text-info"></i>
+                            Vincular Existente
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCriarUsuario">
+                            <i class="fas fa-plus me-1 text-success"></i>
+                            Criar Novo
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
     <div class="card-body p-0">
@@ -167,17 +197,26 @@
                             <td class="text-center">
                                 @if(isset($vinculo->pivot) && $vinculo->pivot->perfil !== 'proprietario')
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-primary btn-sm" 
+                                    <a href="{{ route('comerciantes.empresas.usuarios.edit', [$empresa, $vinculo]) }}" 
+                                       class="btn btn-outline-primary btn-sm" 
+                                       title="Editar usuário">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    <button class="btn btn-outline-info btn-sm" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#modalEditarUsuario"
                                             data-user-id="{{ $vinculo->id ?? '' }}"
                                             data-user-nome="{{ getNomeUsuario($vinculo) }}"
                                             data-user-perfil="{{ isset($vinculo->pivot->perfil) ? $vinculo->pivot->perfil : '' }}"
-                                            data-user-status="{{ isset($vinculo->pivot->status) ? $vinculo->pivot->status : '' }}">
-                                        <i class="fas fa-edit"></i>
+                                            data-user-status="{{ isset($vinculo->pivot->status) ? $vinculo->pivot->status : '' }}"
+                                            title="Configurações rápidas">
+                                        <i class="fas fa-cog"></i>
                                     </button>
+                                    
                                     <button class="btn btn-outline-danger btn-sm"
-                                            onclick="confirmarRemocao({{ $vinculo->id ?? 0 }}, '{{ addslashes(getNomeUsuario($vinculo)) }}')">
+                                            onclick="confirmarRemocao({{ $vinculo->id ?? 0 }}, '{{ addslashes(getNomeUsuario($vinculo)) }}')"
+                                            title="Remover usuário">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -217,63 +256,47 @@
     </div>
 </div>
 
-<!-- Modal Adicionar Usuário -->
-<div class="modal fade" id="modalAdicionarUsuario" tabindex="-1">
+<!-- Modal Vincular Usuário Existente -->
+<div class="modal fade" id="modalVincularUsuario" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="POST" action="{{ route('comerciantes.empresas.usuarios.store', $empresa) }}">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title">Adicionar Usuário</h5>
+                    <h5 class="modal-title">
+                        <i class="fas fa-link me-2 text-info"></i>
+                        Vincular Usuário Existente
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-1"></i>
+                        <strong>Vincular usuário existente:</strong> Use esta opção para adicionar um usuário que já está cadastrado no sistema.
+                    </div>
+                    
                     <div class="mb-3">
-                        <label for="user_email" class="form-label">E-mail do Usuário</label>
-                        <input type="email" class="form-control" id="user_email" name="user_email" required>
-                        <div class="form-text">O usuário deve já estar cadastrado no sistema.</div>
+                        <label for="user_email_vincular" class="form-label">E-mail do Usuário <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="user_email_vincular" name="user_email" required>
+                        <div class="form-text">Digite o e-mail do usuário que já está cadastrado no sistema.</div>
                     </div>
                     <div class="mb-3">
-                        <label for="perfil" class="form-label">Perfil</label>
-                        <select class="form-select" id="perfil" name="perfil" required>
+                        <label for="perfil_vincular" class="form-label">Perfil <span class="text-danger">*</span></label>
+                        <select class="form-select" id="perfil_vincular" name="perfil" required>
                             <option value="colaborador">Colaborador</option>
                             <option value="gerente">Gerente</option>
                             <option value="administrador">Administrador</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Permissões</label>
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.view" id="perm_produtos_view">
-                                    <label class="form-check-label" for="perm_produtos_view">Ver Produtos</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.create" id="perm_produtos_create">
-                                    <label class="form-check-label" for="perm_produtos_create">Criar Produtos</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="vendas.view" id="perm_vendas_view">
-                                    <label class="form-check-label" for="perm_vendas_view">Ver Vendas</label>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="relatorios.view" id="perm_relatorios_view">
-                                    <label class="form-check-label" for="perm_relatorios_view">Ver Relatórios</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="configuracoes.edit" id="perm_config_edit">
-                                    <label class="form-check-label" for="perm_config_edit">Editar Configurações</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
+                    @include('components.permissions-list', ['prefix' => 'vincular'])
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Adicionar Usuário</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-link me-1"></i>
+                        Vincular Usuário
+                    </button>
                 </div>
             </form>
         </div>
@@ -287,10 +310,17 @@
             <form method="POST" action="{{ route('comerciantes.empresas.usuarios.create', $empresa) }}">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title">Criar Novo Usuário</h5>
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2 text-success"></i>
+                        Criar Novo Usuário
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="alert alert-success">
+                        <i class="fas fa-plus-circle me-1"></i>
+                        <strong>Criar novo usuário:</strong> Use esta opção para criar um usuário completamente novo no sistema.
+                    </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -355,51 +385,14 @@
                         </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label">Permissões</label>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.view" id="criar_perm_produtos_view">
-                                    <label class="form-check-label" for="criar_perm_produtos_view">Ver Produtos</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.create" id="criar_perm_produtos_create">
-                                    <label class="form-check-label" for="criar_perm_produtos_create">Criar Produtos</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.edit" id="criar_perm_produtos_edit">
-                                    <label class="form-check-label" for="criar_perm_produtos_edit">Editar Produtos</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="vendas.view" id="criar_perm_vendas_view">
-                                    <label class="form-check-label" for="criar_perm_vendas_view">Ver Vendas</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="relatorios.view" id="criar_perm_relatorios_view">
-                                    <label class="form-check-label" for="criar_perm_relatorios_view">Ver Relatórios</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="configuracoes.edit" id="criar_perm_config_edit">
-                                    <label class="form-check-label" for="criar_perm_config_edit">Editar Configurações</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="usuarios.manage" id="criar_perm_usuarios_manage">
-                                    <label class="form-check-label" for="criar_perm_usuarios_manage">Gerenciar Usuários</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="horarios.manage" id="criar_perm_horarios_manage">
-                                    <label class="form-check-label" for="criar_perm_horarios_manage">Gerenciar Horários</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @include('components.permissions-list', ['prefix' => 'criar'])
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Criar Usuário</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus me-1"></i>
+                        Criar Usuário
+                    </button>
                 </div>
             </form>
         </div>
@@ -414,10 +407,17 @@
                 @csrf
                 @method('PUT')
                 <div class="modal-header">
-                    <h5 class="modal-title">Editar Usuário</h5>
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2 text-warning"></i>
+                        Editar Usuário
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-edit me-1"></i>
+                        <strong>Editar usuário vinculado:</strong> Modifique as configurações de acesso deste usuário na empresa.
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Nome</label>
                         <input type="text" class="form-control" id="edit_nome" readonly>
@@ -439,47 +439,7 @@
                         </select>
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label">Permissões</label>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.view" id="edit_perm_produtos_view">
-                                    <label class="form-check-label" for="edit_perm_produtos_view">Ver Produtos</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.create" id="edit_perm_produtos_create">
-                                    <label class="form-check-label" for="edit_perm_produtos_create">Criar Produtos</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="produtos.edit" id="edit_perm_produtos_edit">
-                                    <label class="form-check-label" for="edit_perm_produtos_edit">Editar Produtos</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="vendas.view" id="edit_perm_vendas_view">
-                                    <label class="form-check-label" for="edit_perm_vendas_view">Ver Vendas</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="relatorios.view" id="edit_perm_relatorios_view">
-                                    <label class="form-check-label" for="edit_perm_relatorios_view">Ver Relatórios</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="configuracoes.edit" id="edit_perm_config_edit">
-                                    <label class="form-check-label" for="edit_perm_config_edit">Editar Configurações</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="usuarios.manage" id="edit_perm_usuarios_manage">
-                                    <label class="form-check-label" for="edit_perm_usuarios_manage">Gerenciar Usuários</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="permissoes[]" value="horarios.manage" id="edit_perm_horarios_manage">
-                                    <label class="form-check-label" for="edit_perm_horarios_manage">Gerenciar Horários</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @include('components.permissions-list', ['prefix' => 'edit'])
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -489,6 +449,128 @@
         </div>
     </div>
 </div>
+
+<script>
+const todasPermissoes = [
+    "atendente-acesso_sistema",
+    "caixa-abrir_caixa",
+    "caixa-acesso_pdv",
+    "caixa-excluir_item",
+    "caixa-form_pgto",
+    "caixa.abrir",
+    "caixa.fechar",
+    "caixa.relatorio",
+    "caixa.sangria",
+    "caixa.suprimento",
+    "clientes.criar",
+    "clientes.editar",
+    "clientes.excluir",
+    "clientes.listar",
+    "clientes.visualizar",
+    "configuracoes.backup",
+    "configuracoes.empresa",
+    "configuracoes.gerais",
+    "configuracoes.impressao",
+    "configuracoes.pdv",
+    "configuracoes.seguranca",
+    "configuracoes.sistema",
+    "dashboard.relatorios",
+    "dashboard.visualizar",
+    "empresas.criar",
+    "empresas.editar",
+    "empresas.excluir",
+    "empresas.listar",
+    "empresas.visualizar",
+    "estoque.ajustar",
+    "estoque.relatorios",
+    "estoque.transferir",
+    "estoque.visualizar",
+    "Finalizar venda",
+    "financeiro.contas_pagar",
+    "financeiro.contas_receber",
+    "financeiro.fluxo_caixa",
+    "financeiro.relatorios",
+    "financeiro.visualizar",
+    "horarios.criar",
+    "horarios.editar",
+    "horarios.excecoes.visualizar",
+    "horarios.excluir",
+    "horarios.listar",
+    "horarios.padrao.visualizar",
+    "horarios.visualizar",
+    "marcas.criar",
+    "marcas.editar",
+    "marcas.excluir",
+    "marcas.listar",
+    "marcas.visualizar",
+    "pdv.acessar",
+    "pdv.adicionar_item",
+    "pdv.aplicar_desconto",
+    "pdv.cancelar_venda",
+    "pdv.finalizar_venda",
+    "pdv.iniciar_venda",
+    "pdv.remover_item",
+    "produtos.criar",
+    "produtos.editar",
+    "produtos.excluir",
+    "produtos.gerenciar_estoque",
+    "produtos.importar",
+    "produtos.listar",
+    "produtos.visualizar",
+    "relatorios.avancados",
+    "relatorios.clientes",
+    "relatorios.estoque",
+    "relatorios.financeiros",
+    "relatorios.vendas",
+    "sistema.admin",
+    "sistema.logs",
+    "sistema.manutencao",
+    "usuarios.criar",
+    "usuarios.editar",
+    "usuarios.excluir",
+    "usuarios.gerenciar_papeis",
+    "usuarios.gerenciar_permissoes",
+    "usuarios.listar",
+    "usuarios.visualizar",
+    "vendas.cancelar",
+    "vendas.criar",
+    "vendas.listar",
+    "vendas.relatorios",
+    "vendas.visualizar"
+];
+
+function toggleTodasPermissoes(isAdmin) {
+    const checkboxes = document.querySelectorAll('input[name="permissoes[]"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = isAdmin;
+        checkbox.disabled = isAdmin;
+    });
+}
+
+// Adicionar event listener para o select de perfil
+document.addEventListener('DOMContentLoaded', function() {
+    // Função consolidada para gerenciar permissões de administrador
+    function setupAdminPermissions(modalSelector, perfilSelector) {
+        const perfilSelect = document.querySelector(modalSelector + ' ' + perfilSelector);
+        if (perfilSelect) {
+            perfilSelect.addEventListener('change', function() {
+                const isAdmin = this.value === 'administrador';
+                const modalCheckboxes = document.querySelectorAll(modalSelector + ' input[name="permissoes[]"]');
+                modalCheckboxes.forEach(checkbox => {
+                    checkbox.checked = isAdmin;
+                    checkbox.disabled = isAdmin;
+                });
+            });
+        }
+    }
+
+    // Aplicar para todos os modais
+    setupAdminPermissions('#modalVincularUsuario', 'select[name="perfil"]');
+    setupAdminPermissions('#modalCriarUsuario', 'select[name="perfil"]');
+    setupAdminPermissions('#modalEditarUsuario', 'select[name="perfil"]');
+});
+
+</script>
 @endsection
 
 @push('styles')

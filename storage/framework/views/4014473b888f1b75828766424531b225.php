@@ -46,9 +46,9 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-8 mb-3">
-                            <label for="nome_fantasia" class="form-label">Nome da Empresa <span class="text-danger">*</span></label>
+                            <label for="razao_social" class="form-label">Razão Social <span class="text-danger">*</span></label>
                             <input type="text" 
-                                   class="form-control <?php $__errorArgs = ['nome_fantasia'];
+                                   class="form-control <?php $__errorArgs = ['razao_social'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -56,11 +56,11 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                   id="nome_fantasia" 
-                                   name="nome_fantasia" 
-                                   value="<?php echo e(old('nome_fantasia', $empresa->nome_fantasia)); ?>" 
+                                   id="razao_social" 
+                                   name="razao_social" 
+                                   value="<?php echo e(old('razao_social', $empresa->razao_social)); ?>" 
                                    required>
-                            <?php $__errorArgs = ['nome_fantasia'];
+                            <?php $__errorArgs = ['razao_social'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -158,14 +158,11 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="slug" class="form-label">URL Amigável <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text"><?php echo e(url('/')); ?>/loja/</span>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="inscricao_estadual" class="form-label">Inscrição Estadual</label>
                             <input type="text" 
-                                   class="form-control <?php $__errorArgs = ['slug'];
+                                   class="form-control <?php $__errorArgs = ['inscricao_estadual'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -173,22 +170,21 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                   id="slug" 
-                                   name="slug" 
-                                   value="<?php echo e(old('slug', $empresa->slug)); ?>" 
-                                   required>
-                        </div>
-                        <div class="form-text">URL única para sua loja online. Use apenas letras, números e hífens.</div>
-                        <?php $__errorArgs = ['slug'];
+                                   id="inscricao_estadual" 
+                                   name="inscricao_estadual" 
+                                   value="<?php echo e(old('inscricao_estadual', $empresa->inscricao_estadual)); ?>"
+                                   placeholder="000.000.000.000">
+                            <?php $__errorArgs = ['inscricao_estadual'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-                            <div class="invalid-feedback"><?php echo e($message); ?></div>
-                        <?php unset($message);
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -204,9 +200,9 @@ unset($__errorArgs, $__bag); ?>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <label for="endereco_cep" class="form-label">CEP</label>
+                            <label for="cep" class="form-label">CEP</label>
                             <input type="text" 
-                                   class="form-control <?php $__errorArgs = ['endereco_cep'];
+                                   class="form-control <?php $__errorArgs = ['cep'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -214,11 +210,11 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                   id="endereco_cep" 
-                                   name="endereco_cep" 
-                                   value="<?php echo e(old('endereco_cep', $empresa->endereco_cep)); ?>"
+                                   id="cep" 
+                                   name="cep" 
+                                   value="<?php echo e(old('cep', $empresa->cep)); ?>"
                                    placeholder="00000-000">
-                            <?php $__errorArgs = ['endereco_cep'];
+                            <?php $__errorArgs = ['cep'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -230,9 +226,9 @@ endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="endereco_logradouro" class="form-label">Logradouro</label>
+                            <label for="logradouro" class="form-label">Logradouro</label>
                             <input type="text" 
-                                   class="form-control <?php $__errorArgs = ['endereco_logradouro'];
+                                   class="form-control <?php $__errorArgs = ['logradouro'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -240,11 +236,11 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                   id="endereco_logradouro" 
-                                   name="endereco_logradouro" 
-                                   value="<?php echo e(old('endereco_logradouro', $empresa->endereco_logradouro)); ?>"
+                                   id="logradouro" 
+                                   name="logradouro" 
+                                   value="<?php echo e(old('logradouro', $empresa->logradouro)); ?>"
                                    placeholder="Rua, Avenida, etc.">
-                            <?php $__errorArgs = ['endereco_logradouro'];
+                            <?php $__errorArgs = ['logradouro'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -256,9 +252,9 @@ endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label for="endereco_numero" class="form-label">Número</label>
+                            <label for="numero" class="form-label">Número</label>
                             <input type="text" 
-                                   class="form-control <?php $__errorArgs = ['endereco_numero'];
+                                   class="form-control <?php $__errorArgs = ['numero'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -266,11 +262,11 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                   id="endereco_numero" 
-                                   name="endereco_numero" 
-                                   value="<?php echo e(old('endereco_numero', $empresa->endereco_numero)); ?>"
+                                   id="numero" 
+                                   name="numero" 
+                                   value="<?php echo e(old('numero', $empresa->numero)); ?>"
                                    placeholder="123">
-                            <?php $__errorArgs = ['endereco_numero'];
+                            <?php $__errorArgs = ['numero'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -285,9 +281,9 @@ unset($__errorArgs, $__bag); ?>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="endereco_complemento" class="form-label">Complemento</label>
+                            <label for="complemento" class="form-label">Complemento</label>
                             <input type="text" 
-                                   class="form-control <?php $__errorArgs = ['endereco_complemento'];
+                                   class="form-control <?php $__errorArgs = ['complemento'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -295,11 +291,11 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                   id="endereco_complemento" 
-                                   name="endereco_complemento" 
-                                   value="<?php echo e(old('endereco_complemento', $empresa->endereco_complemento)); ?>"
+                                   id="complemento" 
+                                   name="complemento" 
+                                   value="<?php echo e(old('complemento', $empresa->complemento)); ?>"
                                    placeholder="Apartamento, Sala, etc.">
-                            <?php $__errorArgs = ['endereco_complemento'];
+                            <?php $__errorArgs = ['complemento'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -311,9 +307,9 @@ endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="endereco_bairro" class="form-label">Bairro</label>
+                            <label for="bairro" class="form-label">Bairro</label>
                             <input type="text" 
-                                   class="form-control <?php $__errorArgs = ['endereco_bairro'];
+                                   class="form-control <?php $__errorArgs = ['bairro'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -321,10 +317,10 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                   id="endereco_bairro" 
-                                   name="endereco_bairro" 
-                                   value="<?php echo e(old('endereco_bairro', $empresa->endereco_bairro)); ?>">
-                            <?php $__errorArgs = ['endereco_bairro'];
+                                   id="bairro" 
+                                   name="bairro" 
+                                   value="<?php echo e(old('bairro', $empresa->bairro)); ?>">
+                            <?php $__errorArgs = ['bairro'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -339,9 +335,9 @@ unset($__errorArgs, $__bag); ?>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="endereco_cidade" class="form-label">Cidade</label>
+                            <label for="cidade" class="form-label">Cidade</label>
                             <input type="text" 
-                                   class="form-control <?php $__errorArgs = ['endereco_cidade'];
+                                   class="form-control <?php $__errorArgs = ['cidade'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -349,10 +345,10 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                   id="endereco_cidade" 
-                                   name="endereco_cidade" 
-                                   value="<?php echo e(old('endereco_cidade', $empresa->endereco_cidade)); ?>">
-                            <?php $__errorArgs = ['endereco_cidade'];
+                                   id="cidade" 
+                                   name="cidade" 
+                                   value="<?php echo e(old('cidade', $empresa->cidade)); ?>">
+                            <?php $__errorArgs = ['cidade'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -364,45 +360,45 @@ endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="endereco_estado" class="form-label">Estado</label>
-                            <select class="form-select <?php $__errorArgs = ['endereco_estado'];
+                            <label for="uf" class="form-label">Estado</label>
+                            <select class="form-select <?php $__errorArgs = ['uf'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" id="endereco_estado" name="endereco_estado">
+unset($__errorArgs, $__bag); ?>" id="uf" name="uf">
                                 <option value="">Selecione o estado</option>
-                                <option value="AC" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'AC' ? 'selected' : ''); ?>>Acre</option>
-                                <option value="AL" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'AL' ? 'selected' : ''); ?>>Alagoas</option>
-                                <option value="AP" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'AP' ? 'selected' : ''); ?>>Amapá</option>
-                                <option value="AM" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'AM' ? 'selected' : ''); ?>>Amazonas</option>
-                                <option value="BA" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'BA' ? 'selected' : ''); ?>>Bahia</option>
-                                <option value="CE" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'CE' ? 'selected' : ''); ?>>Ceará</option>
-                                <option value="DF" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'DF' ? 'selected' : ''); ?>>Distrito Federal</option>
-                                <option value="ES" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'ES' ? 'selected' : ''); ?>>Espírito Santo</option>
-                                <option value="GO" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'GO' ? 'selected' : ''); ?>>Goiás</option>
-                                <option value="MA" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'MA' ? 'selected' : ''); ?>>Maranhão</option>
-                                <option value="MT" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'MT' ? 'selected' : ''); ?>>Mato Grosso</option>
-                                <option value="MS" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'MS' ? 'selected' : ''); ?>>Mato Grosso do Sul</option>
-                                <option value="MG" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'MG' ? 'selected' : ''); ?>>Minas Gerais</option>
-                                <option value="PA" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'PA' ? 'selected' : ''); ?>>Pará</option>
-                                <option value="PB" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'PB' ? 'selected' : ''); ?>>Paraíba</option>
-                                <option value="PR" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'PR' ? 'selected' : ''); ?>>Paraná</option>
-                                <option value="PE" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'PE' ? 'selected' : ''); ?>>Pernambuco</option>
-                                <option value="PI" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'PI' ? 'selected' : ''); ?>>Piauí</option>
-                                <option value="RJ" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'RJ' ? 'selected' : ''); ?>>Rio de Janeiro</option>
-                                <option value="RN" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'RN' ? 'selected' : ''); ?>>Rio Grande do Norte</option>
-                                <option value="RS" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'RS' ? 'selected' : ''); ?>>Rio Grande do Sul</option>
-                                <option value="RO" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'RO' ? 'selected' : ''); ?>>Rondônia</option>
-                                <option value="RR" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'RR' ? 'selected' : ''); ?>>Roraima</option>
-                                <option value="SC" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'SC' ? 'selected' : ''); ?>>Santa Catarina</option>
-                                <option value="SP" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'SP' ? 'selected' : ''); ?>>São Paulo</option>
-                                <option value="SE" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'SE' ? 'selected' : ''); ?>>Sergipe</option>
-                                <option value="TO" <?php echo e(old('endereco_estado', $empresa->endereco_estado) == 'TO' ? 'selected' : ''); ?>>Tocantins</option>
+                                <option value="AC" <?php echo e(old('uf', $empresa->uf) == 'AC' ? 'selected' : ''); ?>>Acre</option>
+                                <option value="AL" <?php echo e(old('uf', $empresa->uf) == 'AL' ? 'selected' : ''); ?>>Alagoas</option>
+                                <option value="AP" <?php echo e(old('uf', $empresa->uf) == 'AP' ? 'selected' : ''); ?>>Amapá</option>
+                                <option value="AM" <?php echo e(old('uf', $empresa->uf) == 'AM' ? 'selected' : ''); ?>>Amazonas</option>
+                                <option value="BA" <?php echo e(old('uf', $empresa->uf) == 'BA' ? 'selected' : ''); ?>>Bahia</option>
+                                <option value="CE" <?php echo e(old('uf', $empresa->uf) == 'CE' ? 'selected' : ''); ?>>Ceará</option>
+                                <option value="DF" <?php echo e(old('uf', $empresa->uf) == 'DF' ? 'selected' : ''); ?>>Distrito Federal</option>
+                                <option value="ES" <?php echo e(old('uf', $empresa->uf) == 'ES' ? 'selected' : ''); ?>>Espírito Santo</option>
+                                <option value="GO" <?php echo e(old('uf', $empresa->uf) == 'GO' ? 'selected' : ''); ?>>Goiás</option>
+                                <option value="MA" <?php echo e(old('uf', $empresa->uf) == 'MA' ? 'selected' : ''); ?>>Maranhão</option>
+                                <option value="MT" <?php echo e(old('uf', $empresa->uf) == 'MT' ? 'selected' : ''); ?>>Mato Grosso</option>
+                                <option value="MS" <?php echo e(old('uf', $empresa->uf) == 'MS' ? 'selected' : ''); ?>>Mato Grosso do Sul</option>
+                                <option value="MG" <?php echo e(old('uf', $empresa->uf) == 'MG' ? 'selected' : ''); ?>>Minas Gerais</option>
+                                <option value="PA" <?php echo e(old('uf', $empresa->uf) == 'PA' ? 'selected' : ''); ?>>Pará</option>
+                                <option value="PB" <?php echo e(old('uf', $empresa->uf) == 'PB' ? 'selected' : ''); ?>>Paraíba</option>
+                                <option value="PR" <?php echo e(old('uf', $empresa->uf) == 'PR' ? 'selected' : ''); ?>>Paraná</option>
+                                <option value="PE" <?php echo e(old('uf', $empresa->uf) == 'PE' ? 'selected' : ''); ?>>Pernambuco</option>
+                                <option value="PI" <?php echo e(old('uf', $empresa->uf) == 'PI' ? 'selected' : ''); ?>>Piauí</option>
+                                <option value="RJ" <?php echo e(old('uf', $empresa->uf) == 'RJ' ? 'selected' : ''); ?>>Rio de Janeiro</option>
+                                <option value="RN" <?php echo e(old('uf', $empresa->uf) == 'RN' ? 'selected' : ''); ?>>Rio Grande do Norte</option>
+                                <option value="RS" <?php echo e(old('uf', $empresa->uf) == 'RS' ? 'selected' : ''); ?>>Rio Grande do Sul</option>
+                                <option value="RO" <?php echo e(old('uf', $empresa->uf) == 'RO' ? 'selected' : ''); ?>>Rondônia</option>
+                                <option value="RR" <?php echo e(old('uf', $empresa->uf) == 'RR' ? 'selected' : ''); ?>>Roraima</option>
+                                <option value="SC" <?php echo e(old('uf', $empresa->uf) == 'SC' ? 'selected' : ''); ?>>Santa Catarina</option>
+                                <option value="SP" <?php echo e(old('uf', $empresa->uf) == 'SP' ? 'selected' : ''); ?>>São Paulo</option>
+                                <option value="SE" <?php echo e(old('uf', $empresa->uf) == 'SE' ? 'selected' : ''); ?>>Sergipe</option>
+                                <option value="TO" <?php echo e(old('uf', $empresa->uf) == 'TO' ? 'selected' : ''); ?>>Tocantins</option>
                             </select>
-                            <?php $__errorArgs = ['endereco_estado'];
+                            <?php $__errorArgs = ['uf'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -453,6 +449,33 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="celular" class="form-label">Celular</label>
+                            <input type="text" 
+                                   class="form-control <?php $__errorArgs = ['celular'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                   id="celular" 
+                                   name="celular" 
+                                   value="<?php echo e(old('celular', $empresa->celular)); ?>"
+                                   placeholder="(00) 90000-0000">
+                            <?php $__errorArgs = ['celular'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
                         <div class="col-md-4 mb-3">
                             <label for="email" class="form-label">E-mail</label>
                             <input type="email" 
@@ -480,9 +503,9 @@ endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="website" class="form-label">Website</label>
+                            <label for="site" class="form-label">Website</label>
                             <input type="url" 
-                                   class="form-control <?php $__errorArgs = ['website'];
+                                   class="form-control <?php $__errorArgs = ['site'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -490,11 +513,11 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                   id="website" 
-                                   name="website" 
-                                   value="<?php echo e(old('website', $empresa->website)); ?>"
+                                   id="site" 
+                                   name="site" 
+                                   value="<?php echo e(old('site', $empresa->site)); ?>"
                                    placeholder="https://www.empresa.com">
-                            <?php $__errorArgs = ['website'];
+                            <?php $__errorArgs = ['site'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -531,9 +554,10 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" id="status" name="status">
-                            <option value="ativa" <?php echo e(old('status', $empresa->status) == 'ativa' ? 'selected' : ''); ?>>Ativa</option>
-                            <option value="inativa" <?php echo e(old('status', $empresa->status) == 'inativa' ? 'selected' : ''); ?>>Inativa</option>
-                            <option value="suspensa" <?php echo e(old('status', $empresa->status) == 'suspensa' ? 'selected' : ''); ?>>Suspensa</option>
+                            <option value="ativo" <?php echo e(old('status', $empresa->status) == 'ativo' ? 'selected' : ''); ?>>Ativo</option>
+                            <option value="inativo" <?php echo e(old('status', $empresa->status) == 'inativo' ? 'selected' : ''); ?>>Inativo</option>
+                            <option value="suspenso" <?php echo e(old('status', $empresa->status) == 'suspenso' ? 'selected' : ''); ?>>Suspenso</option>
+                            <option value="bloqueado" <?php echo e(old('status', $empresa->status) == 'bloqueado' ? 'selected' : ''); ?>>Bloqueado</option>
                         </select>
                         <?php $__errorArgs = ['status'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -666,21 +690,6 @@ unset($__errorArgs, $__bag); ?>
     }, false);
 })();
 
-// Auto-gerar slug a partir do nome
-document.getElementById('nome').addEventListener('input', function() {
-    const nome = this.value;
-    const slug = nome
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim('-');
-    
-    document.getElementById('slug').value = slug;
-});
-
 // Máscara para CNPJ
 document.getElementById('cnpj').addEventListener('input', function() {
     let value = this.value.replace(/\D/g, '');
@@ -698,6 +707,30 @@ document.getElementById('telefone').addEventListener('input', function() {
     let value = this.value.replace(/\D/g, '');
     if (value.length <= 11) {
         if (value.length <= 10) {
+            value = value.replace(/^(\d{2})(\d{4})(\d)/, '($1) $2-$3');
+        } else {
+            value = value.replace(/^(\d{2})(\d{5})(\d)/, '($1) $2-$3');
+        }
+        this.value = value;
+    }
+});
+
+// Máscara para celular
+document.getElementById('celular').addEventListener('input', function() {
+    let value = this.value.replace(/\D/g, '');
+    if (value.length <= 11) {
+        if (value.length <= 10) {
+            value = value.replace(/^(\d{2})(\d{4})(\d)/, '($1) $2-$3');
+        } else {
+            value = value.replace(/^(\d{2})(\d{5})(\d)/, '($1) $2-$3');
+        }
+        this.value = value;
+    }
+});
+document.getElementById('telefone').addEventListener('input', function() {
+    let value = this.value.replace(/\D/g, '');
+    if (value.length <= 11) {
+        if (value.length <= 10) {
             value = value.replace(/^(\d{2})(\d)/, '($1) $2');
             value = value.replace(/(\d{4})(\d)/, '$1-$2');
         } else {
@@ -709,7 +742,7 @@ document.getElementById('telefone').addEventListener('input', function() {
 });
 
 // Máscara para CEP
-document.getElementById('endereco_cep').addEventListener('input', function() {
+document.getElementById('cep').addEventListener('input', function() {
     let value = this.value.replace(/\D/g, '');
     if (value.length <= 8) {
         value = value.replace(/^(\d{5})(\d)/, '$1-$2');
@@ -718,18 +751,18 @@ document.getElementById('endereco_cep').addEventListener('input', function() {
 });
 
 // Buscar endereço pelo CEP
-document.getElementById('endereco_cep').addEventListener('blur', function() {
+document.getElementById('cep').addEventListener('blur', function() {
     const cep = this.value.replace(/\D/g, '');
     if (cep.length === 8) {
         fetch(`https://viacep.com.br/ws/${cep}/json/`)
             .then(response => response.json())
             .then(data => {
                 if (!data.erro) {
-                    document.getElementById('endereco_logradouro').value = data.logradouro;
-                    document.getElementById('endereco_bairro').value = data.bairro;
-                    document.getElementById('endereco_cidade').value = data.localidade;
-                    document.getElementById('endereco_estado').value = data.uf;
-                    document.getElementById('endereco_numero').focus();
+                    document.getElementById('logradouro').value = data.logradouro;
+                    document.getElementById('bairro').value = data.bairro;
+                    document.getElementById('cidade').value = data.localidade;
+                    document.getElementById('uf').value = data.uf;
+                    document.getElementById('numero').focus();
                 }
             })
             .catch(error => console.log('Erro ao buscar CEP:', error));

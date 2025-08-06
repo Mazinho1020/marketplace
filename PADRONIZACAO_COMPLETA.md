@@ -11,14 +11,17 @@
 3. [Padrões de Frontend (Theme Hyper)](#padrões-de-frontend-theme-hyper)
 4. [Padrões de Código](#padrões-de-código)
 5. [Base de Dados](#base-de-dados) 📖 **Ver**: [`PADRAO_BANCO_DADOS.md`](./PADRAO_BANCO_DADOS.md)
-6. [Validações e Segurança](#validações-e-segurança)
-7. [Configurações e Ambiente](#configurações-e-ambiente)
-8. [Sistema de Fidelidade](#sistema-de-fidelidade)
+6. [Sistema de Permissões Automáticas](#sistema-de-permissões-automáticas) 🔐 **Ver**: [`SISTEMA_PERMISSOES_AUTOMATICAS.md`](./SISTEMA_PERMISSOES_AUTOMATICAS.md)
+7. [Validações e Segurança](#validações-e-segurança)
+8. [Configurações e Ambiente](#configurações-e-ambiente)
+9. [Sistema de Fidelidade](#sistema-de-fidelidade)
 
 ### **📋 Documentos Auxiliares**
 
 - [`PADRAO_BANCO_DADOS.md`](./PADRAO_BANCO_DADOS.md) - Padrão completo para banco de dados
 - [`CHECKLIST_BANCO_DADOS.md`](./CHECKLIST_BANCO_DADOS.md) - Checklist rápido para banco de dados
+- [`SISTEMA_PERMISSOES_AUTOMATICAS.md`](./SISTEMA_PERMISSOES_AUTOMATICAS.md) - Sistema de permissões automáticas para todo o site
+- [`TESTE_SISTEMA_PERMISSOES.md`](./TESTE_SISTEMA_PERMISSOES.md) - Guia de teste do sistema de permissões
 
 ---
 
@@ -487,7 +490,183 @@ return redirect()->back()
 
 ---
 
-## 🔧 **PADRÕES DE BACKEND (LARAVEL)**
+## �️ **PADRÕES DE ROTAS (COM PERMISSÕES AUTOMÁTICAS)**
+
+### **Estrutura de Rotas Obrigatória**
+
+#### **1. Rotas Protegidas (Comerciantes)**
+
+```php
+// routes/comerciantes.php ou routes/web.php
+Route::middleware(['comerciantes.protected'])->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Empresas - Permissões automáticas: empresa.visualizar, empresa.criar, empresa.editar, empresa.excluir
+    Route::resource('empresas', EmpresaController::class);
+
+    // Produtos - Permissões automáticas: produto.visualizar, produto.criar, produto.editar, produto.excluir
+    Route::resource('produtos', ProdutoController::class);
+
+    // Vendas - Permissões automáticas: venda.visualizar, venda.criar, venda.editar, venda.excluir
+    Route::resource('vendas', VendaController::class);
+
+    // Usuários aninhados por empresa
+    Route::resource('empresas.usuarios', UsuarioController::class)
+        ->except(['index', 'show']); // Permissões: usuario.criar, usuario.editar, usuario.excluir
+
+    // Rotas específicas com permissões customizadas
+    Route::get('/relatorios', [RelatorioController::class, 'index'])->name('relatorios.index');
+    Route::get('/relatorios/vendas', [RelatorioController::class, 'vendas'])->name('relatorios.vendas');
+    Route::get('/relatorios/export', [RelatorioController::class, 'export'])->name('relatorios.export');
+});
+```
+
+#### **2. Rotas Protegidas (Admin)**
+
+```php
+// routes/admin.php
+Route::prefix('admin')->name('admin.')->middleware(['admin.protected'])->group(function () {
+
+    // Dashboard
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Gestão de Empresas
+    Route::resource('empresas', EmpresaController::class);
+
+    // Gestão de Usuários do Sistema
+    Route::resource('usuarios', UsuarioController::class);
+
+    // Configurações do Sistema
+    Route::resource('configuracoes', ConfiguracaoController::class)->only(['index', 'update']);
+
+    // Relatórios Administrativos
+    Route::prefix('relatorios')->name('relatorios.')->group(function () {
+        Route::get('/', [RelatorioController::class, 'index'])->name('index');
+        Route::get('/financeiro', [RelatorioController::class, 'financeiro'])->name('financeiro');
+        Route::get('/usuarios', [RelatorioController::class, 'usuarios'])->name('usuarios');
+    });
+});
+```
+
+#### **3. Rotas Públicas (Sem Proteção)**
+
+```php
+// routes/web.php
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/sobre', [HomeController::class, 'sobre'])->name('sobre');
+Route::get('/contato', [ContatoController::class, 'index'])->name('contato');
+Route::post('/contato', [ContatoController::class, 'enviar'])->name('contato.enviar');
+
+// Autenticação
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [RegisterController::class, 'register']);
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+});
+```
+
+### **Nomenclatura de Rotas**
+
+#### **Padrão Obrigatório:**
+
+```php
+// ✅ CORRETO - Seguindo convenções
+Route::resource('produtos', ProdutoController::class);
+// Gera: produtos.index, produtos.create, produtos.store, produtos.show, produtos.edit, produtos.update, produtos.destroy
+
+// Rotas nomeadas específicas
+Route::get('/dashboard/estatisticas', [DashboardController::class, 'estatisticas'])->name('dashboard.estatisticas');
+Route::post('/produtos/{produto}/duplicar', [ProdutoController::class, 'duplicar'])->name('produtos.duplicar');
+
+// ❌ EVITAR - Nomes inconsistentes
+Route::get('/lista-produtos', [ProdutoController::class, 'index'])->name('lista_produtos');
+Route::get('/product-list', [ProdutoController::class, 'index'])->name('productList');
+```
+
+### **Mapeamento de Permissões por Rota**
+
+| Método    | Rota                  | Ação Controller | Permissão Gerada     |
+| --------- | --------------------- | --------------- | -------------------- |
+| GET       | `/produtos`           | `index()`       | `produto.visualizar` |
+| GET       | `/produtos/create`    | `create()`      | `produto.criar`      |
+| POST      | `/produtos`           | `store()`       | `produto.criar`      |
+| GET       | `/produtos/{id}`      | `show()`        | `produto.visualizar` |
+| GET       | `/produtos/{id}/edit` | `edit()`        | `produto.editar`     |
+| PUT/PATCH | `/produtos/{id}`      | `update()`      | `produto.editar`     |
+| DELETE    | `/produtos/{id}`      | `destroy()`     | `produto.excluir`    |
+
+#### **Rotas Personalizadas:**
+
+```php
+// Para ações customizadas, adicione ao mapeamento do middleware
+Route::post('/produtos/{produto}/duplicate', [ProdutoController::class, 'duplicate'])
+     ->name('produtos.duplicate'); // Permissão: produto.criar (definido no middleware)
+
+Route::patch('/produtos/{produto}/toggle-status', [ProdutoController::class, 'toggleStatus'])
+      ->name('produtos.toggle-status'); // Permissão: produto.editar
+```
+
+### **Grupos de Middleware Disponíveis**
+
+```php
+// Middleware automático para comerciantes
+'comerciantes.protected' => [
+    'auth',
+    'verified',
+    'empresa.access', // Verifica se usuário tem empresa associada
+    'auto.permission' // Verifica permissões automaticamente
+]
+
+// Middleware automático para admin
+'admin.protected' => [
+    'auth',
+    'verified',
+    'role:admin', // Verifica se é administrador
+    'auto.permission' // Verifica permissões automaticamente
+]
+```
+
+### **Como Adicionar Novas Rotas**
+
+#### **1. Para Comerciantes:**
+
+```php
+// 1. Adicione no grupo protegido
+Route::middleware(['comerciantes.protected'])->group(function () {
+    // 2. Use resource para CRUD completo
+    Route::resource('clientes', ClienteController::class);
+
+    // 3. Ou rotas específicas
+    Route::get('/dashboard/metricas', [DashboardController::class, 'metricas'])
+         ->name('dashboard.metricas'); // Permissão: dashboard.visualizar
+});
+
+// 4. Pronto! Permissões automáticas:
+// - cliente.visualizar (index, show)
+// - cliente.criar (create, store)
+// - cliente.editar (edit, update)
+// - cliente.excluir (destroy)
+```
+
+#### **2. Para Admin:**
+
+```php
+Route::prefix('admin')->name('admin.')->middleware(['admin.protected'])->group(function () {
+    Route::resource('configuracoes', ConfiguracaoController::class);
+    // Permissões automáticas: configuracao.visualizar, configuracao.criar, etc.
+});
+```
+
+---
+
+## �🔧 **PADRÕES DE BACKEND (LARAVEL)**
 
 ### **Models (Estrutura Obrigatória)**
 
@@ -697,14 +876,17 @@ class ModelNameController extends Controller
     public function __construct(
         protected ModelNameService $modelNameService
     ) {
+        // ✅ Middleware de autenticação básico
         $this->middleware('auth');
         $this->middleware('verified');
-        // Middleware específico por tipo de usuário
-        $this->middleware('role:admin')->only(['destroy']);
+
+        // ✅ Permissões são verificadas automaticamente pelo middleware 'auto.permission'
+        // ❌ Não precisa mais: $this->middleware('permission:...')->only([...]);
     }
 
     /**
      * Exibe lista do recurso
+     * 🔐 Permissão automática: modelname.visualizar
      */
     public function index(Request $request): View
     {
@@ -731,6 +913,7 @@ class ModelNameController extends Controller
 
     /**
      * Mostra formulário de criação
+     * 🔐 Permissão automática: modelname.criar
      */
     public function create(): View
     {
@@ -739,10 +922,12 @@ class ModelNameController extends Controller
 
     /**
      * Armazena novo recurso
+     * 🔐 Permissão automática: modelname.criar
      */
     public function store(StoreModelNameRequest $request): RedirectResponse
     {
         try {
+            // ✅ Permissão já verificada automaticamente - apenas implemente a lógica
             $this->modelNameService->create($request->validated());
 
             return redirect()
@@ -759,32 +944,36 @@ class ModelNameController extends Controller
 
     /**
      * Exibe recurso específico
+     * 🔐 Permissão automática: modelname.visualizar
      */
     public function show(ModelName $modelName): View
     {
-        $this->authorize('view', $modelName);
+        // ❌ Não precisa mais: $this->authorize('view', $modelName);
+        // ✅ Permissão já verificada automaticamente
 
         return view('{user_type}.model_name.show', compact('modelName'));
     }
 
     /**
      * Mostra formulário de edição
+     * 🔐 Permissão automática: modelname.editar
      */
     public function edit(ModelName $modelName): View
     {
-        $this->authorize('update', $modelName);
+        // ❌ Não precisa mais: $this->authorize('update', $modelName);
+        // ✅ Permissão já verificada automaticamente
 
         return view('{user_type}.model_name.edit', compact('modelName'));
     }
 
     /**
      * Atualiza recurso
+     * 🔐 Permissão automática: modelname.editar
      */
     public function update(UpdateModelNameRequest $request, ModelName $modelName): RedirectResponse
     {
-        $this->authorize('update', $modelName);
-
         try {
+            // ✅ Permissão já verificada automaticamente
             $this->modelNameService->update($modelName, $request->validated());
 
             return redirect()
@@ -801,12 +990,12 @@ class ModelNameController extends Controller
 
     /**
      * Remove recurso
+     * 🔐 Permissão automática: modelname.excluir
      */
     public function destroy(ModelName $modelName): RedirectResponse
     {
-        $this->authorize('delete', $modelName);
-
         try {
+            // ✅ Permissão já verificada automaticamente
             $this->modelNameService->delete($modelName);
 
             return redirect()
@@ -817,6 +1006,26 @@ class ModelNameController extends Controller
             return redirect()
                 ->back()
                 ->with('error', 'Erro ao excluir registro: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Ação customizada - duplicar
+     * 🔐 Permissão automática: modelname.criar (definido no middleware)
+     */
+    public function duplicate(ModelName $modelName): RedirectResponse
+    {
+        try {
+            $this->modelNameService->duplicate($modelName);
+
+            return redirect()
+                ->route('{user_type}.model_names.index')
+                ->with('success', 'Registro duplicado com sucesso!');
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->with('error', 'Erro ao duplicar registro: ' . $e->getMessage());
         }
     }
 }
@@ -1044,6 +1253,151 @@ return new class extends Migration
 > 🔄 **Scripts completos**: Ver seção "Script para Tabelas Existentes" em [`PADRAO_BANCO_DADOS.md`](./PADRAO_BANCO_DADOS.md)
 
 Para aplicar os padrões em tabelas já existentes, use os scripts SQL e migrations disponíveis no documento dedicado.
+
+---
+
+## 🔐 **SISTEMA DE PERMISSÕES AUTOMÁTICAS**
+
+> 🚀 **DOCUMENTO DEDICADO**: Para o guia completo de uso, consulte: [`SISTEMA_PERMISSOES_AUTOMATICAS.md`](./SISTEMA_PERMISSOES_AUTOMATICAS.md)
+
+### **Visão Geral**
+
+O sistema de permissões automáticas foi implementado para **todo o site**, eliminando a necessidade de verificações manuais de permissão em cada controller. O sistema detecta automaticamente as permissões necessárias baseado nas rotas acessadas.
+
+### **Como Funciona**
+
+#### **1. Configuração Automática**
+
+```bash
+# Execute uma única vez para configurar todo o sistema
+php artisan permissions:setup
+```
+
+#### **2. Para Novas Aplicações/Módulos**
+
+**✅ NÃO precisa chamar métodos manualmente!** Apenas use o middleware nos grupos de rotas:
+
+```php
+// routes/web.php ou routes/comerciantes.php
+Route::middleware(['comerciantes.protected'])->group(function () {
+    // TODAS as rotas aqui serão automaticamente protegidas
+    Route::resource('produtos', ProdutoController::class);
+    Route::resource('vendas', VendaController::class);
+    Route::resource('clientes', ClienteController::class);
+});
+```
+
+#### **3. Mapeamento Automático de Permissões**
+
+| Rota               | Método HTTP | Permissão Gerada     |
+| ------------------ | ----------- | -------------------- |
+| `produtos.index`   | GET         | `produto.visualizar` |
+| `produtos.create`  | GET         | `produto.criar`      |
+| `produtos.store`   | POST        | `produto.criar`      |
+| `produtos.show`    | GET         | `produto.visualizar` |
+| `produtos.edit`    | GET         | `produto.editar`     |
+| `produtos.update`  | PUT/PATCH   | `produto.editar`     |
+| `produtos.destroy` | DELETE      | `produto.excluir`    |
+
+#### **4. Exemplos Práticos**
+
+```php
+// ❌ ANTES: Você tinha que fazer isso em cada método
+public function index()
+{
+    if (!auth()->user()->hasPermission('produto.visualizar')) {
+        abort(403);
+    }
+    // ... resto do código
+}
+
+// ✅ AGORA: Automático! Apenas escreva sua lógica
+public function index()
+{
+    // Permissão já verificada automaticamente!
+    return view('produtos.index', compact('produtos'));
+}
+```
+
+### **Uso nas Views (Blade)**
+
+#### **Novas Diretivas Blade Disponíveis**
+
+```blade
+{{-- Verificar permissão simples --}}
+@permission('produto.criar')
+    <a href="{{ route('produtos.create') }}" class="btn btn-primary">
+        Novo Produto
+    </a>
+@endpermission
+
+{{-- Verificar múltiplas permissões (qualquer uma) --}}
+@anypermission('produto.editar', 'produto.excluir')
+    <div class="btn-group">
+        <!-- Botões de ação -->
+    </div>
+@endanypermission
+
+{{-- Verificar permissão específica de empresa --}}
+@empresaPermission('usuario.gerenciar', $empresa->id)
+    <button class="btn btn-success">
+        Gerenciar Usuários
+    </button>
+@endempresaPermission
+
+{{-- Verificar role/função --}}
+@role('administrador')
+    <div class="admin-panel">
+        <!-- Painel administrativo -->
+    </div>
+@endrole
+```
+
+### **Benefícios para Desenvolvimento**
+
+#### **✅ Vantagens**
+
+1. **Zero Configuração**: Novas funcionalidades já vêm protegidas
+2. **Consistência**: Todas as permissões seguem o mesmo padrão
+3. **Manutenibilidade**: Um local central para gerenciar permissões
+4. **Escalabilidade**: Funciona automaticamente com qualquer número de recursos
+5. **Segurança**: Por padrão, tudo é protegido (fail-safe)
+
+#### **🎯 Para Desenvolvedores**
+
+```php
+// Criando um novo módulo? É só isso:
+
+// 1. Criar o controller
+class RelatorioController extends Controller
+{
+    public function index() { /* sua lógica */ }
+    public function create() { /* sua lógica */ }
+    public function store() { /* sua lógica */ }
+    // ... outros métodos
+}
+
+// 2. Adicionar as rotas no grupo protegido
+Route::middleware(['comerciantes.protected'])->group(function () {
+    Route::resource('relatorios', RelatorioController::class);
+});
+
+// 3. Pronto! Permissões automáticas:
+// - relatorio.visualizar
+// - relatorio.criar
+// - relatorio.editar
+// - relatorio.excluir
+```
+
+### **Resultado Final**
+
+- ✅ **Todo o site protegido automaticamente**
+- ✅ **Novas funcionalidades são seguras por padrão**
+- ✅ **Zero código repetitivo de verificação**
+- ✅ **Interface se adapta às permissões do usuário**
+- ✅ **Fácil manutenção e escalabilidade**
+
+**Resumo**: Após a configuração inicial, você nunca mais precisa se preocupar com permissões manualmente. O sistema cuida de tudo automaticamente! 🎉
 
 ---
 
@@ -1431,13 +1785,26 @@ function cancelarTransacao(id) {
 - [ ] Criar Form Requests para validação
 - [ ] Criar Service para lógica de negócio
 - [ ] Criar Controller seguindo estrutura padrão
+- [ ] **Adicionar rotas ao grupo protegido** `comerciantes.protected` ou `admin.protected`
 - [ ] Criar views usando componentes Theme Hyper
+- [ ] **Usar diretivas Blade** `@permission`, `@anypermission`, `@empresaPermission`
 - [ ] Implementar testes unitários e feature
 - [ ] Adicionar tradução de mensagens
-- [ ] Implementar autorização (Policies)
-- [ ] Documenter API endpoints (se aplicável)
+- [ ] ~~Implementar autorização (Policies)~~ ✅ **Automático via middleware**
+- [ ] Documentar API endpoints (se aplicável)
 - [ ] Testar responsividade
 - [ ] Verificar performance (N+1, cache)
+
+### **Para cada Controller:**
+
+- [ ] Usar injeção de dependência para Services
+- [ ] Implementar tratamento de exceções adequado
+- [ ] **Adicionar rotas ao grupo de middleware protegido**
+- [ ] ~~Implementar verificações manuais de permissão~~ ✅ **Automático**
+- [ ] Usar Form Requests para validação
+- [ ] Retornar respostas consistentes
+- [ ] Implementar paginação quando necessário
+- [ ] Adicionar logs de auditoria quando aplicável
 
 ### **Para cada Model:**
 
@@ -1456,10 +1823,63 @@ function cancelarTransacao(id) {
 - [ ] Usar componentes Blade reutilizáveis
 - [ ] Implementar breadcrumb
 - [ ] Adicionar filtros quando necessário
+- [ ] **Usar diretivas de permissão** `@permission`, `@anypermission`, `@empresaPermission`
 - [ ] Usar classes CSS do Theme Hyper
 - [ ] Implementar JavaScript necessário
 - [ ] Adicionar loading states
 - [ ] Testar em diferentes resoluções
+
+### **Exemplo de View com Permissões:**
+
+```blade
+@extends('layouts.merchant')
+
+@section('content')
+<div class="card">
+    <div class="card-header">
+        <h4>Lista de Produtos</h4>
+        <div class="card-widgets">
+            @permission('produto.criar')
+                <a href="{{ route('produtos.create') }}" class="btn btn-primary">
+                    <i class="uil uil-plus me-1"></i> Novo Produto
+                </a>
+            @endpermission
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Tabela -->
+        <table class="table">
+            <tbody>
+                @foreach($produtos as $produto)
+                <tr>
+                    <td>{{ $produto->nome }}</td>
+                    <td>
+                        @permission('produto.visualizar')
+                            <a href="{{ route('produtos.show', $produto) }}" class="btn btn-sm btn-info">
+                                <i class="uil uil-eye"></i>
+                            </a>
+                        @endpermission
+
+                        @permission('produto.editar')
+                            <a href="{{ route('produtos.edit', $produto) }}" class="btn btn-sm btn-warning">
+                                <i class="uil uil-edit"></i>
+                            </a>
+                        @endpermission
+
+                        @permission('produto.excluir')
+                            <button class="btn btn-sm btn-danger" onclick="excluir({{ $produto->id }})">
+                                <i class="uil uil-trash"></i>
+                            </button>
+                        @endpermission
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endsection
+```
 
 ---
 
@@ -1702,9 +2122,18 @@ Para configurações específicas do projeto, use o arquivo `.vscode/settings.js
 
 ---
 
-**📅 Documento atualizado em: {{ date('d/m/Y H:i') }}**
+**📅 Documento atualizado em: 06/08/2025 - Sistema de Permissões Automáticas Implementado**
 
 **👨‍💻 Desenvolvedor: Mazinho1020**
+
+**🔐 Recursos Adicionados:**
+
+- ✅ Sistema de Permissões Automáticas para todo o site
+- ✅ Middleware `AutoPermissionCheck` com detecção automática de permissões
+- ✅ Diretivas Blade: `@permission`, `@anypermission`, `@empresaPermission`, `@role`
+- ✅ Comando de configuração: `php artisan permissions:setup`
+- ✅ Grupos de middleware protegidos: `comerciantes.protected`, `admin.protected`
+- ✅ Documentação completa em [`SISTEMA_PERMISSOES_AUTOMATICAS.md`](./SISTEMA_PERMISSOES_AUTOMATICAS.md)
 
 ---
 

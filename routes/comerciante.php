@@ -16,24 +16,23 @@ use function Laravel\Prompts\alert;
  */
 Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
 
-    /**
-     * ROTAS PÚBLICAS (sem autenticação)
-     */
-    Route::middleware('guest:comerciante')->group(function () {
-        // Login
+    // ========================
+    // ROTAS PÚBLICAS (Login)
+    // ========================
+    Route::middleware(['guest:comerciante'])->group(function () {
         Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [LoginController::class, 'login']);
 
-        // Cadastro (se você quiser permitir auto-cadastro)
         // Route::get('/cadastro', [RegisterController::class, 'showRegistrationForm'])->name('register');
         // Route::post('/cadastro', [RegisterController::class, 'register']);
     });
+});
 
-    /**
-     * ROTAS PROTEGIDAS (com autenticação)
-     */
-    Route::middleware(['auth.comerciante'])->group(function () {
-
+// ===========================
+// ROTAS PROTEGIDAS (SEPARADAS)
+// ===========================
+Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
+    Route::middleware(['comerciantes.protected'])->group(function () {
         // Logout
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
@@ -66,6 +65,7 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
             Route::post('/usuarios', [EmpresaController::class, 'adicionarUsuario'])->name('usuarios.store');
             Route::post('/usuarios/criar', [EmpresaController::class, 'criarEVincularUsuario'])->name('usuarios.create');
             Route::get('/usuarios/{user}', [EmpresaController::class, 'mostrarUsuario'])->name('usuarios.show');
+            Route::get('/usuarios/{user}/edit', [EmpresaController::class, 'editarUsuarioForm'])->name('usuarios.edit');
             Route::put('/usuarios/{user}', [EmpresaController::class, 'editarUsuario'])->name('usuarios.update');
             Route::delete('/usuarios/{user}', [EmpresaController::class, 'removerUsuario'])->name('usuarios.destroy');
         });
