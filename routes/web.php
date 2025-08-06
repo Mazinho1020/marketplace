@@ -877,11 +877,6 @@ Route::middleware('auth.simple')->group(function () {
         return redirect('/admin/dashboard');
     })->middleware('auth.simple:60');
 
-    // Admin Dashboard - requer nível 60 ou superior (supervisor+)
-    Route::get('/admin/dashboard', [DashboardController::class, 'adminDashboard'])
-        ->middleware('auth.simple:60')
-        ->name('admin.dashboard');
-
     // Página de acesso negado
     Route::get('/admin/access-denied', function () {
         return view('admin.access-denied');

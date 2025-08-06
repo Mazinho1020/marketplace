@@ -5,15 +5,10 @@ use App\Http\Controllers\Admin\Permission\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
-// Grupo de rotas administrativas
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+// Grupo de rotas específicas de permissões (evitando conflitos)
+Route::prefix('admin/permission-management')->name('admin.permission.')->middleware(['auth'])->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->middleware('permission:dashboard.visualizar')->name('dashboard');
-
-    // Usuários
+    // Usuários - Gestão de Permissões
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])
             ->middleware('permission:usuarios.listar')
