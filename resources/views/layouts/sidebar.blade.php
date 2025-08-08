@@ -71,25 +71,35 @@
                 <!-- E-commerce -->
                 @if(Auth::user() && in_array(Auth::user()->tipo_id, [1, 2])) <!-- Admin ou Comerciante -->
                 <li class="nav-item">
-                    <a class="nav-link menu-link {{ request()->is('ecommerce*') ? 'active' : '' }}" href="#sidebarEcommerce" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->is('ecommerce*') ? 'true' : 'false' }}" aria-controls="sidebarEcommerce">
-                        <i class="ri-shopping-cart-line"></i> <span data-key="t-ecommerce">E-commerce</span>
+                    <a class="nav-link menu-link {{ request()->routeIs('comerciantes.produtos.*') ? 'active' : '' }}" href="#sidebarEcommerce" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('comerciantes.produtos.*') ? 'true' : 'false' }}" aria-controls="sidebarEcommerce">
+                        <i class="ri-shopping-cart-line"></i> <span data-key="t-ecommerce">Produtos</span>
                     </a>
-                    <div class="collapse menu-dropdown {{ request()->is('ecommerce*') ? 'show' : '' }}" id="sidebarEcommerce">
+                    <div class="collapse menu-dropdown {{ request()->routeIs('comerciantes.produtos.*') ? 'show' : '' }}" id="sidebarEcommerce">
                         <ul class="nav nav-sm flex-column">
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-products"> Produtos </a>
+                                <a href="{{ route('comerciantes.produtos.index') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.index') ? 'active' : '' }}" data-key="t-products">
+                                    <i class="ri-list-check"></i> Todos os Produtos
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-orders"> Pedidos </a>
+                                <a href="{{ route('comerciantes.produtos.create') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.create') ? 'active' : '' }}" data-key="t-add-product">
+                                    <i class="ri-add-circle-line"></i> Novo Produto
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-customers"> Clientes </a>
+                                <a href="{{ route('comerciantes.produtos.categorias.index') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.categorias.*') ? 'active' : '' }}" data-key="t-categories">
+                                    <i class="ri-bookmark-line"></i> Categorias
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-shopping-cart"> Carrinho </a>
+                                <a href="{{ route('comerciantes.produtos.marcas.index') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.marcas.*') ? 'active' : '' }}" data-key="t-brands">
+                                    <i class="ri-award-line"></i> Marcas
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link" data-key="t-checkout"> Checkout </a>
+                                <a href="{{ route('comerciantes.produtos.relatorio-estoque') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.relatorio-estoque') ? 'active' : '' }}" data-key="t-stock-report">
+                                    <i class="ri-file-chart-line"></i> Relatório de Estoque
+                                </a>
                             </li>
                         </ul>
                     </div>

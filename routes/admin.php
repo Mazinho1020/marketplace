@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\EmpresaController;
+use App\Http\Controllers\Admin\Api\ProdutoApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,5 +77,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/revenue', [ReportController::class, 'revenue'])->name('revenue');
         Route::get('/export/{type}', [ReportController::class, 'export'])->name('export');
+    });
+
+    // API de Produtos para Admin
+    Route::prefix('api/produtos')->name('api.produtos.')->group(function () {
+        Route::get('/dashboard', [ProdutoApiController::class, 'dashboard'])->name('dashboard');
+        Route::get('/', [ProdutoApiController::class, 'index'])->name('index');
+        Route::post('/', [ProdutoApiController::class, 'store'])->name('store');
+        Route::get('/{produto}', [ProdutoApiController::class, 'show'])->name('show');
+        Route::put('/{produto}', [ProdutoApiController::class, 'update'])->name('update');
+        Route::delete('/{produto}', [ProdutoApiController::class, 'destroy'])->name('destroy');
+        Route::patch('/{produto}/estoque', [ProdutoApiController::class, 'atualizarEstoque'])->name('atualizar-estoque');
+        Route::get('/{produto}/movimentacoes', [ProdutoApiController::class, 'relatorioMovimentacoes'])->name('movimentacoes');
+        Route::post('/bulk-update', [ProdutoApiController::class, 'bulkUpdate'])->name('bulk-update');
+        Route::get('/relatorio/estoque-baixo', [ProdutoApiController::class, 'relatorioEstoqueBaixo'])->name('relatorio.estoque-baixo');
+        Route::get('/relatorio/vendas-periodo', [ProdutoApiController::class, 'relatorioVendasPeriodo'])->name('relatorio.vendas-periodo');
     });
 });

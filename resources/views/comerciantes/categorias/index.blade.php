@@ -1,6 +1,6 @@
 @extends('comerciantes.layouts.app')
 
-@section('title', 'Marcas de Produtos')
+@section('title', 'Categorias de Produtos')
 
 @section('content')
 <div class="container-fluid">
@@ -9,17 +9,17 @@
             <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 class="fw-bold mb-1">Marcas de Produtos</h2>
+                    <h2 class="fw-bold mb-1">Categorias de Produtos</h2>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ route('comerciantes.dashboard') }}">Dashboard</a></li>
-                            <li class="breadcrumb-item active">Marcas</li>
+                            <li class="breadcrumb-item active">Categorias</li>
                         </ol>
                     </nav>
                 </div>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMarca">
-                        <i class="fas fa-plus me-2"></i>Nova Marca
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCategoria">
+                        <i class="fas fa-plus me-2"></i>Nova Categoria
                     </button>
                 </div>
             </div>
@@ -35,7 +35,7 @@
                                    id="busca" 
                                    name="busca" 
                                    value="{{ request('busca') }}" 
-                                   placeholder="Nome da marca...">
+                                   placeholder="Nome da categoria...">
                         </div>
                         <div class="col-md-3">
                             <label for="status" class="form-label fw-semibold">Status</label>
@@ -59,7 +59,7 @@
                                 <button type="submit" class="btn btn-outline-primary">
                                     <i class="fas fa-search"></i>
                                 </button>
-                                <a href="{{ route('comerciantes.marcas.index') }}" class="btn btn-outline-secondary">
+                                <a href="{{ route('comerciantes.categorias.index') }}" class="btn btn-outline-secondary">
                                     <i class="fas fa-refresh"></i>
                                 </a>
                             </div>
@@ -68,21 +68,21 @@
                 </div>
             </div>
 
-            <!-- Lista de Marcas -->
+            <!-- Lista de Categorias -->
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-award text-primary me-2"></i>
-                        Lista de Marcas ({{ $marcas->total() ?? $marcas->count() }})
+                        <i class="fas fa-tags text-primary me-2"></i>
+                        Lista de Categorias ({{ $categorias->total() }})
                     </h5>
                 </div>
                 <div class="card-body p-0">
-                    @if($marcas->count() > 0)
+                    @if($categorias->count() > 0)
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Marca</th>
+                                        <th>Categoria</th>
                                         <th>Descrição</th>
                                         <th class="text-center">Produtos</th>
                                         <th class="text-center">Status</th>
@@ -91,36 +91,36 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($marcas as $marca)
+                                    @foreach($categorias as $categoria)
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
                                                          style="width: 40px; height: 40px;">
-                                                        <i class="fas fa-award text-white"></i>
+                                                        <i class="fas fa-tag text-white"></i>
                                                     </div>
                                                     <div>
-                                                        <h6 class="mb-0 fw-semibold">{{ $marca->nome }}</h6>
-                                                        @if($marca->slug)
-                                                            <small class="text-muted">{{ $marca->slug }}</small>
+                                                        <h6 class="mb-0 fw-semibold">{{ $categoria->nome }}</h6>
+                                                        @if($categoria->slug)
+                                                            <small class="text-muted">{{ $categoria->slug }}</small>
                                                         @endif
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
-                                                @if($marca->descricao)
-                                                    <span class="text-muted">{{ Str::limit($marca->descricao, 50) }}</span>
+                                                @if($categoria->descricao)
+                                                    <span class="text-muted">{{ Str::limit($categoria->descricao, 50) }}</span>
                                                 @else
                                                     <span class="text-muted fst-italic">Sem descrição</span>
                                                 @endif
                                             </td>
                                             <td class="text-center">
                                                 <span class="badge bg-info fs-6">
-                                                    {{ $marca->produtos_count ?? 0 }}
+                                                    {{ $categoria->produtos_count ?? 0 }}
                                                 </span>
                                             </td>
                                             <td class="text-center">
-                                                @if($marca->ativo)
+                                                @if($categoria->ativo)
                                                     <span class="badge bg-success">
                                                         <i class="fas fa-check-circle me-1"></i>Ativa
                                                     </span>
@@ -131,26 +131,26 @@
                                                 @endif
                                             </td>
                                             <td class="text-center text-muted">
-                                                {{ $marca->created_at->format('d/m/Y') }}
+                                                {{ $categoria->created_at->format('d/m/Y') }}
                                             </td>
                                             <td class="text-center">
                                                 <div class="btn-group btn-group-sm">
                                                     <button type="button" 
                                                             class="btn btn-outline-primary btn-sm" 
-                                                            onclick="editarMarca({{ $marca->id }})"
+                                                            onclick="editarCategoria({{ $categoria->id }})"
                                                             title="Editar">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     <button type="button" 
-                                                            class="btn btn-outline-{{ $marca->ativo ? 'warning' : 'success' }} btn-sm" 
-                                                            onclick="toggleStatus({{ $marca->id }})"
-                                                            title="{{ $marca->ativo ? 'Desativar' : 'Ativar' }}">
-                                                        <i class="fas fa-{{ $marca->ativo ? 'pause' : 'play' }}"></i>
+                                                            class="btn btn-outline-{{ $categoria->ativo ? 'warning' : 'success' }} btn-sm" 
+                                                            onclick="toggleStatus({{ $categoria->id }})"
+                                                            title="{{ $categoria->ativo ? 'Desativar' : 'Ativar' }}">
+                                                        <i class="fas fa-{{ $categoria->ativo ? 'pause' : 'play' }}"></i>
                                                     </button>
-                                                    @if($marca->produtos_count == 0)
+                                                    @if($categoria->produtos_count == 0)
                                                         <button type="button" 
                                                                 class="btn btn-outline-danger btn-sm" 
-                                                                onclick="excluirMarca({{ $marca->id }})"
+                                                                onclick="excluirCategoria({{ $categoria->id }})"
                                                                 title="Excluir">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
@@ -164,18 +164,18 @@
                         </div>
 
                         <!-- Paginação -->
-                        @if(method_exists($marcas, 'hasPages') && $marcas->hasPages())
+                        @if($categorias->hasPages())
                             <div class="card-footer bg-white">
-                                {{ $marcas->appends(request()->query())->links() }}
+                                {{ $categorias->appends(request()->query())->links() }}
                             </div>
                         @endif
                     @else
                         <div class="text-center py-5">
-                            <i class="fas fa-award text-muted fs-1 mb-3"></i>
-                            <h5 class="text-muted">Nenhuma marca encontrada</h5>
-                            <p class="text-muted mb-4">Comece criando sua primeira marca de produto</p>
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalMarca">
-                                <i class="fas fa-plus me-2"></i>Criar Primeira Marca
+                            <i class="fas fa-tags text-muted fs-1 mb-3"></i>
+                            <h5 class="text-muted">Nenhuma categoria encontrada</h5>
+                            <p class="text-muted mb-4">Comece criando sua primeira categoria de produto</p>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCategoria">
+                                <i class="fas fa-plus me-2"></i>Criar Primeira Categoria
                             </button>
                         </div>
                     @endif
@@ -185,23 +185,23 @@
     </div>
 </div>
 
-<!-- Modal Marca -->
-<div class="modal fade" id="modalMarca" tabindex="-1" aria-labelledby="modalMarcaLabel" aria-hidden="true">
+<!-- Modal Categoria -->
+<div class="modal fade" id="modalCategoria" tabindex="-1" aria-labelledby="modalCategoriaLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalMarcaLabel">
-                    <i class="fas fa-award text-primary me-2"></i>
-                    <span id="modalTitulo">Nova Marca</span>
+                <h5 class="modal-title" id="modalCategoriaLabel">
+                    <i class="fas fa-tag text-primary me-2"></i>
+                    <span id="modalTitulo">Nova Categoria</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="formMarca" method="POST">
+            <form id="formCategoria" method="POST">
                 @csrf
                 <div id="methodField"></div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="nome" class="form-label fw-semibold">Nome da Marca *</label>
+                        <label for="nome" class="form-label fw-semibold">Nome da Categoria *</label>
                         <input type="text" 
                                class="form-control" 
                                id="nome" 
@@ -238,7 +238,7 @@
                                    value="1" 
                                    checked>
                             <label class="form-check-label fw-semibold" for="ativo">
-                                Marca Ativa
+                                Categoria Ativa
                             </label>
                         </div>
                     </div>
@@ -266,17 +266,17 @@ $(document).ready(function() {
     });
 
     // Limpar formulário ao fechar modal
-    $('#modalMarca').on('hidden.bs.modal', function() {
-        $('#formMarca')[0].reset();
-        $('#formMarca').attr('action', '{{ route("comerciantes.marcas.store") }}');
+    $('#modalCategoria').on('hidden.bs.modal', function() {
+        $('#formCategoria')[0].reset();
+        $('#formCategoria').attr('action', '{{ route("comerciantes.categorias.store") }}');
         $('#methodField').html('');
-        $('#modalTitulo').text('Nova Marca');
+        $('#modalTitulo').text('Nova Categoria');
         $('.is-invalid').removeClass('is-invalid');
         $('.invalid-feedback').text('');
     });
 
     // Submit do formulário
-    $('#formMarca').on('submit', function(e) {
+    $('#formCategoria').on('submit', function(e) {
         e.preventDefault();
         
         const formData = new FormData(this);
@@ -295,10 +295,10 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.success) {
                     toastr.success(response.message);
-                    $('#modalMarca').modal('hide');
+                    $('#modalCategoria').modal('hide');
                     location.reload();
                 } else {
-                    toastr.error(response.message || 'Erro ao salvar marca');
+                    toastr.error(response.message || 'Erro ao salvar categoria');
                 }
             },
             error: function(xhr) {
@@ -310,33 +310,33 @@ $(document).ready(function() {
                         input.siblings('.invalid-feedback').text(errors[field][0]);
                     });
                 } else {
-                    toastr.error('Erro ao salvar marca');
+                    toastr.error('Erro ao salvar categoria');
                 }
             }
         });
     });
 });
 
-// Função para editar marca
-function editarMarca(id) {
-    $.get(`{{ route('comerciantes.marcas.index') }}/${id}`, function(marca) {
-        $('#modalTitulo').text('Editar Marca');
-        $('#formMarca').attr('action', `{{ route('comerciantes.marcas.index') }}/${id}`);
+// Função para editar categoria
+function editarCategoria(id) {
+    $.get(`{{ route('comerciantes.categorias.index') }}/${id}`, function(categoria) {
+        $('#modalTitulo').text('Editar Categoria');
+        $('#formCategoria').attr('action', `{{ route('comerciantes.categorias.index') }}/${id}`);
         $('#methodField').html('@method("PUT")');
         
-        $('#nome').val(marca.nome);
-        $('#slug').val(marca.slug);
-        $('#descricao').val(marca.descricao);
-        $('#ativo').prop('checked', marca.ativo);
+        $('#nome').val(categoria.nome);
+        $('#slug').val(categoria.slug);
+        $('#descricao').val(categoria.descricao);
+        $('#ativo').prop('checked', categoria.ativo);
         
-        $('#modalMarca').modal('show');
+        $('#modalCategoria').modal('show');
     });
 }
 
 // Função para toggle status
 function toggleStatus(id) {
     $.ajax({
-        url: `{{ route('comerciantes.marcas.index') }}/${id}/toggle-status`,
+        url: `{{ route('comerciantes.categorias.index') }}/${id}/toggle-status`,
         type: 'PATCH',
         data: {
             _token: '{{ csrf_token() }}'
@@ -355,11 +355,11 @@ function toggleStatus(id) {
     });
 }
 
-// Função para excluir marca
-function excluirMarca(id) {
-    if (confirm('Tem certeza que deseja excluir esta marca?')) {
+// Função para excluir categoria
+function excluirCategoria(id) {
+    if (confirm('Tem certeza que deseja excluir esta categoria?')) {
         $.ajax({
-            url: `{{ route('comerciantes.marcas.index') }}/${id}`,
+            url: `{{ route('comerciantes.categorias.index') }}/${id}`,
             type: 'DELETE',
             data: {
                 _token: '{{ csrf_token() }}'
@@ -373,7 +373,7 @@ function excluirMarca(id) {
                 }
             },
             error: function() {
-                toastr.error('Erro ao excluir marca');
+                toastr.error('Erro ao excluir categoria');
             }
         });
     }

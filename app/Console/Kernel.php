@@ -12,8 +12,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Backup automático diário às 2h
-        $schedule->command('db:backup --compress')->dailyAt('02:00');
+        // Verificação de estoque baixo a cada 2 horas durante horário comercial (8h às 18h) nos dias úteis
+        $schedule->command('estoque:verificar-baixo')
+            ->cron('0 8,10,12,14,16,18 * * 1-5') // Segunda a Sexta, nos horários especificados
+            ->withoutOverlapping()
+            ->runInBackground();
+
+        // Limpeza de notificações antigas de estoque - toda segunda-feira às 3h
+        $schedule->command('estoque:verificar-baixo --limpar-antigas')
+            ->weekly()
+            ->mondays()
+            ->at('03:00');
     }
 
     /**

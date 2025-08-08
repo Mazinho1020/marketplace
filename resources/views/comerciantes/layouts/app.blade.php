@@ -258,18 +258,36 @@
                             Dashboard
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('comerciantes.marcas.*') ? 'active' : '' }}" 
-                           href="{{ route('comerciantes.marcas.index') }}">
-                            <i class="fas fa-tags me-1"></i>
-                            Marcas
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->routeIs('comerciantes.produtos.*') ? 'active' : '' }}" 
+                           href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-box me-1"></i>
+                            Produtos
                         </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.produtos.index') }}">
+                                <i class="fas fa-list me-2"></i>Todos os Produtos</a></li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.produtos.create') }}">
+                                <i class="fas fa-plus me-2"></i>Novo Produto</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.produtos.categorias.index') }}">
+                                <i class="fas fa-tags me-2"></i>Categorias</a></li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.produtos.marcas.index') }}">
+                                <i class="fas fa-star me-2"></i>Marcas</a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('comerciantes.empresas.*') ? 'active' : '' }}" 
                            href="{{ route('comerciantes.empresas.index') }}">
                             <i class="fas fa-building me-1"></i>
                             Empresas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('comerciantes.notificacoes.*') ? 'active' : '' }}" 
+                           href="{{ route('comerciantes.notificacoes.index') }}">
+                            <i class="fas fa-bell me-1"></i>
+                            Notificações
                         </a>
                     </li>
                     <li class="nav-item">
@@ -303,14 +321,7 @@
                     </li>
                     
                     <!-- Notificações -->
-                    <li class="nav-item me-2">
-                        <a class="nav-link position-relative" href="#" title="Notificações">
-                            <i class="fas fa-bell"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
-                                3
-                            </span>
-                        </a>
-                    </li>
+                    @include('comerciantes.partials.header-notifications')
                     
                     <!-- Menu do Usuário -->
                     <li class="nav-item dropdown">
