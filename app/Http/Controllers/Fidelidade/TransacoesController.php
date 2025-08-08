@@ -96,7 +96,7 @@ class TransacoesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'cliente_id' => 'required|exists:funforcli,id',
+            'cliente_id' => 'required|exists:pessoas,id',
             'empresa_id' => 'required|exists:empresas,id',
             'tipo' => 'required|in:credito,debito',
             'valor' => 'required|numeric|min:0.01',
@@ -161,7 +161,7 @@ class TransacoesController extends Controller
     public function update(Request $request, FidelidadeCashbackTransacao $transacao)
     {
         $request->validate([
-            'cliente_id' => 'required|exists:funforcli,id',
+            'cliente_id' => 'required|exists:pessoas,id',
             'empresa_id' => 'required|exists:empresas,id',
             'tipo' => 'required|in:credito,debito',
             'valor' => 'required|numeric|min:0.01',

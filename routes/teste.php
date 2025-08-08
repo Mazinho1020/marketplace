@@ -22,7 +22,7 @@ Route::get('/test-system', function () {
 Route::get('/test-fidelidade-simple', function () {
     try {
         $stats = [
-            'total_clientes' => \Illuminate\Support\Facades\DB::table('funforcli')->where(function ($query) {
+            'total_clientes' => \Illuminate\Support\Facades\DB::table('pessoas')->where(function ($query) {
                 $query->where('tipo', 'cliente')->orWhere('tipo', 'funcionario');
             })->count(),
             'tabelas_fidelidade' => \Illuminate\Support\Facades\DB::select("

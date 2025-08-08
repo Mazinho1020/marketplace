@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Middleware personalizado para autenticação de comerciantes
@@ -17,7 +18,7 @@ class ComercianteAuthMiddleware
         // Verificar se o usuário está logado no guard comerciante
         if (!Auth::guard('comerciante')->check()) {
             // Forçar redirecionamento para a URL correta
-            return redirect('http://localhost:8000/comerciantes/login')
+            return redirect()->route('comerciantes.login')
                 ->withErrors(['error' => 'Faça login para acessar esta área.']);
         }
 

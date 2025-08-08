@@ -10,7 +10,7 @@ date_default_timezone_set('America/Cuiaba');
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
-        App\Providers\PermissionServiceProvider::class,
+        App\Providers\AppServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__ . '/../routes/web.php',
@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Registrar alias de middlewares
         $middleware->alias([
             'empresa' => \App\Http\Middleware\EmpresaMiddleware::class,
             'auth.simple' => \App\Http\Middleware\AuthMiddleware::class,

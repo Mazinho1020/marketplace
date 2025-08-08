@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Comerciantes\Controllers\Auth\LoginController as AuthController;
 use App\Comerciantes\Controllers\DashboardController;
 use App\Comerciantes\Controllers\EmpresaController;
 
@@ -17,12 +18,12 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-// Rotas protegidas com permissões automáticas
-Route::prefix('comerciantes')->name('comerciantes.')->middleware(['comerciantes.protected'])->group(function () {
-    
+// Rotas autenticadas (protegidas por login)
+Route::prefix('comerciantes')->name('comerciantes.')->middleware(['auth.comerciante'])->group(function () {
+
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Empresas
     Route::resource('empresas', EmpresaController::class);
     Route::prefix('empresas/{empresa}')->name('empresas.')->group(function () {
@@ -31,5 +32,4 @@ Route::prefix('comerciantes')->name('comerciantes.')->middleware(['comerciantes.
         Route::put('usuarios/{usuario}', [EmpresaController::class, 'editarUsuario'])->name('usuarios.update');
         Route::delete('usuarios/{usuario}', [EmpresaController::class, 'removerUsuario'])->name('usuarios.destroy');
     });
-    
 });

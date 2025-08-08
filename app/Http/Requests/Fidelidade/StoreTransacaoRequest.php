@@ -14,7 +14,7 @@ class StoreTransacaoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cliente_id' => 'required|exists:funforcli,id',
+            'cliente_id' => 'required|exists:pessoas,id',
             'empresa_id' => 'required|exists:empresas,id',
             'tipo' => 'required|in:credito,debito',
             'valor' => 'required|numeric|min:0.01|max:99999.99',

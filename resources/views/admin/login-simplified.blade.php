@@ -210,8 +210,10 @@
         setTimeout(function() {
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    alert.remove();
+                }, 300);
             });
         }, 5000);
     </script>

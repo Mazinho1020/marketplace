@@ -20,13 +20,13 @@ class AdminFidelidadeController extends Controller
     public function dashboard()
     {
         try {
-            // Estatísticas gerais baseadas na tabela funforcli
+            // Estatísticas gerais baseadas na tabela pessoas
             $stats = [
-                'total_clientes' => DB::table('funforcli')->where(function ($query) {
-                    $query->where('tipo', 'cliente')->orWhere('tipo', 'funcionario');
+                'total_clientes' => DB::table('pessoas')->where(function ($query) {
+                    $query->where('tipo', 'like', '%cliente%')->orWhere('tipo', 'like', '%funcionario%');
                 })->count(),
-                'clientes_ativos' => DB::table('funforcli')->where('ativo', 1)->where(function ($query) {
-                    $query->where('tipo', 'cliente')->orWhere('tipo', 'funcionario');
+                'clientes_ativos' => DB::table('pessoas')->where('status', 'ativo')->where(function ($query) {
+                    $query->where('tipo', 'like', '%cliente%')->orWhere('tipo', 'like', '%funcionario%');
                 })->count(),
                 'total_cupons' => DB::table('fidelidade_cupons')->count(),
                 'cupons_ativos' => DB::table('fidelidade_cupons')->where('status', 'ativo')->count(),
@@ -34,43 +34,43 @@ class AdminFidelidadeController extends Controller
                 'regras_ativas' => DB::table('fidelidade_cashback_regras')->where('status', 'ativo')->count(),
                 'total_transacoes' => DB::table('fidelidade_cashback_transacoes')->count(),
                 'valor_total_transacoes' => DB::table('fidelidade_cashback_transacoes')->sum('valor') ?? 0,
-                'total_cashback_distribuido' => DB::table('funforcli')->sum('cashback_acumulado') ?? 0,
-                'saldo_total_clientes' => DB::table('funforcli')->sum('saldo_disponivel') ?? 0
+                'total_cashback_distribuido' => 0, // Campo não existe na nova tabela
+                'saldo_total_clientes' => 0 // Campo não existe na nova tabela
             ];
 
             // Top clientes por pontos
-            $top_clientes = DB::table('funforcli as fc')
-                ->leftJoin('empresas as e', 'fc.empresa_id', '=', 'e.id')
+            $top_clientes = DB::table('pessoas as p')
+                ->leftJoin('empresas as e', 'p.empresa_id', '=', 'e.id')
                 ->select(
-                    'fc.id',
-                    'fc.nome',
-                    'fc.sobrenome',
-                    'fc.pontos_acumulados',
-                    'fc.saldo_disponivel',
-                    'fc.nivel_fidelidade',
+                    'p.id',
+                    'p.nome',
+                    'p.sobrenome',
+                    DB::raw('0 as pontos_acumulados'), // Campo não existe na nova tabela
+                    DB::raw('0 as saldo_disponivel'), // Campo não existe na nova tabela
+                    DB::raw('"bronze" as nivel_fidelidade'), // Campo não existe na nova tabela
                     'e.nome_fantasia as empresa_nome'
                 )
                 ->where(function ($query) {
-                    $query->where('fc.tipo', 'cliente')->orWhere('fc.tipo', 'funcionario');
+                    $query->where('p.tipo', 'like', '%cliente%')->orWhere('p.tipo', 'like', '%funcionario%');
                 })
-                ->orderBy('fc.pontos_acumulados', 'desc')
+                ->orderBy('p.created_at', 'desc')
                 ->limit(10)
                 ->get();
 
             // Atividade recente (simulada baseada em criação de clientes)
-            $atividade_recente = DB::table('funforcli as fc')
-                ->leftJoin('empresas as e', 'fc.empresa_id', '=', 'e.id')
+            $atividade_recente = DB::table('pessoas as p')
+                ->leftJoin('empresas as e', 'p.empresa_id', '=', 'e.id')
                 ->select(
-                    'fc.id',
-                    'fc.nome',
-                    'fc.sobrenome',
-                    'fc.created_at',
+                    'p.id',
+                    'p.nome',
+                    'p.sobrenome',
+                    'p.created_at',
                     'e.nome_fantasia as empresa_nome'
                 )
                 ->where(function ($query) {
-                    $query->where('fc.tipo', 'cliente')->orWhere('fc.tipo', 'funcionario');
+                    $query->where('p.tipo', 'like', '%cliente%')->orWhere('p.tipo', 'like', '%funcionario%');
                 })
-                ->orderBy('fc.created_at', 'desc')
+                ->orderBy('p.created_at', 'desc')
                 ->limit(10)
                 ->get();
 
@@ -102,20 +102,20 @@ class AdminFidelidadeController extends Controller
     public function clientes()
     {
         try {
-            $clientes = DB::table('funforcli as fc')
-                ->leftJoin('fidelidade_carteiras as cart', 'fc.id', '=', 'cart.cliente_id')
-                ->leftJoin('empresas as e', 'fc.empresa_id', '=', 'e.id')
+            $clientes = DB::table('pessoas as p')
+                ->leftJoin('fidelidade_carteiras as cart', 'p.id', '=', 'cart.cliente_id')
+                ->leftJoin('empresas as e', 'p.empresa_id', '=', 'e.id')
                 ->select(
-                    'fc.id',
-                    'fc.nome',
-                    'fc.sobrenome',
-                    'fc.email',
-                    'fc.telefone',
-                    'fc.cpf_cnpj',
-                    'fc.status',
-                    'fc.tipo',
-                    'fc.ativo',
-                    'fc.created_at',
+                    'p.id',
+                    'p.nome',
+                    'p.sobrenome',
+                    'p.email',
+                    'p.telefone',
+                    'p.cpf_cnpj',
+                    'p.status',
+                    'p.tipo',
+                    DB::raw('CASE WHEN p.status = "ativo" THEN 1 ELSE 0 END as ativo'),
+                    'p.created_at',
                     'e.nome_fantasia as empresa_nome',
                     'cart.saldo_cashback',
                     'cart.saldo_creditos',
@@ -124,14 +124,14 @@ class AdminFidelidadeController extends Controller
                     'cart.xp_total',
                     'cart.status as status_carteira'
                 )
-                ->where('fc.tipo', 'cliente')
-                ->orderBy('fc.created_at', 'desc')
+                ->where('p.tipo', 'like', '%cliente%')
+                ->orderBy('p.created_at', 'desc')
                 ->paginate(15);
 
             $stats = [
-                'total_clientes' => DB::table('funforcli')->where('tipo', 'cliente')->count(),
-                'clientes_ativos' => DB::table('funforcli')->where('ativo', 1)->where('tipo', 'cliente')->count(),
-                'clientes_inativos' => DB::table('funforcli')->where('ativo', 0)->where('tipo', 'cliente')->count(),
+                'total_clientes' => DB::table('pessoas')->where('tipo', 'like', '%cliente%')->count(),
+                'clientes_ativos' => DB::table('pessoas')->where('status', 'ativo')->where('tipo', 'like', '%cliente%')->count(),
+                'clientes_inativos' => DB::table('pessoas')->where('status', '!=', 'ativo')->where('tipo', 'like', '%cliente%')->count(),
                 'saldo_total' => DB::table('fidelidade_carteiras')->sum('saldo_total_disponivel') ?? 0
             ];
 

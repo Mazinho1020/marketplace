@@ -50,6 +50,218 @@
         </div>
     </div>
 
+    <!-- Cards de Estatísticas Principais -->
+    <div class="row mb-4">
+        <!-- Clientes -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Clientes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo e($estatisticas['clientes']); ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funcionários -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Funcionários
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo e($estatisticas['funcionarios']); ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-tie fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fornecedores -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Fornecedores
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo e($estatisticas['fornecedores']); ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-truck fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Entregadores -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Entregadores
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo e($estatisticas['entregadores']); ?></div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-motorcycle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Gestão de Pessoas -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-users-cog me-2"></i>
+                Gestão de Pessoas
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Clientes -->
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                        <div>
+                            <h6 class="text-primary mb-1">
+                                <i class="fas fa-users me-2"></i>
+                                Clientes
+                            </h6>
+                            <small class="text-muted"><?php echo e($estatisticas['clientes']); ?> registros</small>
+                        </div>
+                        <div>
+                            <a href="<?php echo e(route('comerciantes.clientes.pessoas.index')); ?>?empresa_id=<?php echo e($empresa->id); ?>&tipo=cliente" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>
+                                Ver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Funcionários -->
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                        <div>
+                            <h6 class="text-success mb-1">
+                                <i class="fas fa-user-tie me-2"></i>
+                                Funcionários
+                            </h6>
+                            <small class="text-muted"><?php echo e($estatisticas['funcionarios']); ?> registros</small>
+                        </div>
+                        <div>
+                            <a href="<?php echo e(route('comerciantes.clientes.pessoas.index')); ?>?empresa_id=<?php echo e($empresa->id); ?>&tipo=funcionario" 
+                               class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-eye me-1"></i>
+                                Ver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fornecedores -->
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                        <div>
+                            <h6 class="text-info mb-1">
+                                <i class="fas fa-truck me-2"></i>
+                                Fornecedores
+                            </h6>
+                            <small class="text-muted"><?php echo e($estatisticas['fornecedores']); ?> registros</small>
+                        </div>
+                        <div>
+                            <a href="<?php echo e(route('comerciantes.clientes.pessoas.index')); ?>?empresa_id=<?php echo e($empresa->id); ?>&tipo=fornecedor" 
+                               class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-eye me-1"></i>
+                                Ver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entregadores -->
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                        <div>
+                            <h6 class="text-warning mb-1">
+                                <i class="fas fa-motorcycle me-2"></i>
+                                Entregadores
+                            </h6>
+                            <small class="text-muted"><?php echo e($estatisticas['entregadores']); ?> registros</small>
+                        </div>
+                        <div>
+                            <a href="<?php echo e(route('comerciantes.clientes.pessoas.index')); ?>?empresa_id=<?php echo e($empresa->id); ?>&tipo=entregador" 
+                               class="btn btn-sm btn-outline-warning">
+                                <i class="fas fa-eye me-1"></i>
+                                Ver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Departamentos -->
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                        <div>
+                            <h6 class="text-secondary mb-1">
+                                <i class="fas fa-sitemap me-2"></i>
+                                Departamentos
+                            </h6>
+                            <small class="text-muted"><?php echo e($estatisticas['departamentos']); ?> registros</small>
+                        </div>
+                        <div>
+                            <a href="<?php echo e(route('comerciantes.clientes.departamentos.index')); ?>?empresa_id=<?php echo e($empresa->id); ?>" 
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-eye me-1"></i>
+                                Ver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cargos -->
+                <div class="col-lg-4 col-md-6 mb-3">
+                    <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                        <div>
+                            <h6 class="text-dark mb-1">
+                                <i class="fas fa-briefcase me-2"></i>
+                                Cargos
+                            </h6>
+                            <small class="text-muted"><?php echo e($estatisticas['cargos']); ?> registros</small>
+                        </div>
+                        <div>
+                            <a href="<?php echo e(route('comerciantes.clientes.cargos.index')); ?>?empresa_id=<?php echo e($empresa->id); ?>" 
+                               class="btn btn-sm btn-outline-dark">
+                                <i class="fas fa-eye me-1"></i>
+                                Ver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <!-- Coluna principal -->
         <div class="col-lg-8">
@@ -92,58 +304,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Endereço -->
-            <?php if($empresa->logradouro || $empresa->cidade): ?>
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">
-                            <i class="fas fa-map-marker-alt me-2"></i>
-                            Endereço
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <?php
-                                    $endereco = collect([
-                                        $empresa->logradouro,
-                                        $empresa->numero,
-                                        $empresa->complemento
-                                    ])->filter()->implode(', ');
-                                    
-                                    $localidade = collect([
-                                        $empresa->bairro,
-                                        $empresa->cidade,
-                                        $empresa->uf
-                                    ])->filter()->implode(', ');
-                                ?>
-
-                                <?php if($endereco): ?>
-                                    <p class="mb-2">
-                                        <strong>Logradouro:</strong> <?php echo e($endereco); ?>
-
-                                    </p>
-                                <?php endif; ?>
-
-                                <?php if($localidade): ?>
-                                    <p class="mb-2">
-                                        <strong>Localidade:</strong> <?php echo e($localidade); ?>
-
-                                    </p>
-                                <?php endif; ?>
-
-                                <?php if($empresa->cep): ?>
-                                    <p class="mb-2">
-                                        <strong>CEP:</strong> <?php echo e($empresa->cep); ?>
-
-                                    </p>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
 
             <!-- Contato -->
             <?php if($empresa->telefone || $empresa->email || $empresa->site): ?>
@@ -196,85 +356,49 @@
                     </div>
                 </div>
             <?php endif; ?>
-
-            <!-- Horário de funcionamento -->
-            <?php if($empresa->horario_funcionamento): ?>
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">
-                            <i class="fas fa-clock me-2"></i>
-                            Horário de Funcionamento
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <?php
-                            $horarios = $empresa->horario_funcionamento;
-                            $diasSemana = [
-                                'segunda' => 'Segunda-feira',
-                                'terca' => 'Terça-feira',
-                                'quarta' => 'Quarta-feira',
-                                'quinta' => 'Quinta-feira',
-                                'sexta' => 'Sexta-feira',
-                                'sabado' => 'Sábado',
-                                'domingo' => 'Domingo'
-                            ];
-                        ?>
-
-                        <div class="row">
-                            <?php $__currentLoopData = $diasSemana; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dia => $nome): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <div class="col-md-6 col-lg-4 mb-2">
-                                    <strong><?php echo e($nome); ?>:</strong>
-                                    <?php if(isset($horarios[$dia]) && $horarios[$dia]['abertura'] && $horarios[$dia]['fechamento']): ?>
-                                        <span class="text-success">
-                                            <?php echo e($horarios[$dia]['abertura']); ?> às <?php echo e($horarios[$dia]['fechamento']); ?>
-
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="text-muted">Fechado</span>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
         </div>
 
         <!-- Sidebar -->
         <div class="col-lg-4">
-            <!-- Estatísticas rápidas -->
+            <!-- Estatísticas de Status -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-chart-bar me-2"></i>
-                        Estatísticas
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Status das Pessoas
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-6 mb-3">
-                            <div class="stat-item">
-                                <div class="stat-number text-primary"><?php echo e($empresa->usuarios_vinculados_count ?? 0); ?></div>
-                                <div class="stat-label">Usuários</div>
-                            </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Pessoas Ativas</span>
+                            <span class="text-success font-weight-bold"><?php echo e($estatisticasStatus['pessoas_ativas']); ?></span>
                         </div>
-                        <div class="col-6 mb-3">
-                            <div class="stat-item">
-                                <div class="stat-number text-success"><?php echo e($empresa->produtos_count ?? 0); ?></div>
-                                <div class="stat-label">Produtos</div>
-                            </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: <?php echo e($estatisticasStatus['pessoas_ativas'] > 0 ? ($estatisticasStatus['pessoas_ativas'] / max(1, $estatisticasStatus['pessoas_ativas'] + $estatisticasStatus['pessoas_inativas'])) * 100 : 0); ?>%"></div>
                         </div>
-                        <div class="col-6">
-                            <div class="stat-item">
-                                <div class="stat-number text-info"><?php echo e($empresa->pedidos_count ?? 0); ?></div>
-                                <div class="stat-label">Pedidos</div>
-                            </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Pessoas Inativas</span>
+                            <span class="text-danger font-weight-bold"><?php echo e($estatisticasStatus['pessoas_inativas']); ?></span>
                         </div>
-                        <div class="col-6">
-                            <div class="stat-item">
-                                <div class="stat-number text-warning"><?php echo e($empresa->avaliacoes_count ?? 0); ?></div>
-                                <div class="stat-label">Avaliações</div>
-                            </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-danger" role="progressbar" 
+                                 style="width: <?php echo e($estatisticasStatus['pessoas_inativas'] > 0 ? ($estatisticasStatus['pessoas_inativas'] / max(1, $estatisticasStatus['pessoas_ativas'] + $estatisticasStatus['pessoas_inativas'])) * 100 : 0); ?>%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between">
+                            <span>Funcionários Ativos</span>
+                            <span class="text-info font-weight-bold"><?php echo e($estatisticasStatus['funcionarios_ativos']); ?></span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-info" role="progressbar" 
+                                 style="width: <?php echo e($estatisticasStatus['funcionarios_ativos'] > 0 ? ($estatisticasStatus['funcionarios_ativos'] / max(1, $estatisticas['funcionarios'])) * 100 : 0); ?>%"></div>
                         </div>
                     </div>
                 </div>
@@ -294,6 +418,10 @@
                             <i class="fas fa-tachometer-alt me-2"></i>
                             Ver Dashboard
                         </a>
+                        <a href="<?php echo e(route('comerciantes.clientes.pessoas.create')); ?>?empresa_id=<?php echo e($empresa->id); ?>" class="btn btn-outline-success">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Adicionar Pessoa
+                        </a>
                         <a href="<?php echo e(route('comerciantes.empresas.usuarios.index', $empresa)); ?>" class="btn btn-outline-secondary">
                             <i class="fas fa-users me-2"></i>
                             Gerenciar Usuários
@@ -304,44 +432,6 @@
                             Editar Empresa
                         </a>
                     </div>
-                </div>
-            </div>
-
-            <!-- Informações do proprietário -->
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-user me-2"></i>
-                        Proprietário
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <?php if($empresa->proprietario && $empresa->proprietario->isNotEmpty()): ?>
-                        <?php $prop = $empresa->proprietario->first(); ?>
-                        <div class="d-flex align-items-center">
-                            <div class="avatar me-3">
-                                <?php if($prop->avatar): ?>
-                                    <img src="<?php echo e($prop->avatar); ?>" alt="Avatar" 
-                                         class="rounded-circle" width="50" height="50">
-                                <?php else: ?>
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                         style="width: 50px; height: 50px;">
-                                        <?php echo e(substr($prop->nome, 0, 1)); ?>
-
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                            <div>
-                                <h6 class="mb-1"><?php echo e($prop->nome); ?></h6>
-                                <p class="text-muted mb-0 small"><?php echo e($prop->email); ?></p>
-                            </div>
-                        </div>
-                    <?php else: ?>
-                        <div class="text-center text-muted">
-                            <i class="fas fa-user-times fa-2x mb-2"></i>
-                            <p class="mb-0">Nenhum proprietário definido</p>
-                        </div>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -390,25 +480,20 @@
 
 <?php $__env->startPush('styles'); ?>
 <style>
-.stat-item {
-    padding: 0.5rem 0;
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
 }
 
-.stat-number {
-    font-size: 1.8rem;
-    font-weight: 600;
-    line-height: 1;
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
 }
 
-.stat-label {
-    font-size: 0.75rem;
-    color: var(--bs-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
 }
 
-.avatar {
-    flex-shrink: 0;
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
 }
 </style>
 <?php $__env->stopPush(); ?>

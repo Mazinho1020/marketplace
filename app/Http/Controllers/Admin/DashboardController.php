@@ -49,7 +49,7 @@ class DashboardController extends Controller
         try {
             // Estatísticas básicas do sistema
             $totalEmpresas = DB::table('empresas')->where('status', 'ativo')->count();
-            $totalUsuarios = DB::table('funforcli')->count();
+            $totalUsuarios = DB::table('pessoas')->count();
             $totalTransacoes = DB::table('afi_plan_transacoes')->count();
             $totalGateways = DB::table('afi_plan_gateways')->where('ativo', true)->count();
 
@@ -71,7 +71,7 @@ class DashboardController extends Controller
             $mrr = $monthlyRevenue; // Simplificado
 
             // Afiliados ativos (placeholder)
-            $activeAffiliates = DB::table('funforcli')->where('tipo', 'afiliado')->count() ?? 0;
+            $activeAffiliates = DB::table('pessoas')->where('tipo', 'like', '%afiliado%')->count() ?? 0;
 
             return [
                 'total_merchants' => $totalEmpresas,

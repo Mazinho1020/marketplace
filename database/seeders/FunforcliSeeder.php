@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class FunforcliSeeder extends Seeder
+class PessoasSeeder extends Seeder
 {
     /**
      * Popula dados de fidelidade para os clientes existentes
@@ -14,33 +14,39 @@ class FunforcliSeeder extends Seeder
     public function run(): void
     {
         // Buscar todos os clientes e funcionários
-        $clientes = DB::table('funforcli')
-            ->where('tipo', 'cliente')
-            ->orWhere('tipo', 'funcionario')
+        $clientes = DB::table('pessoas')
+            ->where('tipo', 'like', '%cliente%')
+            ->orWhere('tipo', 'like', '%funcionario%')
             ->get();
 
         foreach ($clientes as $cliente) {
-            // Gerar dados aleatórios de fidelidade
-            $pontos = rand(0, 5000);
-            $nivel = $this->determinarNivel($pontos);
-            $saldo = rand(0, 1000);
-            $cashback = rand(0, 500);
-            $totalCompras = rand(1, 50);
-            $valorTotalGasto = rand(100, 10000);
+            // Criar carteira de fidelidade se não existir
+            $carteiraExiste = DB::table('fidelidade_carteiras')
+                ->where('cliente_id', $cliente->id)
+                ->exists();
 
-            DB::table('funforcli')
-                ->where('id', $cliente->id)
-                ->update([
-                    'pontos_acumulados' => $pontos,
-                    'nivel_fidelidade' => $nivel,
-                    'saldo_disponivel' => $saldo,
-                    'cashback_acumulado' => $cashback,
-                    'data_ultimo_uso' => now()->subDays(rand(1, 90)),
-                    'total_compras' => $totalCompras,
-                    'valor_total_gasto' => $valorTotalGasto,
-                    'programa_fidelidade_ativo' => true,
-                    'data_aniversario' => now()->subYears(rand(18, 70))->format('Y-m-d')
+            if (!$carteiraExiste) {
+                // Gerar dados aleatórios de fidelidade
+                $pontos = rand(0, 5000);
+                $nivel = $this->determinarNivel($pontos);
+                $saldo = rand(0, 1000);
+                $cashback = rand(0, 500);
+                $totalCompras = rand(1, 50);
+                $valorTotalGasto = rand(100, 10000);
+
+                DB::table('fidelidade_carteiras')->insert([
+                    'cliente_id' => $cliente->id,
+                    'empresa_id' => $cliente->empresa_id,
+                    'saldo_cashback' => $cashback,
+                    'saldo_creditos' => $pontos,
+                    'saldo_total_disponivel' => $saldo,
+                    'nivel_atual' => $nivel,
+                    'xp_total' => $pontos,
+                    'status' => 'ativo',
+                    'created_at' => now(),
+                    'updated_at' => now()
                 ]);
+            }
         }
     }
 

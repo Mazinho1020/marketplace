@@ -142,7 +142,7 @@ class TransacoesController extends Controller
     public function criarManual(Request $request): RedirectResponse
     {
         $request->validate([
-            'cliente_id' => 'required|exists:funforcli,id',
+            'cliente_id' => 'required|exists:pessoas,id',
             'valor' => 'required|numeric|min:0.01',
             'descricao' => 'required|string',
         ]);

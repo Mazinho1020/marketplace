@@ -116,7 +116,52 @@ class EmpresaController extends Controller
         // Carrega relacionamentos disponíveis neste modelo
         $empresa->load(['usuariosVinculados']);
 
-        return view('comerciantes.empresas.show', compact('empresa'));
+        // Estatísticas de pessoas por tipo
+        $estatisticas = [
+            'clientes' => DB::table('pessoas')
+                ->where('empresa_id', $empresa->id)
+                ->where('tipo', 'like', '%cliente%')
+                ->count(),
+            'funcionarios' => DB::table('pessoas')
+                ->where('empresa_id', $empresa->id)
+                ->where('tipo', 'like', '%funcionario%')
+                ->count(),
+            'fornecedores' => DB::table('pessoas')
+                ->where('empresa_id', $empresa->id)
+                ->where('tipo', 'like', '%fornecedor%')
+                ->count(),
+            'entregadores' => DB::table('pessoas')
+                ->where('empresa_id', $empresa->id)
+                ->where('tipo', 'like', '%entregador%')
+                ->count(),
+            'departamentos' => DB::table('pessoas_departamentos')
+                ->where('empresa_id', $empresa->id)
+                ->where('ativo', true)
+                ->count(),
+            'cargos' => DB::table('pessoas_cargos')
+                ->where('empresa_id', $empresa->id)
+                ->where('ativo', true)
+                ->count()
+        ];
+
+        // Estatísticas de status
+        $estatisticasStatus = [
+            'pessoas_ativas' => DB::table('pessoas')
+                ->where('empresa_id', $empresa->id)
+                ->where('status', 'ativo')
+                ->count(),
+            'pessoas_inativas' => DB::table('pessoas')
+                ->where('empresa_id', $empresa->id)
+                ->where('status', '!=', 'ativo')
+                ->count(),
+            'funcionarios_ativos' => DB::table('pessoas')
+                ->where('empresa_id', $empresa->id)
+                ->where('tipo', 'like', '%funcionario%')
+                ->where('status', 'ativo')
+                ->count()
+        ];
+
+        return view('comerciantes.empresas.show', compact('empresa', 'estatisticas', 'estatisticasStatus'));
     }
 
     /**

@@ -111,7 +111,7 @@ class CarteirasController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'cliente_id' => 'required|exists:funforcli,id',
+            'cliente_id' => 'required|exists:pessoas,id',
             'empresa_id' => 'required|integer',
             'nivel_atual' => 'required|string'
         ]);
