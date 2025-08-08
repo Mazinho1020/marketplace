@@ -243,6 +243,14 @@
                                 </a>
                             </li>
 
+                            <li class="nav-item">
+                                <a class="nav-link <?php echo e(request()->routeIs('comerciantes.planos.*') ? 'active' : ''); ?>" 
+                                   href="<?php echo e(route('comerciantes.planos.dashboard')); ?>">
+                                    <i class="fas fa-crown"></i>
+                                    Minha Assinatura
+                                </a>
+                            </li>
+
                             
                             
 

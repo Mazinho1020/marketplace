@@ -8,6 +8,7 @@ use App\Comerciantes\Controllers\DashboardController;
 use App\Comerciantes\Controllers\MarcaController;
 use App\Comerciantes\Controllers\EmpresaController;
 use App\Comerciantes\Controllers\HorarioController;
+use App\Comerciantes\Controllers\PlanoController;
 
 // Controladores do módulo Comerciante
 use App\Modules\Comerciante\Controllers\Config\ConfigController;
@@ -50,6 +51,10 @@ Route::prefix('comerciantes/clientes')->name('comerciantes.clientes.')->group(fu
     // Dashboard principal do sistema
     Route::get('/dashboard', function () {
         try {
+            // Buscar informações do usuário logado
+            $user = Auth::guard('comerciante')->user();
+            $empresaId = $user->empresa_id ?? 1; // Fallback para teste
+
             // Estatísticas
             $totalPessoas = \App\Modules\Comerciante\Models\Pessoas\Pessoa::count();
             $totalDepartamentos = \App\Modules\Comerciante\Models\Pessoas\PessoaDepartamento::count();
@@ -61,6 +66,28 @@ Route::prefix('comerciantes/clientes')->name('comerciantes.clientes.')->group(fu
             $totalFuncionarios = \App\Modules\Comerciante\Models\Pessoas\Pessoa::where('tipo', 'LIKE', '%funcionario%')->count();
             $totalFornecedores = \App\Modules\Comerciante\Models\Pessoas\Pessoa::where('tipo', 'LIKE', '%fornecedor%')->count();
             $totalEntregadores = \App\Modules\Comerciante\Models\Pessoas\Pessoa::where('tipo', 'LIKE', '%entregador%')->count();
+
+            // Buscar informações do plano atual
+            $assinaturaAtual = null;
+            $planoStatus = 'Sem plano ativo';
+            $planoNome = 'Nenhum';
+            $planoVencimento = '-';
+
+            try {
+                $assinaturaAtual = \App\Models\AfiPlanAssinaturas::with('plano')
+                    ->where('empresa_id', $empresaId)
+                    ->whereIn('status', ['trial', 'ativo'])
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                if ($assinaturaAtual) {
+                    $planoNome = $assinaturaAtual->plano->nome ?? 'Plano Básico';
+                    $planoStatus = $assinaturaAtual->status === 'ativo' ? 'Ativo' : 'Trial';
+                    $planoVencimento = $assinaturaAtual->expira_em ? $assinaturaAtual->expira_em->format('d/m/Y') : '-';
+                }
+            } catch (\Exception $e) {
+                // Silenciar erro se tabelas de planos não existirem
+            }
 
             $html = '<!DOCTYPE html>
 <html lang="pt-BR">
@@ -116,6 +143,7 @@ Route::prefix('comerciantes/clientes')->name('comerciantes.clientes.')->group(fu
             <div class="logo">🏢 Sistema Comercial</div>
             <div class="nav-links">
                 <a href="/comerciantes/clientes/dashboard">🏠 Dashboard</a>
+                <a href="/comerciantes/planos">💎 Planos</a>
                 <a href="/comerciantes/clientes/clientes">👤 Clientes</a>
                 <a href="/comerciantes/clientes/funcionarios">👔 Funcionários</a>
                 <a href="/comerciantes/clientes/fornecedores">🏭 Fornecedores</a>
@@ -155,7 +183,29 @@ Route::prefix('comerciantes/clientes')->name('comerciantes.clientes.')->group(fu
         </div>
 
         <div class="quick-stats">
-            <h3>📈 Distribuição por Tipo de Pessoa</h3>
+            <h3>� Informações do Plano Atual</h3>
+            <div class="mini-stats">
+                <div class="mini-stat">
+                    <div class="mini-stat-number">' . $planoNome . '</div>
+                    <div class="mini-stat-label">Plano Ativo</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="mini-stat-number">' . $planoStatus . '</div>
+                    <div class="mini-stat-label">Status</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="mini-stat-number">' . $planoVencimento . '</div>
+                    <div class="mini-stat-label">Vencimento</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="mini-stat-number"><a href="/comerciantes/planos" style="color: #3498db; text-decoration: none;">Gerenciar</a></div>
+                    <div class="mini-stat-label">Ações</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-stats">
+            <h3>�📈 Distribuição por Tipo de Pessoa</h3>
             <div class="mini-stats">
                 <div class="mini-stat">
                     <div class="mini-stat-number">' . $totalClientes . '</div>
@@ -178,7 +228,22 @@ Route::prefix('comerciantes/clientes')->name('comerciantes.clientes.')->group(fu
 
         <div class="actions-grid">
             <div class="action-card">
-                <h3>👤 Gestão de Clientes</h3>
+                <h3>� Gerenciar Planos</h3>
+                <div class="action-links">
+                    <a href="/comerciantes/planos" class="action-link">
+                        <span>📊</span> Dashboard de Planos
+                    </a>
+                    <a href="/comerciantes/planos/planos" class="action-link">
+                        <span>💰</span> Ver Planos Disponíveis
+                    </a>
+                    <a href="/comerciantes/planos/historico" class="action-link">
+                        <span>📈</span> Histórico de Pagamentos
+                    </a>
+                </div>
+            </div>
+
+            <div class="action-card">
+                <h3>�👤 Gestão de Clientes</h3>
                 <div class="action-links">
                     <a href="/comerciantes/clientes/clientes" class="action-link">
                         <span>👥</span> Ver Todos os Clientes
@@ -1175,10 +1240,128 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
         Route::get('/dashboard/progresso', [DashboardController::class, 'atualizarProgresso'])->name('dashboard.progresso');
 
         /**
-         * MARCAS
-         * Resource completo: index, create, store, show, edit, update, destroy
+         * DEMONSTRAÇÃO DO SISTEMA DE PERMISSÕES
+         */
+        Route::get('/demo-permissoes', function () {
+            return view('comerciantes.demo-permissoes');
+        })->name('demo-permissoes');
+
+        /**
+         * RELATÓRIOS BÁSICOS (todos os planos)
+         */
+        Route::prefix('relatorios')->name('relatorios.')->group(function () {
+            Route::get('/vendas', function () {
+                return view('comerciantes.relatorios.vendas');
+            })->name('vendas');
+
+            Route::get('/clientes', function () {
+                return view('comerciantes.relatorios.clientes');
+            })->name('clientes');
+        });
+
+        /**
+         * RELATÓRIOS AVANÇADOS (apenas planos profissional e enterprise)
+         */
+        Route::prefix('relatorios')->name('relatorios.')->middleware('plan:advanced_reports')->group(function () {
+            Route::get('/analytics', function () {
+                return view('comerciantes.relatorios.analytics');
+            })->name('analytics');
+
+            Route::get('/performance', function () {
+                return view('comerciantes.relatorios.performance');
+            })->name('performance');
+
+            Route::get('/financeiro-detalhado', function () {
+                return view('comerciantes.relatorios.financeiro-detalhado');
+            })->name('financeiro-detalhado');
+        });
+
+        /**
+         * GESTÃO DE MARCAS (planos básico, profissional e enterprise)
          */
         Route::resource('marcas', MarcaController::class);
+
+        /**
+         * GESTÃO DE EMPRESAS (apenas planos profissional e enterprise)
+         */
+        Route::middleware('plan:company_management')->resource('empresas', EmpresaController::class);
+
+        /**
+         * INTEGRAÇÃO COM API (apenas planos profissional e enterprise)
+         */
+        Route::prefix('api')->name('api.')->middleware('plan:api_access')->group(function () {
+            Route::get('/tokens', function () {
+                return view('comerciantes.api.tokens');
+            })->name('tokens');
+
+            Route::post('/gerar-token', function () {
+                return response()->json(['token' => 'novo-token-api']);
+            })->name('gerar-token');
+        });
+
+        /**
+         * OPERAÇÕES EM LOTE (apenas planos profissional e enterprise)
+         */
+        Route::prefix('bulk')->name('bulk.')->middleware('plan:bulk_operations')->group(function () {
+            Route::get('/importar', function () {
+                return view('comerciantes.bulk.importar');
+            })->name('importar');
+
+            Route::post('/exportar', function () {
+                return response()->download('path/to/export.csv');
+            })->name('exportar');
+        });
+
+        /**
+         * AUDITORIA E LOGS (apenas plano enterprise)
+         */
+        Route::prefix('auditoria')->name('auditoria.')->middleware('plan:audit_logs')->group(function () {
+            Route::get('/', function () {
+                return view('comerciantes.auditoria.index');
+            })->name('index');
+
+            Route::get('/logs/{user}', function ($user) {
+                return view('comerciantes.auditoria.user-logs', compact('user'));
+            })->name('user-logs');
+        });
+
+        /**
+         * CAMPOS PERSONALIZADOS (apenas plano enterprise)
+         */
+        Route::prefix('campos-personalizados')->name('campos.')->middleware('plan:custom_fields')->group(function () {
+            Route::get('/', function () {
+                return view('comerciantes.campos.index');
+            })->name('index');
+
+            Route::post('/criar', function () {
+                return response()->json(['success' => true]);
+            })->name('criar');
+        });
+
+        /**
+         * PERMISSÕES AVANÇADAS (apenas plano enterprise)
+         */
+        Route::prefix('permissoes')->name('permissoes.')->middleware('plan:advanced_permissions')->group(function () {
+            Route::get('/gerenciar', function () {
+                return view('comerciantes.permissoes.gerenciar');
+            })->name('gerenciar');
+
+            Route::post('/aplicar', function () {
+                return response()->json(['success' => true]);
+            })->name('aplicar');
+        });
+
+        /**
+         * MARCAS (recursos limitados por plano)
+         * Observação: Resource completo não tem middleware, mas métodos específicos podem ter
+         */
+        Route::resource('marcas', MarcaController::class)->except(['edit', 'update']);
+
+        // Edição de marcas limitada por plano
+        Route::middleware('plan:brand_management')->group(function () {
+            Route::get('marcas/{marca}/edit', [MarcaController::class, 'edit'])->name('marcas.edit');
+            Route::put('marcas/{marca}', [MarcaController::class, 'update'])->name('marcas.update');
+        });
 
         /**
          * EMPRESAS
@@ -1195,6 +1378,42 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
             Route::get('/usuarios/{user}/edit', [EmpresaController::class, 'editarUsuarioForm'])->name('usuarios.edit');
             Route::put('/usuarios/{user}', [EmpresaController::class, 'editarUsuario'])->name('usuarios.update');
             Route::delete('/usuarios/{user}', [EmpresaController::class, 'removerUsuario'])->name('usuarios.destroy');
+        });
+
+        /**
+         * PLANOS E ASSINATURAS
+         * Sistema completo de gestão de planos e pagamentos
+         */
+        Route::prefix('planos')->name('planos.')->group(function () {
+            // Dashboard de planos
+            Route::get('/', [PlanoController::class, 'dashboard'])->name('dashboard');
+
+            // Visualizar e escolher planos
+            Route::get('/planos', [PlanoController::class, 'planos'])->name('planos');
+
+            // Alterar plano
+            Route::post('/alterar', [PlanoController::class, 'alterarPlano'])->name('alterar');
+
+            // Checkout e pagamento
+            Route::get('/checkout/{transactionUuid}', [PlanoController::class, 'checkout'])->name('checkout');
+
+            // Confirmar pagamento manual
+            Route::post('/confirmar-pagamento/{transactionUuid}', [PlanoController::class, 'confirmarPagamento'])->name('confirmar-pagamento');
+
+            // Histórico
+            Route::get('/historico', [PlanoController::class, 'historico'])->name('historico');
+
+            // Toggle renovação automática
+            Route::post('/toggle-renovacao', [PlanoController::class, 'toggleRenovacao'])->name('toggle-renovacao');
+
+            // Páginas de resultado
+            Route::get('/sucesso', function () {
+                return view('comerciantes.planos.sucesso');
+            })->name('sucesso');
+
+            Route::get('/cancelado', function () {
+                return view('comerciantes.planos.cancelado');
+            })->name('cancelado');
         });
 
         /**

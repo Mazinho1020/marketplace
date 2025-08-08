@@ -127,6 +127,96 @@
     </div>
 </div>
 
+<!-- Informações do Plano Atual -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-gem me-2"></i>
+                    Seu Plano Atual
+                </h6>
+                <a href="{{ route('comerciantes.planos.planos') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-arrow-up me-1"></i>
+                    Fazer Upgrade
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <div class="plan-icon mb-2">
+                                <i class="fas fa-gem fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="mb-0">{{ $planoAtual['nome'] }}</h5>
+                            <small class="text-muted">Status: 
+                                <span class="badge bg-{{ $planoAtual['status'] === 'ativo' ? 'success' : ($planoAtual['status'] === 'trial' ? 'warning' : 'secondary') }}">
+                                    {{ ucfirst($planoAtual['status']) }}
+                                </span>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="h4 mb-0 text-info">∞</div>
+                                    <small class="text-muted">Marcas</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="h4 mb-0 text-success">∞</div>
+                                    <small class="text-muted">Empresas</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="h4 mb-0 text-warning">∞</div>
+                                    <small class="text-muted">Usuários</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="h4 mb-0 text-primary">5GB</div>
+                                    <small class="text-muted">Armazenamento</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            @if($planoAtual['vencimento'])
+                                <div class="mb-2">
+                                    <small class="text-muted">Próxima renovação:</small>
+                                    <div class="h6 mb-0">{{ $planoAtual['vencimento'] }}</div>
+                                </div>
+                            @else
+                                <div class="mb-2">
+                                    <small class="text-muted">Renovação:</small>
+                                    <div class="h6 mb-0">{{ $planoAtual['renovacao_automatica'] ? 'Automática' : 'Manual' }}</div>
+                                </div>
+                            @endif
+                            <div class="d-grid gap-2">
+                                <a href="{{ route('comerciantes.planos.dashboard') }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-cog me-1"></i>
+                                    Gerenciar
+                                </a>
+                                <a href="{{ route('comerciantes.planos.historico') }}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-history me-1"></i>
+                                    Histórico
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Progresso de Configuração -->
 @if($dashboardData['progresso_configuracao']['porcentagem'] < 100)
 <div class="row mb-4">
@@ -229,6 +319,16 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6 col-lg-3 mb-3">
+                        <a href="{{ route('comerciantes.planos.dashboard') }}" class="quick-action-btn">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-gem"></i>
+                            </div>
+                            <strong>Meus Planos</strong>
+                            <small class="text-muted">Gerenciar assinatura</small>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3 mb-3">
                         <a href="{{ route('comerciantes.marcas.create') }}" class="quick-action-btn">
                             <div class="quick-action-icon">
                                 <i class="fas fa-plus"></i>
@@ -245,6 +345,16 @@
                             </div>
                             <strong>Nova Empresa</strong>
                             <small class="text-muted">Adicionar nova empresa</small>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <a href="{{ route('comerciantes.planos.planos') }}" class="quick-action-btn">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-gem"></i>
+                            </div>
+                            <strong>Upgrade de Plano</strong>
+                            <small class="text-muted">Mais recursos para sua empresa</small>
                         </a>
                     </div>
                     

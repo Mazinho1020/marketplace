@@ -243,6 +243,14 @@
                                 </a>
                             </li>
 
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('comerciantes.planos.*') ? 'active' : '' }}" 
+                                   href="{{ route('comerciantes.planos.dashboard') }}">
+                                    <i class="fas fa-crown"></i>
+                                    Minha Assinatura
+                                </a>
+                            </li>
+
                             {{-- HORÁRIOS REMOVIDOS TEMPORARIAMENTE --}}
                             {{-- 
                             <li class="nav-item">

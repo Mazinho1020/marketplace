@@ -36,7 +36,53 @@ class DashboardController extends Controller
         // Busca sugestões de ações
         $sugestoes = $this->comercianteService->getSugestoesAcoes($user);
 
-        return view('comerciantes.dashboard.index', compact('dashboardData', 'user', 'sugestoes'));
+        // Buscar informações do plano atual
+        $planoAtual = $this->buscarPlanoAtual($user);
+
+        return view('comerciantes.dashboard.index', compact('dashboardData', 'user', 'sugestoes', 'planoAtual'));
+    }
+
+    /**
+     * Buscar informações do plano atual do comerciante
+     */
+    private function buscarPlanoAtual($user)
+    {
+        try {
+            $empresaId = $user->empresa_id ?? 1; // Fallback para teste
+
+            $assinatura = \App\Models\AfiPlanAssinaturas::with('plano')
+                ->where('empresa_id', $empresaId)
+                ->whereIn('status', ['trial', 'ativo'])
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if ($assinatura && $assinatura->plano) {
+                return [
+                    'nome' => $assinatura->plano->nome,
+                    'status' => $assinatura->status,
+                    'vencimento' => $assinatura->expira_em ? $assinatura->expira_em->format('d/m/Y') : null,
+                    'renovacao_automatica' => $assinatura->renovacao_automatica,
+                    'valor' => $assinatura->valor
+                ];
+            }
+
+            return [
+                'nome' => 'Plano Básico',
+                'status' => 'trial',
+                'vencimento' => null,
+                'renovacao_automatica' => false,
+                'valor' => 0
+            ];
+        } catch (\Exception $e) {
+            // Retorna dados padrão se houver erro
+            return [
+                'nome' => 'Plano Básico',
+                'status' => 'ativo',
+                'vencimento' => null,
+                'renovacao_automatica' => false,
+                'valor' => 0
+            ];
+        }
     }
 
     /**

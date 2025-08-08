@@ -18,6 +18,9 @@ Route::get('/', function () {
 // Incluir rota de debug específico
 require_once __DIR__ . '/../debug_route.php';
 
+// Incluir rotas da API de pagamento
+require __DIR__ . '/payment-api.php';
+
 // ROTA DE TESTE - Testar views de empresa (sem autenticação)
 Route::get('/test-empresa-views', function () {
     try {

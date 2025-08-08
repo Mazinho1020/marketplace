@@ -275,9 +275,71 @@ class WebhookProcessor
 
         if ($newStatus === PaymentStatus::APPROVED) {
             $transaction->update(['approved_at' => now()]);
+
+            // ✅ INTEGRAÇÃO: Ativar assinatura quando pagamento for aprovado
+            $this->handleApprovedPayment($transaction);
         } elseif ($newStatus === PaymentStatus::CANCELLED) {
             $transaction->update(['cancelled_at' => now()]);
         }
+    }
+
+    /**
+     * Processar pagamento aprovado baseado no tipo de origem
+     */
+    private function handleApprovedPayment(PaymentTransaction $transaction): void
+    {
+        try {
+            // Verificar se é pagamento de plano (comerciantes)
+            if ($transaction->source_type === \App\Enums\Payment\SourceType::SITE_PLANOS) {
+                $this->ativarAssinaturaPlan($transaction);
+            }
+
+            // Aqui podem ser adicionados outros tipos de source_type no futuro
+            // Por exemplo: PDV, LANCAMENTO, API_EXTERNA, etc.
+
+        } catch (\Exception $e) {
+            Log::error('Erro ao processar pagamento aprovado', [
+                'transaction_id' => $transaction->id,
+                'source_type' => $transaction->source_type,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Ativar assinatura de plano automaticamente via webhook
+     */
+    private function ativarAssinaturaPlan(PaymentTransaction $transaction): void
+    {
+        if (!$transaction->source_id) {
+            Log::warning('Transaction aprovada sem source_id para ativar assinatura', [
+                'transaction_id' => $transaction->id
+            ]);
+            return;
+        }
+
+        $assinatura = \App\Models\AfiPlanAssinaturas::find($transaction->source_id);
+
+        if (!$assinatura) {
+            Log::warning('Assinatura não encontrada para ativar', [
+                'transaction_id' => $transaction->id,
+                'assinatura_id' => $transaction->source_id
+            ]);
+            return;
+        }
+
+        // Ativar a assinatura
+        $assinatura->update([
+            'status' => 'ativo',
+            'iniciado_em' => now(),
+            'ultima_cobranca_em' => now()
+        ]);
+
+        Log::info('Assinatura ativada automaticamente via webhook', [
+            'transaction_id' => $transaction->id,
+            'assinatura_id' => $assinatura->id,
+            'empresa_id' => $assinatura->empresa_id
+        ]);
     }
 
     public function processPendingWebhooks(int $limit = 50): int
