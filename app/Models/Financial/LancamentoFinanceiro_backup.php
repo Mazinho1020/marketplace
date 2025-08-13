@@ -285,6 +285,159 @@ class LancamentoFinanceiro extends Model
             $this->gerarProximaRecorrencia();
         }
     }
+
+    public function gerarProximaRecorrencia(): ?self
+    {
+        if (!$this->e_recorrente || !$this->frequencia_recorrencia) {
+            return null;
+        }
+
+        $proximaData = $this->frequencia_recorrencia->calcularProximaData(
+            Carbon::parse($this->data_vencimento)
+        );
+
+        return self::create([
+            'empresa_id' => $this->empresa_id,
+            'natureza_financeira' => $this->natureza_financeira,
+            'pessoa_id' => $this->pessoa_id,
+            'pessoa_tipo' => $this->pessoa_tipo,
+            'conta_gerencial_id' => $this->conta_gerencial_id,
+            'descricao' => $this->descricao . ' (Recorrente)',
+            'valor_original' => $this->valor_original,
+            'data_vencimento' => $proximaData,
+            'data_emissao' => now(),
+            'situacao_financeira' => SituacaoFinanceiraEnum::PENDENTE,
+            'e_recorrente' => true,
+            'frequencia_recorrencia' => $this->frequencia_recorrencia,
+            'juros_multa_config' => $this->juros_multa_config,
+            'desconto_antecipacao' => $this->desconto_antecipacao,
+            'config_alertas' => $this->config_alertas,
+        ]);
+    }
+
+    // ===== MÉTODOS DE VERIFICAÇÃO =====
+
+    public function isPaga(): bool
+    {
+        return $this->situacao_financeira === SituacaoFinanceiraEnum::PAGO;
+    }
+
+    public function isVencida(): bool
+    {
+        return $this->situacao_financeira === SituacaoFinanceiraEnum::VENCIDO ||
+            ($this->situacao_financeira === SituacaoFinanceiraEnum::PENDENTE &&
+                $this->data_vencimento < now());
+    }
+
+    public function isPendente(): bool
+    {
+        return $this->situacao_financeira === SituacaoFinanceiraEnum::PENDENTE;
+    }
+
+    public function isContaPagar(): bool
+    {
+        return $this->natureza_financeira === NaturezaFinanceiraEnum::PAGAR;
+    }
+
+    public function isContaReceber(): bool
+    {
+        return $this->natureza_financeira === NaturezaFinanceiraEnum::RECEBER;
+    }
+
+    public function temParcelamento(): bool
+    {
+        return $this->total_parcelas > 1;
+    }
+
+    // ===== MÉTODOS DE NEGÓCIO =====
+
+    public function adicionarPagamento(array $dados): Pagamento
+    {
+        $dados['lancamento_id'] = $this->id;
+        $dados['usuario_id'] = $dados['usuario_id'] ?? auth()->id();
+        
+        $pagamento = $this->pagamentos()->create($dados);
+        
+        // A situação será atualizada automaticamente pelo evento do Pagamento
+        return $pagamento;
+    }
+
+    public function atualizarSituacao(): void
+    {
+        $valorPago = $this->pagamentos()->confirmados()->sum('valor');
+        $valorTotal = $this->valor_final;
+        
+        if ($valorPago >= $valorTotal) {
+            $this->situacao_financeira = SituacaoFinanceiraEnum::PAGO;
+            $this->data_pagamento = $this->pagamentos()
+                ->confirmados()
+                ->latest('data_pagamento')
+                ->first()
+                ->data_pagamento ?? now();
+        } elseif ($this->data_vencimento < now() && $valorPago < $valorTotal) {
+            $this->situacao_financeira = SituacaoFinanceiraEnum::VENCIDO;
+        } else {
+            $this->situacao_financeira = SituacaoFinanceiraEnum::PENDENTE;
+        }
+        
+        $this->save();
+    }
+
+    public function calcularEncargos(): void
+    {
+        if (!$this->isVencida() || !$this->juros_multa_config) {
+            return;
+        }
+        
+        $config = $this->juros_multa_config;
+        $diasAtraso = $this->dias_atraso;
+        
+        // Calcular multa
+        if ($diasAtraso > 0 && isset($config['multa_percentual'])) {
+            $this->valor_multa = $this->valor_original * ($config['multa_percentual'] / 100);
+        }
+        
+        // Calcular juros
+        if ($diasAtraso > 0 && isset($config['juros_dia_percentual'])) {
+            $this->valor_juros = $this->valor_original * ($config['juros_dia_percentual'] / 100) * $diasAtraso;
+        }
+        
+        $this->save();
+    }
+
+    public function gerarProximaRecorrencia(): ?LancamentoFinanceiro
+    {
+        if (!$this->e_recorrente || !$this->frequencia_recorrencia) {
+            return null;
+        }
+
+        $proximaData = $this->frequencia_recorrencia->calcularProximaData(
+            Carbon::parse($this->proxima_recorrencia ?? $this->data_vencimento)
+        );
+
+        return self::create([
+            'empresa_id' => $this->empresa_id,
+            'usuario_id' => $this->usuario_id,
+            'conta_gerencial_id' => $this->conta_gerencial_id,
+            'natureza_financeira' => $this->natureza_financeira,
+            'pessoa_id' => $this->pessoa_id,
+            'pessoa_tipo' => $this->pessoa_tipo,
+            'numero_documento' => $this->numero_documento,
+            'descricao' => $this->descricao,
+            'observacoes' => $this->observacoes,
+            'valor' => $this->valor,
+            'valor_original' => $this->valor_original,
+            'data_vencimento' => $proximaData,
+            'data_emissao' => now(),
+            'situacao_financeira' => SituacaoFinanceiraEnum::PENDENTE,
+            'e_recorrente' => true,
+            'frequencia_recorrencia' => $this->frequencia_recorrencia,
+            'juros_multa_config' => $this->juros_multa_config,
+            'desconto_antecipacao' => $this->desconto_antecipacao,
+            'config_alertas' => $this->config_alertas,
+        ]);
+    }
+
     // ===== ATRIBUTOS COMPUTED =====
 
     public function getValorPagoAttribute(): float
