@@ -115,7 +115,7 @@
                                         <option value="">Selecione...</option>
                                         @foreach($naturezas as $natureza)
                                         <option value="{{ $natureza->value }}" 
-                                                {{ old('natureza', $conta->natureza->value) === $natureza->value ? 'selected' : '' }}>
+                                                {{ old('natureza', $conta->natureza?->value) === $natureza->value ? 'selected' : '' }}>
                                             {{ $natureza->label() }} ({{ $natureza->value }})
                                         </option>
                                         @endforeach
@@ -460,3 +460,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+
+
+
+
+
+
+

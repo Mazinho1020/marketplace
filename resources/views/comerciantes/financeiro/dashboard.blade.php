@@ -28,6 +28,34 @@
                         <div class="col-md-6 col-xl-3">
                             <div class="card text-center">
                                 <div class="card-body">
+                                    <h4 class="text-muted fw-normal mt-0" title="Contas a Pagar">Contas a Pagar</h4>
+                                    <h3 class="my-2 py-1"><i class="mdi mdi-credit-card-minus text-danger"></i></h3>
+                                    <p class="text-muted">
+                                        <a href="{{ route('comerciantes.empresas.financeiro.contas-pagar.index', $empresa) }}" class="btn btn-danger btn-sm">
+                                            Gerenciar Contas a Pagar
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h4 class="text-muted fw-normal mt-0" title="Contas a Receber">Contas a Receber</h4>
+                                    <h3 class="my-2 py-1"><i class="mdi mdi-credit-card-plus text-success"></i></h3>
+                                    <p class="text-muted">
+                                        <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.index', $empresa) }}" class="btn btn-success btn-sm">
+                                            Gerenciar Contas a Receber
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-3">
+                            <div class="card text-center">
+                                <div class="card-body">
                                     <h4 class="text-muted fw-normal mt-0" title="Categorias">Categorias</h4>
                                     <h3 class="my-2 py-1"><i class="mdi mdi-folder text-primary"></i></h3>
                                     <p class="text-muted">
@@ -43,23 +71,25 @@
                             <div class="card text-center">
                                 <div class="card-body">
                                     <h4 class="text-muted fw-normal mt-0" title="Contas">Contas Gerenciais</h4>
-                                    <h3 class="my-2 py-1"><i class="mdi mdi-bank text-success"></i></h3>
+                                    <h3 class="my-2 py-1"><i class="mdi mdi-bank text-info"></i></h3>
                                     <p class="text-muted">
-                                        <a href="{{ route('comerciantes.empresas.financeiro.contas.index', $empresa) }}" class="btn btn-success btn-sm">
+                                        <a href="{{ route('comerciantes.empresas.financeiro.contas.index', $empresa) }}" class="btn btn-info btn-sm">
                                             Gerenciar Contas
                                         </a>
                                     </p>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
+                    <div class="row mt-3">
                         <div class="col-md-6 col-xl-3">
                             <div class="card text-center">
                                 <div class="card-body">
                                     <h4 class="text-muted fw-normal mt-0" title="Relatórios">Relatórios</h4>
-                                    <h3 class="my-2 py-1"><i class="mdi mdi-chart-line text-info"></i></h3>
+                                    <h3 class="my-2 py-1"><i class="mdi mdi-chart-line text-warning"></i></h3>
                                     <p class="text-muted">
-                                        <a href="#" class="btn btn-info btn-sm">
+                                        <a href="#" class="btn btn-warning btn-sm">
                                             Visualizar Relatórios
                                         </a>
                                     </p>
@@ -71,10 +101,43 @@
                             <div class="card text-center">
                                 <div class="card-body">
                                     <h4 class="text-muted fw-normal mt-0" title="Configurações">Configurações</h4>
-                                    <h3 class="my-2 py-1"><i class="mdi mdi-cog text-warning"></i></h3>
+                                    <h3 class="my-2 py-1"><i class="mdi mdi-cog text-secondary"></i></h3>
                                     <p class="text-muted">
-                                        <a href="#" class="btn btn-warning btn-sm">
+                                        <a href="#" class="btn btn-secondary btn-sm">
                                             Configurações
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h4 class="text-muted fw-normal mt-0" title="Novo Lançamento">Novo Lançamento</h4>
+                                    <h3 class="my-2 py-1"><i class="mdi mdi-plus-circle text-success"></i></h3>
+                                    <p class="text-muted">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ route('comerciantes.empresas.financeiro.contas-pagar.create', $empresa) }}" class="btn btn-sm btn-outline-danger">
+                                                <i class="mdi mdi-minus"></i> Pagar
+                                            </a>
+                                            <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.create', $empresa) }}" class="btn btn-sm btn-outline-success">
+                                                <i class="mdi mdi-plus"></i> Receber
+                                            </a>
+                                        </div>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-xl-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h4 class="text-muted fw-normal mt-0" title="Dashboard">Dashboard</h4>
+                                    <h3 class="my-2 py-1"><i class="mdi mdi-view-dashboard text-primary"></i></h3>
+                                    <p class="text-muted">
+                                        <a href="#" class="btn btn-primary btn-sm">
+                                            Resumo Geral
                                         </a>
                                     </p>
                                 </div>
@@ -99,3 +162,11 @@
     </div>
 </div>
 @endsection
+
+
+
+
+
+
+
+

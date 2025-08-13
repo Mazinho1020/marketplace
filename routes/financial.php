@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Financial\ContaGerencialController;
 use App\Http\Controllers\Financial\CategoriaContaGerencialController;
+use App\Http\Controllers\Financial\ContasPagarController;
+use App\Http\Controllers\Financial\ContasReceberController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,6 +60,31 @@ Route::prefix('comerciantes/empresas/{empresa}/financeiro')->name('comerciantes.
         Route::get('/categoria/{categoriaId}', [ContaGerencialController::class, 'byCategory'])->name('by-category');
         Route::get('/natureza/{natureza}', [ContaGerencialController::class, 'byNature'])->name('by-nature');
         Route::post('/importar-padrao', [ContaGerencialController::class, 'importDefault'])->name('import-default');
+    });
+
+    // Rotas para Contas a Pagar
+    Route::prefix('contas-pagar')->name('contas-pagar.')->group(function () {
+        Route::get('/', [ContasPagarController::class, 'index'])->name('index');
+        Route::get('/create', [ContasPagarController::class, 'create'])->name('create');
+        Route::post('/', [ContasPagarController::class, 'store'])->name('store');
+        Route::get('/{id}', [ContasPagarController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [ContasPagarController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ContasPagarController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ContasPagarController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/pagar', [ContasPagarController::class, 'pagar'])->name('pagar');
+    });
+
+    // Rotas para Contas a Receber
+    Route::prefix('contas-receber')->name('contas-receber.')->group(function () {
+        Route::get('/', [ContasReceberController::class, 'index'])->name('index');
+        Route::get('/create', [ContasReceberController::class, 'create'])->name('create');
+        Route::post('/', [ContasReceberController::class, 'store'])->name('store');
+        Route::get('/{id}', [ContasReceberController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [ContasReceberController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ContasReceberController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ContasReceberController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/receber', [ContasReceberController::class, 'receber'])->name('receber');
+        Route::post('/{id}/gerar-boleto', [ContasReceberController::class, 'gerarBoleto'])->name('gerar-boleto');
     });
 
     // Rotas para APIs gerais do financeiro

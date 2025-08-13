@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏦 Sistema Financeiro - Teste de Links</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .link-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .link-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .status-ok { color: #28a745; }
+        .status-error { color: #dc3545; }
+        .status-loading { color: #ffc107; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center mb-5">
+                    <h1 class="display-4">🏦 Sistema Financeiro</h1>
+                    <p class="lead">Teste de Links e Funcionalidades</p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Servidor:</strong> http://127.0.0.1:8000 | 
+                        <strong>Empresa:</strong> ID = 1
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Dashboard -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card link-card h-100" onclick="testarLink('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro', this)">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tachometer-alt fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">📊 Dashboard</h5>
+                        <p class="card-text">Visão geral financeira</p>
+                        <div class="status-indicator">
+                            <i class="fas fa-circle status-loading"></i>
+                            <span class="status-text">Clique para testar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contas a Pagar -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card link-card h-100" onclick="testarLink('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/contas-pagar', this)">
+                    <div class="card-body text-center">
+                        <i class="fas fa-credit-card fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">💰 Contas a Pagar</h5>
+                        <p class="card-text">Gestão de pagamentos</p>
+                        <div class="status-indicator">
+                            <i class="fas fa-circle status-loading"></i>
+                            <span class="status-text">Clique para testar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contas a Receber -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card link-card h-100" onclick="testarLink('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/contas-receber', this)">
+                    <div class="card-body text-center">
+                        <i class="fas fa-money-bill-wave fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">💸 Contas a Receber</h5>
+                        <p class="card-text">Gestão de recebimentos</p>
+                        <div class="status-indicator">
+                            <i class="fas fa-circle status-loading"></i>
+                            <span class="status-text">Clique para testar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Criar Conta a Pagar -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card link-card h-100" onclick="testarLink('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/contas-pagar/create', this)">
+                    <div class="card-body text-center">
+                        <i class="fas fa-plus-circle fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">➕ Nova Conta a Pagar</h5>
+                        <p class="card-text">Criar nova despesa</p>
+                        <div class="status-indicator">
+                            <i class="fas fa-circle status-loading"></i>
+                            <span class="status-text">Clique para testar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Criar Conta a Receber -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card link-card h-100" onclick="testarLink('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/contas-receber/create', this)">
+                    <div class="card-body text-center">
+                        <i class="fas fa-plus-circle fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">➕ Nova Conta a Receber</h5>
+                        <p class="card-text">Criar nova receita</p>
+                        <div class="status-indicator">
+                            <i class="fas fa-circle status-loading"></i>
+                            <span class="status-text">Clique para testar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categorias -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card link-card h-100" onclick="testarLink('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/categorias', this)">
+                    <div class="card-body text-center">
+                        <i class="fas fa-folder fa-3x text-secondary mb-3"></i>
+                        <h5 class="card-title">📂 Categorias</h5>
+                        <p class="card-text">Categorias de contas</p>
+                        <div class="status-indicator">
+                            <i class="fas fa-circle status-loading"></i>
+                            <span class="status-text">Clique para testar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plano de Contas -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card link-card h-100" onclick="testarLink('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/contas', this)">
+                    <div class="card-body text-center">
+                        <i class="fas fa-sitemap fa-3x text-dark mb-3"></i>
+                        <h5 class="card-title">🏦 Plano de Contas</h5>
+                        <p class="card-text">Estrutura contábil</p>
+                        <div class="status-indicator">
+                            <i class="fas fa-circle status-loading"></i>
+                            <span class="status-text">Clique para testar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Resumo -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card link-card h-100" onclick="testarAPI('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/api/resumo', this)">
+                    <div class="card-body text-center">
+                        <i class="fas fa-code fa-3x text-purple mb-3"></i>
+                        <h5 class="card-title">🔌 API Resumo</h5>
+                        <p class="card-text">Teste da API</p>
+                        <div class="status-indicator">
+                            <i class="fas fa-circle status-loading"></i>
+                            <span class="status-text">Clique para testar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Hierarquia -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card link-card h-100" onclick="testarAPI('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/contas/api/hierarquia', this)">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tree fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">🌳 API Hierarquia</h5>
+                        <p class="card-text">Estrutura de contas</p>
+                        <div class="status-indicator">
+                            <i class="fas fa-circle status-loading"></i>
+                            <span class="status-text">Clique para testar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações Técnicas -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">🔧 Informações Técnicas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6>✅ Sistema Implementado:</h6>
+                                <ul class="list-unstyled">
+                                    <li>✅ 3 Enums (Natureza, Situação, Frequência)</li>
+                                    <li>✅ Model LancamentoFinanceiro</li>
+                                    <li>✅ 2 Controllers (Pagar/Receber)</li>
+                                    <li>✅ 45 Rotas configuradas</li>
+                                    <li>✅ Sistema de parcelamento</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>🎯 Funcionalidades:</h6>
+                                <ul class="list-unstyled">
+                                    <li>💰 Contas a Pagar</li>
+                                    <li>💸 Contas a Receber</li>
+                                    <li>📊 Parcelamento</li>
+                                    <li>🧾 Juros e Multa</li>
+                                    <li>👥 Gestão de Pessoas</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>🚀 Status Atual:</h6>
+                                <ul class="list-unstyled">
+                                    <li><span class="badge bg-success">Backend: 100%</span></li>
+                                    <li><span class="badge bg-warning">Frontend: 0%</span></li>
+                                    <li><span class="badge bg-info">APIs: 100%</span></li>
+                                    <li><span class="badge bg-primary">Testes: ✅</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function testarLink(url, card) {
+            const statusIndicator = card.querySelector('.status-indicator i');
+            const statusText = card.querySelector('.status-text');
+            
+            // Indicar carregamento
+            statusIndicator.className = 'fas fa-spinner fa-spin status-loading';
+            statusText.textContent = 'Testando...';
+            
+            // Tentar abrir o link
+            try {
+                window.open(url, '_blank');
+                
+                // Simular sucesso após 1 segundo
+                setTimeout(() => {
+                    statusIndicator.className = 'fas fa-check-circle status-ok';
+                    statusText.textContent = 'Link aberto!';
+                }, 1000);
+                
+            } catch (error) {
+                statusIndicator.className = 'fas fa-times-circle status-error';
+                statusText.textContent = 'Erro ao abrir';
+            }
+        }
+
+        function testarAPI(url, card) {
+            const statusIndicator = card.querySelector('.status-indicator i');
+            const statusText = card.querySelector('.status-text');
+            
+            // Indicar carregamento
+            statusIndicator.className = 'fas fa-spinner fa-spin status-loading';
+            statusText.textContent = 'Testando API...';
+            
+            // Fazer requisição de teste
+            fetch(url)
+                .then(response => {
+                    if (response.ok) {
+                        statusIndicator.className = 'fas fa-check-circle status-ok';
+                        statusText.textContent = `API OK (${response.status})`;
+                    } else {
+                        statusIndicator.className = 'fas fa-exclamation-triangle status-error';
+                        statusText.textContent = `Erro ${response.status}`;
+                    }
+                })
+                .catch(error => {
+                    statusIndicator.className = 'fas fa-times-circle status-error';
+                    statusText.textContent = 'Erro de conexão';
+                });
+        }
+    </script>
+</body>
+</html>

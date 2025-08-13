@@ -374,10 +374,10 @@
 
     /* Estilos para o select com carregamento automático */
     .produto-select {
-        background-image: linear-gradient(45deg, transparent 25%, rgba(0, 123, 255, 0.1) 25%), 
-                          linear-gradient(-45deg, transparent 25%, rgba(0, 123, 255, 0.1) 25%), 
-                          linear-gradient(45deg, rgba(0, 123, 255, 0.1) 75%, transparent 75%), 
-                          linear-gradient(-45deg, rgba(0, 123, 255, 0.1) 75%, transparent 75%);
+        background-image: linear-gradient(45deg, transparent 25%, rgba(0, 123, 255, 0.1) 25%),
+            linear-gradient(-45deg, transparent 25%, rgba(0, 123, 255, 0.1) 25%),
+            linear-gradient(45deg, rgba(0, 123, 255, 0.1) 75%, transparent 75%),
+            linear-gradient(-45deg, rgba(0, 123, 255, 0.1) 75%, transparent 75%);
         background-size: 10px 10px;
         background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
         transition: all 0.3s ease;
@@ -447,16 +447,16 @@
     function setupProductSelect() {
         console.log('🔄 Configurando select de produtos com AJAX...');
         const elemento = $('#modal_produto_relacionado_id');
-        
+
         // Limpar o select e adicionar uma opção padrão
         elemento.empty().append('<option value="">📋 Clique para carregar produtos disponíveis</option>');
-        
+
         // Adicionar classes de estilo
         elemento.addClass('produto-select');
-        
+
         // Adicionar tooltip explicativo
         elemento.attr('title', 'Clique para carregar produtos disponíveis');
-        
+
         // Adicionar evento de foco para buscar produtos
         elemento.off('focus.produtos').on('focus.produtos', function() {
             if ($(this).find('option').length <= 1) {
@@ -478,7 +478,7 @@
     function loadProductsForSelect() {
         const elemento = $('#modal_produto_relacionado_id');
         const buscarUrl = '{{ route("comerciantes.produtos.relacionados.buscar", $produto->id) }}';
-        
+
         // Indicar carregamento
         elemento.prop('disabled', true);
         elemento.removeClass('produto-select sucesso erro').addClass('carregando');
@@ -487,32 +487,35 @@
         $.ajax({
             url: buscarUrl,
             method: 'GET',
-            data: { q: '', page: 1 },
+            data: {
+                q: '',
+                page: 1
+            },
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 'X-Requested-With': 'XMLHttpRequest'
             },
             success: function(data) {
                 elemento.empty().append('<option value="">✅ Selecione um produto...</option>');
-                
+
                 const results = data.results || data || [];
                 results.forEach(function(item) {
                     elemento.append(`<option value="${item.id}">${item.text}</option>`);
                 });
-                
+
                 elemento.prop('disabled', false);
                 elemento.removeClass('carregando erro').addClass('sucesso');
-                
+
                 // Mostrar pequena notificação de sucesso
                 const small = elemento.siblings('small');
                 const originalText = small.text();
                 small.text(`✅ ${results.length} produtos carregados com sucesso!`).css('color', '#0f5132');
-                
+
                 setTimeout(() => {
                     small.text(originalText).css('color', '');
                     elemento.removeClass('sucesso').addClass('produto-select');
                 }, 3000);
-                
+
                 console.log(`✅ ${results.length} produtos carregados no select`);
             },
             error: function(xhr, status, error) {
@@ -520,12 +523,12 @@
                 elemento.empty().append('<option value="">❌ Erro ao carregar produtos</option>');
                 elemento.prop('disabled', false);
                 elemento.removeClass('carregando sucesso').addClass('erro');
-                
+
                 // Mostrar erro para o usuário
                 const small = elemento.siblings('small');
                 const originalText = small.text();
                 small.text('❌ Erro ao carregar produtos. Tente novamente.').css('color', '#721c24');
-                
+
                 setTimeout(() => {
                     small.text(originalText).css('color', '');
                     elemento.empty().append('<option value="">📋 Clique para tentar novamente</option>');
@@ -533,7 +536,7 @@
                 }, 5000);
             }
         });
-    }    // Função para inicializar Select2
+    } // Função para inicializar Select2
     function initializeSelect2() {
         select2InitAttempts++;
         console.log(`🚀 Iniciando configuração do Select2... (tentativa ${select2InitAttempts}/${MAX_INIT_ATTEMPTS})`);

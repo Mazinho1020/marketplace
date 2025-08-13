@@ -60,9 +60,13 @@
 
                                 <dt class="col-sm-4">Natureza:</dt>
                                 <dd class="col-sm-8">
-                                    <span class="badge badge-{{ $conta->natureza->color() }}">
-                                        {{ $conta->natureza->label() }}
-                                    </span>
+                                    @if($conta->natureza)
+                                        <span class="badge badge-{{ $conta->natureza->color() }}">
+                                            {{ $conta->natureza->label() }}
+                                        </span>
+                                    @else
+                                        <span class="badge badge-secondary">Não definida</span>
+                                    @endif
                                 </dd>
 
                                 <dt class="col-sm-4">Status:</dt>
@@ -197,9 +201,13 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <span class="badge badge-{{ $filho->natureza->color() }} badge-sm">
-                                            {{ $filho->natureza->value }}
-                                        </span>
+                                        @if($filho->natureza)
+                                            <span class="badge badge-{{ $filho->natureza->color() }} badge-sm">
+                                                {{ $filho->natureza->value }}
+                                            </span>
+                                        @else
+                                            <span class="badge badge-secondary badge-sm">N/D</span>
+                                        @endif
                                     </td>
                                     <td>
                                         <span class="badge badge-{{ $filho->ativo ? 'success' : 'secondary' }} badge-sm">
@@ -349,3 +357,11 @@ dl.row dd {
 }
 </style>
 @endpush
+
+
+
+
+
+
+
+
