@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste JavaScript - Função removerImagem</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Teste da função removerImagem</h1>
+    
+    <button onclick="removerImagem(123)" class="btn btn-danger">
+        🗑️ Testar Remover Imagem
+    </button>
+
+    <script>
+        $(document).ready(function() {
+            // Definir funções globais no escopo window para serem acessíveis via onclick
+            window.removerImagem = function(imagemId) {
+                alert('Função removerImagem chamada com ID: ' + imagemId);
+                if (confirm('Tem certeza que deseja remover esta imagem? Esta ação não pode ser desfeita.')) {
+                    alert('Usuário confirmou a remoção da imagem ' + imagemId);
+                    // Simular o envio do form
+                    console.log('Form seria enviado para remover imagem ' + imagemId);
+                }
+            };
+            
+            console.log('jQuery carregado e função definida');
+        });
+    </script>
+</body>
+</html>

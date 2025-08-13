@@ -13,6 +13,8 @@ use App\Comerciantes\Controllers\NotificacaoController;
 use App\Comerciantes\Controllers\ProdutoController;
 use App\Comerciantes\Controllers\ProdutoCategoriaController;
 use App\Comerciantes\Controllers\ProdutoMarcaController;
+use App\Comerciantes\Controllers\ProdutoSubcategoriaController;
+use App\Comerciantes\Controllers\ProdutoPrecoQuantidadeController;
 
 // Controladores do módulo Comerciante
 use App\Modules\Comerciante\Controllers\Config\ConfigController;
@@ -1294,11 +1296,6 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
         });
 
         /**
-         * GESTÃO DE MARCAS (planos básico, profissional e enterprise)
-         */
-        Route::resource('marcas', MarcaController::class);
-
-        /**
          * GESTÃO DE EMPRESAS (apenas planos profissional e enterprise)
          */
         Route::middleware('plan:company_management')->resource('empresas', EmpresaController::class);
@@ -1467,11 +1464,147 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
                 Route::delete('/{marca}', [ProdutoMarcaController::class, 'destroy'])->name('destroy');
             });
 
+            // Subcategorias (ANTES das rotas {produto})
+            Route::prefix('subcategorias')->name('subcategorias.')->group(function () {
+                Route::get('/', [ProdutoSubcategoriaController::class, 'index'])->name('index');
+                Route::get('/create', [ProdutoSubcategoriaController::class, 'create'])->name('create');
+                Route::post('/', [ProdutoSubcategoriaController::class, 'store'])->name('store');
+                Route::get('/{subcategoria}', [ProdutoSubcategoriaController::class, 'show'])->name('show');
+                Route::get('/{subcategoria}/edit', [ProdutoSubcategoriaController::class, 'edit'])->name('edit');
+                Route::put('/{subcategoria}', [ProdutoSubcategoriaController::class, 'update'])->name('update');
+                Route::delete('/{subcategoria}', [ProdutoSubcategoriaController::class, 'destroy'])->name('destroy');
+
+                // AJAX Routes
+                Route::get('/por-categoria', [ProdutoSubcategoriaController::class, 'porCategoria'])->name('por-categoria');
+                Route::get('/principais-por-categoria', [ProdutoSubcategoriaController::class, 'principaisPorCategoria'])->name('principais-por-categoria');
+                Route::post('/atualizar-ordem', [ProdutoSubcategoriaController::class, 'atualizarOrdem'])->name('atualizar-ordem');
+                Route::post('/{subcategoria}/toggle-ativo', [ProdutoSubcategoriaController::class, 'toggleAtivo'])->name('toggle-ativo');
+            });
+
+            // Códigos de Barras (ANTES das rotas {produto})
+            Route::prefix('codigos-barras')->name('codigos-barras.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'store'])->name('store');
+                Route::get('/scanner', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'scanner'])->name('scanner');
+                Route::get('/relatorio-duplicados', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'relatorioDuplicados'])->name('relatorio-duplicados');
+                Route::get('/{codigoBarras}', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'show'])->name('show');
+                Route::get('/{codigoBarras}/edit', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'edit'])->name('edit');
+                Route::put('/{codigoBarras}', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'update'])->name('update');
+                Route::delete('/{codigoBarras}', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'destroy'])->name('destroy');
+
+                // AJAX Routes
+                Route::get('/buscar-por-codigo', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'buscarPorCodigo'])->name('buscar-por-codigo');
+                Route::get('/gerar-codigo-interno', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'gerarCodigoInterno'])->name('gerar-codigo-interno');
+                Route::post('/validar-codigo', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'validarCodigo'])->name('validar-codigo');
+                Route::post('/{codigoBarras}/definir-principal', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'definirPrincipal'])->name('definir-principal');
+                Route::post('/{codigoBarras}/toggle-ativo', [\App\Http\Controllers\Comerciante\ProdutoCodigoBarrasController::class, 'toggleAtivo'])->name('toggle-ativo');
+            });
+
+            // Histórico de Preços (ANTES das rotas {produto})
+            Route::prefix('historico-precos')->name('historico-precos.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'store'])->name('store');
+                Route::get('/relatorio', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'relatorio'])->name('relatorio');
+                Route::get('/comparacao', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'comparacao'])->name('comparacao');
+                Route::get('/exportar', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'exportar'])->name('exportar');
+                Route::get('/produto/{produto}', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'produto'])->name('produto');
+                Route::get('/{historicoPreco}', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'show'])->name('show');
+                Route::get('/{historicoPreco}/edit', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'edit'])->name('edit');
+                Route::put('/{historicoPreco}', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'update'])->name('update');
+                Route::delete('/{historicoPreco}', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'destroy'])->name('destroy');
+
+                // AJAX Routes
+                Route::get('/dados-grafico', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'dadosGrafico'])->name('dados-grafico');
+                Route::get('/estatisticas-rapidas', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'estatisticasRapidas'])->name('estatisticas-rapidas');
+                Route::post('/limpar-antigo', [\App\Http\Controllers\Comerciante\ProdutoHistoricoPrecoController::class, 'limparAntigo'])->name('limpar-antigo');
+            });
+
+            // Configurações de Produtos (ANTES das rotas {produto})
+            Route::prefix('configuracoes')->name('configuracoes.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'store'])->name('store');
+                Route::get('/por-produto', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'porProduto'])->name('por-produto');
+                Route::get('/{configuracao}', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'show'])->name('show');
+                Route::get('/{configuracao}/edit', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'edit'])->name('edit');
+                Route::put('/{configuracao}', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'update'])->name('update');
+                Route::delete('/{configuracao}', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'destroy'])->name('destroy');
+                Route::post('/{configuracao}/toggle-ativo', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'toggleAtivo'])->name('toggle-ativo');
+
+                // Rotas para gerenciar itens das configurações
+                Route::post('/{configuracao}/itens', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'storeItem'])->name('itens.store');
+                Route::put('/{configuracao}/itens/{item}', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'updateItem'])->name('itens.update');
+                Route::delete('/{configuracao}/itens/{item}', [\App\Http\Controllers\Comerciante\ProdutoConfiguracaoController::class, 'destroyItem'])->name('itens.destroy');
+            });
+
+            // Kits/Combos de Produtos (ANTES das rotas {produto})
+            Route::prefix('kits')->name('kits.')->group(function () {
+                // ROTAS ESPECÍFICAS PRIMEIRO (antes das rotas com parâmetros)
+                Route::get('/buscar-produto', [\App\Http\Controllers\Comerciante\ProdutoKitController::class, 'buscarProduto'])->name('buscar-produto');
+                Route::post('/calcular-preco', [\App\Http\Controllers\Comerciante\ProdutoKitController::class, 'calcularPrecoKit'])->name('calcular-preco');
+
+                // ROTAS BÁSICAS
+                Route::get('/', [\App\Http\Controllers\Comerciante\ProdutoKitController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Comerciante\ProdutoKitController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Comerciante\ProdutoKitController::class, 'store'])->name('store');
+
+                // ROTAS COM PARÂMETROS NO FINAL
+                Route::get('/{kit}', [\App\Http\Controllers\Comerciante\ProdutoKitController::class, 'show'])->name('show');
+                Route::get('/{kit}/edit', [\App\Http\Controllers\Comerciante\ProdutoKitController::class, 'edit'])->name('edit');
+                Route::put('/{kit}', [\App\Http\Controllers\Comerciante\ProdutoKitController::class, 'update'])->name('update');
+                Route::delete('/{kit}', [\App\Http\Controllers\Comerciante\ProdutoKitController::class, 'destroy'])->name('destroy');
+            });
+
+            // Preços por Quantidade (ANTES das rotas {produto})
+            Route::prefix('precos-quantidade')->name('precos-quantidade.')->group(function () {
+                Route::get('/', [ProdutoPrecoQuantidadeController::class, 'index'])->name('index');
+                Route::get('/create', [ProdutoPrecoQuantidadeController::class, 'create'])->name('create');
+                Route::post('/', [ProdutoPrecoQuantidadeController::class, 'store'])->name('store');
+                Route::get('/{preco}', [ProdutoPrecoQuantidadeController::class, 'show'])->name('show');
+                Route::get('/{preco}/edit', [ProdutoPrecoQuantidadeController::class, 'edit'])->name('edit');
+                Route::put('/{preco}', [ProdutoPrecoQuantidadeController::class, 'update'])->name('update');
+                Route::delete('/{preco}', [ProdutoPrecoQuantidadeController::class, 'destroy'])->name('destroy');
+                Route::post('/calcular', [ProdutoPrecoQuantidadeController::class, 'calcular'])->name('calcular');
+                Route::get('/produto/{produto}', [ProdutoPrecoQuantidadeController::class, 'porProduto'])->name('por-produto');
+                Route::post('/{preco}/toggle-ativo', [ProdutoPrecoQuantidadeController::class, 'toggleAtivo'])->name('toggle-ativo');
+                Route::get('/relatorio/desconto', [ProdutoPrecoQuantidadeController::class, 'relatorioDesconto'])->name('relatorio-desconto');
+            });
+
+            // Estoque (ANTES das rotas {produto})
+            Route::prefix('estoque')->name('estoque.')->group(function () {
+                Route::get('/alertas', [\App\Http\Controllers\Comerciante\EstoqueController::class, 'alertas'])->name('alertas');
+                Route::get('/movimentacoes', [\App\Http\Controllers\Comerciante\EstoqueController::class, 'movimentacoes'])->name('movimentacoes');
+                Route::post('/movimentacao/registrar', [\App\Http\Controllers\Comerciante\EstoqueController::class, 'registrarMovimentacao'])->name('movimentacao.registrar');
+                Route::post('/atualizar-lote', [\App\Http\Controllers\Comerciante\EstoqueController::class, 'atualizarLote'])->name('atualizar-lote');
+            });
+
             // Rotas com parâmetros {produto} (NO FINAL)
             Route::get('/{produto}', [ProdutoController::class, 'show'])->name('show');
             Route::get('/{produto}/edit', [ProdutoController::class, 'edit'])->name('edit');
             Route::put('/{produto}', [ProdutoController::class, 'update'])->name('update');
             Route::delete('/{produto}', [ProdutoController::class, 'destroy'])->name('destroy');
+
+            // Galeria de Imagens por produto (ANTES das ações especiais)
+            Route::prefix('{produto}/imagens')->name('imagens.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Comerciante\ProdutoImagemController::class, 'index'])->name('index');
+                Route::post('/upload', [\App\Http\Controllers\Comerciante\ProdutoImagemController::class, 'upload'])->name('upload');
+                Route::put('/{imagem}', [\App\Http\Controllers\Comerciante\ProdutoImagemController::class, 'update'])->name('update');
+                Route::delete('/{imagem}', [\App\Http\Controllers\Comerciante\ProdutoImagemController::class, 'destroy'])->name('destroy');
+                Route::post('/{imagem}/principal', [\App\Http\Controllers\Comerciante\ProdutoImagemController::class, 'setPrincipal'])->name('setPrincipal');
+                Route::post('/reordenar', [\App\Http\Controllers\Comerciante\ProdutoImagemController::class, 'reordenar'])->name('reordenar');
+            });
+
+            // Produtos Relacionados (Cross-sell, Up-sell, Similares, etc.)
+            Route::prefix('{produto}/relacionados')->name('relacionados.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Comerciante\ProdutoRelacionadoController::class, 'index'])->name('index');
+                Route::post('/', [\App\Http\Controllers\Comerciante\ProdutoRelacionadoController::class, 'store'])->name('store');
+                Route::put('/{relacionado}', [\App\Http\Controllers\Comerciante\ProdutoRelacionadoController::class, 'update'])->name('update');
+                Route::delete('/{relacionado}', [\App\Http\Controllers\Comerciante\ProdutoRelacionadoController::class, 'destroy'])->name('destroy');
+                Route::post('/update-ordem', [\App\Http\Controllers\Comerciante\ProdutoRelacionadoController::class, 'updateOrdem'])->name('update-ordem');
+                Route::get('/buscar', [\App\Http\Controllers\Comerciante\ProdutoRelacionadoController::class, 'buscarProdutos'])->name('buscar');
+            });
 
             // Ações especiais de produtos específicos (também no final)
             Route::post('/{produto}/movimentacao', [ProdutoController::class, 'movimentacao'])->name('movimentacao');

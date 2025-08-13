@@ -329,6 +329,16 @@
                     </div>
                     
                     <div class="col-md-6 col-lg-3 mb-3">
+                        <a href="{{ route('comerciantes.produtos.kits.index') }}" class="quick-action-btn">
+                            <div class="quick-action-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <strong>Kits/Combos</strong>
+                            <small class="text-muted">Criar ofertas combinadas</small>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3 mb-3">
                         <a href="{{ route('comerciantes.marcas.create') }}" class="quick-action-btn">
                             <div class="quick-action-icon">
                                 <i class="fas fa-plus"></i>

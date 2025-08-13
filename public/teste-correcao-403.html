@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste - Correção Erros 403</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-light">
+    <div class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-md-10">
+          <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+              <h4 class="mb-0">🔧 Correção Erros 403 (Forbidden) - Imagens</h4>
+            </div>
+            <div class="card-body">
+              <!-- Status das Correções -->
+              <div class="alert alert-success">
+                <h5>✅ Soluções Implementadas:</h5>
+                <ul class="mb-0">
+                  <li>
+                    <strong>ImageController:</strong> Controller para servir
+                    imagens com fallback automático
+                  </li>
+                  <li>
+                    <strong>Rotas dinâmicas:</strong>
+                    /storage/produtos/{filename} agora interceptada
+                  </li>
+                  <li>
+                    <strong>Verificação de arquivos:</strong> Model Produto
+                    verifica se arquivo existe
+                  </li>
+                  <li>
+                    <strong>Logging:</strong> Sistema registra imagens órfãs
+                    para auditoria
+                  </li>
+                  <li>
+                    <strong>Comando Artisan:</strong> php artisan
+                    imagens:limpar-orfas
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Teste das URLs Problemáticas -->
+              <h5>🧪 Teste das URLs que Estavam Dando 403:</h5>
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header">
+                      <h6>1754764310_12033882.jpg</h6>
+                    </div>
+                    <div class="card-body text-center">
+                      <img
+                        src="http://192.168.1.127/marketplace/public/storage/produtos/1754764310_12033882.jpg"
+                        alt="Teste 1"
+                        class="img-fluid"
+                        style="max-height: 200px; border: 2px solid #dee2e6"
+                      />
+                      <p class="small mt-2 text-muted">
+                        Antes: 403 Forbidden<br />Agora: Placeholder automático
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header">
+                      <h6>produto_principal_3.jpg</h6>
+                    </div>
+                    <div class="card-body text-center">
+                      <img
+                        src="http://192.168.1.127/marketplace/public/storage/produtos/produto_principal_3.jpg"
+                        alt="Teste 2"
+                        class="img-fluid"
+                        style="max-height: 200px; border: 2px solid #dee2e6"
+                      />
+                      <p class="small mt-2 text-muted">
+                        Antes: 403 Forbidden<br />Agora: Placeholder automático
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Teste Placeholder Dinâmico -->
+              <h5>🎨 Teste Placeholder Dinâmico:</h5>
+              <div class="row mb-4">
+                <div class="col-md-4">
+                  <div class="card">
+                    <div class="card-header">
+                      <h6>Placeholder 150x150</h6>
+                    </div>
+                    <div class="card-body text-center">
+                      <img
+                        src="http://192.168.1.127/marketplace/public/placeholder/150/150/Pequeno"
+                        alt="Placeholder Pequeno"
+                        class="img-fluid"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card">
+                    <div class="card-header">
+                      <h6>Placeholder 300x300</h6>
+                    </div>
+                    <div class="card-body text-center">
+                      <img
+                        src="http://192.168.1.127/marketplace/public/placeholder/300/300/Médio"
+                        alt="Placeholder Médio"
+                        class="img-fluid"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card">
+                    <div class="card-header">
+                      <h6>Placeholder 500x300</h6>
+                    </div>
+                    <div class="card-body text-center">
+                      <img
+                        src="http://192.168.1.127/marketplace/public/placeholder/500/300/Grande"
+                        alt="Placeholder Grande"
+                        class="img-fluid"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Console de Monitoramento -->
+              <div class="mt-4">
+                <h5>📊 Console de Monitoramento:</h5>
+                <div class="card">
+                  <div class="card-body">
+                    <div
+                      id="status-console"
+                      class="border p-3 bg-dark text-light"
+                      style="
+                        height: 200px;
+                        overflow-y: auto;
+                        font-family: monospace;
+                      "
+                    >
+                      <div class="text-success">
+                        [INFO] Sistema de correção 403 inicializado
+                      </div>
+                      <div class="text-info">
+                        [DEBUG] Monitorando carregamento de imagens...
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Comandos Úteis -->
+              <div class="alert alert-info mt-4">
+                <h6><i class="fas fa-terminal me-2"></i>Comandos Úteis:</h6>
+                <div class="row">
+                  <div class="col-md-6">
+                    <code>php artisan imagens:limpar-orfas --dry-run</code>
+                    <p class="small mb-2">
+                      Verificar imagens órfãs sem alterar
+                    </p>
+
+                    <code>php artisan imagens:limpar-orfas --verbose</code>
+                    <p class="small mb-2">Limpar com detalhes</p>
+                  </div>
+                  <div class="col-md-6">
+                    <code>php artisan storage:link</code>
+                    <p class="small mb-2">Recriar link simbólico</p>
+
+                    <code>tail -f storage/logs/laravel.log</code>
+                    <p class="small mb-2">Monitorar logs de imagens órfãs</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Links de Teste -->
+              <div class="row">
+                <div class="col-md-12">
+                  <h5>🔗 Links para Teste Completo:</h5>
+                  <div class="list-group">
+                    <a
+                      href="http://192.168.1.127/marketplace/public/comerciantes/produtos"
+                      class="list-group-item list-group-item-action"
+                    >
+                      <i class="fas fa-box me-2"></i>Lista de Produtos (testar
+                      imagens reais)
+                    </a>
+                    <a
+                      href="http://192.168.1.127/marketplace/public/teste-imagens-debug.html"
+                      class="list-group-item list-group-item-action"
+                    >
+                      <i class="fas fa-bug me-2"></i>Debug Completo de Imagens
+                    </a>
+                    <a
+                      href="http://192.168.1.127/marketplace/public/teste-produtos-relacionados.html"
+                      class="list-group-item list-group-item-action"
+                    >
+                      <i class="fas fa-link me-2"></i>Sistema Produtos
+                      Relacionados
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const statusConsole = document.getElementById("status-console");
+
+      function log(message, type = "INFO") {
+        const timestamp = new Date().toLocaleTimeString();
+        const colorClass =
+          {
+            INFO: "text-info",
+            SUCCESS: "text-success",
+            WARNING: "text-warning",
+            ERROR: "text-danger",
+            FIXED: "text-primary",
+          }[type] || "text-light";
+
+        const div = document.createElement("div");
+        div.className = colorClass;
+        div.textContent = `[${timestamp}] [${type}] ${message}`;
+        statusConsole.appendChild(div);
+        statusConsole.scrollTop = statusConsole.scrollHeight;
+      }
+
+      // Monitorar carregamento de todas as imagens
+      document.addEventListener("DOMContentLoaded", function () {
+        let imageCount = 0;
+        let loadedCount = 0;
+        let errorCount = 0;
+
+        document.querySelectorAll("img").forEach(function (img, index) {
+          imageCount++;
+
+          img.addEventListener("load", function () {
+            loadedCount++;
+            log(
+              `Imagem ${index + 1} carregada: ${this.src.split("/").pop()}`,
+              "SUCCESS"
+            );
+
+            if (loadedCount + errorCount === imageCount) {
+              log(
+                `Total: ${imageCount} imagens, ${loadedCount} carregadas, ${errorCount} com erro`,
+                "INFO"
+              );
+
+              if (errorCount === 0) {
+                log("🎉 TODAS as imagens carregaram sem erro 403!", "FIXED");
+              }
+            }
+          });
+
+          img.addEventListener("error", function () {
+            errorCount++;
+            log(
+              `ERRO na imagem ${index + 1}: ${this.src.split("/").pop()}`,
+              "ERROR"
+            );
+
+            if (loadedCount + errorCount === imageCount) {
+              log(
+                `Total: ${imageCount} imagens, ${loadedCount} carregadas, ${errorCount} com erro`,
+                "WARNING"
+              );
+            }
+          });
+        });
+
+        log(`Monitorando ${imageCount} imagens...`);
+      });
+
+      // Interceptar erros de rede
+      window.addEventListener(
+        "error",
+        function (e) {
+          if (e.target && e.target.src) {
+            log(`Erro de rede: ${e.target.src.split("/").pop()}`, "ERROR");
+          }
+        },
+        true
+      );
+    </script>
+  </body>
+</html>

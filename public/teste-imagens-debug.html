@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Sistema - Imagens e Funcionalidades</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-light">
+    <div class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-md-10">
+          <div class="card shadow">
+            <div class="card-header bg-success text-white">
+              <h4 class="mb-0">🧪 Teste do Sistema - Produtos e Imagens</h4>
+            </div>
+            <div class="card-body">
+              <!-- Status das Correções -->
+              <div class="alert alert-success">
+                <h5>✅ Correções Aplicadas:</h5>
+                <ul class="mb-0">
+                  <li>
+                    <strong>Placeholder local:</strong> Substituído
+                    via.placeholder.com por SVG local
+                  </li>
+                  <li>
+                    <strong>Tratamento de erro:</strong> JavaScript adicionado
+                    para imagens que falham
+                  </li>
+                  <li>
+                    <strong>Storage link:</strong> Verificado e funcionando
+                  </li>
+                  <li>
+                    <strong>Permissões:</strong> Configuradas corretamente no
+                    Windows
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Teste de Imagens -->
+              <h5>🖼️ Teste de Carregamento de Imagens:</h5>
+              <div class="row mb-4">
+                <div class="col-md-4">
+                  <div class="card">
+                    <div class="card-header">
+                      <h6>Placeholder SVG Local</h6>
+                    </div>
+                    <div class="card-body text-center">
+                      <img
+                        src="http://192.168.1.127/marketplace/public/images/placeholder.svg"
+                        alt="Placeholder"
+                        class="img-fluid"
+                        style="max-height: 200px"
+                      />
+                      <p class="small mt-2">Deve carregar sem erro</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card">
+                    <div class="card-header">
+                      <h6>Imagem Real do Storage</h6>
+                    </div>
+                    <div class="card-body text-center">
+                      <img
+                        src="http://192.168.1.127/marketplace/public/storage/produtos/1754765501_kit_12033882.jpg"
+                        alt="Produto"
+                        class="img-fluid produto-teste"
+                        style="max-height: 200px"
+                      />
+                      <p class="small mt-2">Produto real do storage</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card">
+                    <div class="card-header">
+                      <h6>Teste Fallback</h6>
+                    </div>
+                    <div class="card-body text-center">
+                      <img
+                        src="http://192.168.1.127/marketplace/public/storage/produtos/imagem_inexistente.jpg"
+                        alt="Teste Fallback"
+                        class="img-fluid produto-teste"
+                        style="max-height: 200px"
+                      />
+                      <p class="small mt-2">
+                        Deve mostrar placeholder após erro
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Links de Teste -->
+              <h5>🔗 Links para Teste:</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="list-group">
+                    <a
+                      href="http://192.168.1.127/marketplace/public/comerciantes/login"
+                      class="list-group-item list-group-item-action"
+                    >
+                      <i class="fas fa-sign-in-alt me-2"></i>Login Comerciante
+                    </a>
+                    <a
+                      href="http://192.168.1.127/marketplace/public/comerciantes/produtos"
+                      class="list-group-item list-group-item-action"
+                    >
+                      <i class="fas fa-box me-2"></i>Lista de Produtos
+                    </a>
+                    <a
+                      href="http://192.168.1.127/marketplace/public/"
+                      class="list-group-item list-group-item-action"
+                    >
+                      <i class="fas fa-home me-2"></i>Página Inicial
+                    </a>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="list-group">
+                    <a
+                      href="http://192.168.1.127/marketplace/public/images/placeholder.svg"
+                      class="list-group-item list-group-item-action"
+                      target="_blank"
+                    >
+                      <i class="fas fa-image me-2"></i>Testar Placeholder SVG
+                    </a>
+                    <a
+                      href="http://192.168.1.127/marketplace/public/storage/produtos/"
+                      class="list-group-item list-group-item-action"
+                      target="_blank"
+                    >
+                      <i class="fas fa-folder me-2"></i>Diretório
+                      Storage/Produtos
+                    </a>
+                    <a
+                      href="http://192.168.1.127/marketplace/public/teste-produtos-relacionados.html"
+                      class="list-group-item list-group-item-action"
+                    >
+                      <i class="fas fa-cogs me-2"></i>Teste Produtos
+                      Relacionados
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Console de Debug -->
+              <div class="mt-4">
+                <h5>🐛 Console de Debug:</h5>
+                <div class="card">
+                  <div class="card-body">
+                    <div
+                      id="debug-console"
+                      class="border p-3 bg-dark text-light"
+                      style="
+                        height: 200px;
+                        overflow-y: auto;
+                        font-family: monospace;
+                      "
+                    >
+                      <div class="text-success">
+                        [INFO] Sistema inicializado
+                      </div>
+                      <div class="text-info">
+                        [DEBUG] Aguardando teste de imagens...
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Instruções -->
+              <div class="alert alert-info mt-4">
+                <h6>
+                  <i class="fas fa-info-circle me-2"></i>Como usar este teste:
+                </h6>
+                <ol class="mb-0">
+                  <li>Observe se as 3 imagens acima carregam corretamente</li>
+                  <li>A primeira deve mostrar o placeholder SVG</li>
+                  <li>A segunda deve mostrar uma imagem real de produto</li>
+                  <li>
+                    A terceira deve falhar e mostrar o placeholder
+                    automaticamente
+                  </li>
+                  <li>Verifique o console de debug para erros</li>
+                  <li>Teste os links para navegar no sistema</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const debugConsole = document.getElementById("debug-console");
+
+      function log(message, type = "INFO") {
+        const timestamp = new Date().toLocaleTimeString();
+        const colorClass =
+          {
+            INFO: "text-info",
+            SUCCESS: "text-success",
+            WARNING: "text-warning",
+            ERROR: "text-danger",
+          }[type] || "text-light";
+
+        const div = document.createElement("div");
+        div.className = colorClass;
+        div.textContent = `[${timestamp}] [${type}] ${message}`;
+        debugConsole.appendChild(div);
+        debugConsole.scrollTop = debugConsole.scrollHeight;
+      }
+
+      // Tratar erro de carregamento de imagens com fallback
+      document.addEventListener("DOMContentLoaded", function () {
+        const placeholderUrl =
+          "http://192.168.1.127/marketplace/public/images/placeholder.svg";
+
+        document
+          .querySelectorAll(".produto-teste")
+          .forEach(function (img, index) {
+            img.addEventListener("load", function () {
+              log(
+                `Imagem ${index + 1} carregada com sucesso: ${this.src}`,
+                "SUCCESS"
+              );
+            });
+
+            img.addEventListener("error", function () {
+              log(`Erro ao carregar imagem ${index + 1}: ${this.src}`, "ERROR");
+              if (this.src !== placeholderUrl) {
+                log(`Aplicando fallback para placeholder...`, "WARNING");
+                this.src = placeholderUrl;
+              }
+            });
+          });
+
+        // Log inicial
+        log("Sistema de teste inicializado");
+        log("Aguardando carregamento das imagens...");
+      });
+
+      // Interceptar erros JavaScript
+      window.addEventListener("error", function (e) {
+        log(
+          `Erro JavaScript: ${e.message} em ${e.filename}:${e.lineno}`,
+          "ERROR"
+        );
+      });
+
+      // Interceptar erros de recursos
+      window.addEventListener(
+        "error",
+        function (e) {
+          if (e.target !== window) {
+            log(
+              `Erro de recurso: ${
+                e.target.src || e.target.href || "Desconhecido"
+              }`,
+              "ERROR"
+            );
+          }
+        },
+        true
+      );
+    </script>
+  </body>
+</html>

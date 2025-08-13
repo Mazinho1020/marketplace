@@ -264,10 +264,57 @@
 
                             <hr class="border-light border-opacity-25 my-3">
                             
+                            <!-- Menu Produtos -->
+                            <li class="nav-item mb-2">
+                                <div class="text-white-50 small text-uppercase fw-semibold px-2 mb-2">
+                                    <i class="fas fa-box me-2"></i>Produtos
+                                </div>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('comerciantes.produtos.categorias.*') ? 'active' : '' }}" 
+                                   href="{{ route('comerciantes.produtos.categorias.index') }}">
+                                    <i class="fas fa-list"></i>
+                                    Categorias
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('comerciantes.produtos.subcategorias.*') ? 'active' : '' }}" 
+                                   href="{{ route('comerciantes.produtos.subcategorias.index') }}">
+                                    <i class="fas fa-sitemap"></i>
+                                    Subcategorias
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('comerciantes.produtos.codigos-barras.*') ? 'active' : '' }}" 
+                                   href="{{ route('comerciantes.produtos.codigos-barras.index') }}">
+                                    <i class="fas fa-barcode"></i>
+                                    Códigos de Barras
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('comerciantes.produtos.historico-precos.*') ? 'active' : '' }}" 
+                                   href="{{ route('comerciantes.produtos.historico-precos.index') }}">
+                                    <i class="fas fa-chart-line"></i>
+                                    Histórico de Preços
+                                </a>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('comerciantes.produtos.configuracoes.*') ? 'active' : '' }}" 
+                                   href="{{ route('comerciantes.produtos.configuracoes.index') }}">
+                                    <i class="fas fa-cog"></i>
+                                    Configurações
+                                </a>
+                            </li>
+                            
                             <li class="nav-item">
                                 <a class="nav-link" href="#">
-                                    <i class="fas fa-box"></i>
-                                    Produtos
+                                    <i class="fas fa-boxes"></i>
+                                    Catálogo
                                     <span class="badge bg-warning ms-auto">Em breve</span>
                                 </a>
                             </li>

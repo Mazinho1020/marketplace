@@ -26,13 +26,13 @@ try {
 
     echo "📊 CONTADORES DE REGISTROS:\n";
     echo str_repeat("=", 50) . "\n";
-    
+
     foreach ($tabelas as $tabela => $descricao) {
         try {
             $stmt = $pdo->query("SELECT COUNT(*) as total FROM `$tabela`");
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $total = $result['total'];
-            
+
             $status = $total > 0 ? "✅ $total registros" : "⚪ Vazia";
             echo sprintf("%-30s | %-20s | %s\n", $descricao, $tabela, $status);
         } catch (Exception $e) {
@@ -46,7 +46,7 @@ try {
     $funcionalidades = [
         "✅ IMPLEMENTADO COMPLETO" => [
             "Produtos (CRUD)" => "Views + Controller + Model funcionando",
-            "Categorias (CRUD)" => "Views + Controller + Model funcionando", 
+            "Categorias (CRUD)" => "Views + Controller + Model funcionando",
             "Marcas (CRUD)" => "Views + Controller + Model funcionando",
             "Upload de Imagens" => "Funcionalidade básica implementada"
         ],
@@ -94,7 +94,6 @@ try {
     echo "• Sistema de Estoque: ⚠️ 70% (Controle básico funcionando)\n";
     echo "• Funcionalidades Avançadas: ❌ 0% (Para implementação futura)\n";
     echo "• Limpeza de Código: ✅ 100% (Tabela desnecessária removida)\n";
-
 } catch (Exception $e) {
     echo "❌ Erro na análise: " . $e->getMessage() . "\n";
 }

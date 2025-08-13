@@ -113,9 +113,9 @@
                                     </div>
                                 </div>
 
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
+                                <div class="mb-3">
+                                    <div class="row">
+                                        <div class="col-md-12">
                                             <label for="tipo" class="form-label fw-semibold">Tipo *</label>
                                             <select class="form-select @error('tipo') is-invalid @enderror" 
                                                     id="tipo" 
@@ -134,20 +134,33 @@
                                             @enderror
                                         </div>
                                     </div>
+                                </div>
+
+                                <!-- Seção de Preços -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h6 class="text-muted mb-3">
+                                            <i class="fas fa-tag me-2"></i>Preços
+                                        </h6>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
                                     <div class="col-md-4">
                                         <div class="mb-3">
-                                            <label for="preco_custo" class="form-label fw-semibold">Preço de Custo</label>
+                                            <label for="preco_compra" class="form-label fw-semibold">Preço de Compra</label>
                                             <div class="input-group">
                                                 <span class="input-group-text">R$</span>
                                                 <input type="text" 
-                                                       class="form-control money-mask @error('preco_custo') is-invalid @enderror" 
-                                                       id="preco_custo" 
-                                                       name="preco_custo" 
-                                                       value="{{ old('preco_custo', number_format($produto->preco_custo ?? 0, 2, ',', '.')) }}">
-                                                @error('preco_custo')
+                                                       class="form-control money-mask @error('preco_compra') is-invalid @enderror" 
+                                                       id="preco_compra" 
+                                                       name="preco_compra" 
+                                                       value="{{ old('preco_compra', number_format($produto->preco_compra ?? 0, 2, ',', '.')) }}">
+                                                @error('preco_compra')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
+                                            <small class="text-muted">Custo de aquisição do produto</small>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -165,6 +178,24 @@
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
+                                            <small class="text-muted">Preço regular de venda</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="preco_promocional" class="form-label fw-semibold">Preço Promocional</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">R$</span>
+                                                <input type="text" 
+                                                       class="form-control money-mask @error('preco_promocional') is-invalid @enderror" 
+                                                       id="preco_promocional" 
+                                                       name="preco_promocional" 
+                                                       value="{{ old('preco_promocional', $produto->preco_promocional ? number_format($produto->preco_promocional, 2, ',', '.') : '') }}">
+                                                @error('preco_promocional')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <small class="text-muted">Preço em promoção (opcional)</small>
                                         </div>
                                     </div>
                                 </div>

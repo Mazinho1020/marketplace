@@ -8,8 +8,56 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ImageController;
 use App\Comerciantes\Models\Empresa;
 use App\Comerciantes\Models\EmpresaUsuario;
+
+// Rotas para servir imagens com fallback
+Route::get('/storage/produtos/{filename}', [ImageController::class, 'serve'])->where('filename', '.*');
+Route::get('/placeholder/{width?}/{height?}/{text?}', [ImageController::class, 'placeholder']);
+
+// Rota de debug para produtos relacionados
+Route::get('/debug-relacionados-auth/{produtoId}', function ($produtoId) {
+    try {
+        // Verificar se há usuário logado
+        $user = Auth::guard('comerciante')->user();
+
+        if (!$user) {
+            return response()->json([
+                'error' => 'Usuário não está logado no guard comerciante',
+                'guards' => array_keys(config('auth.guards')),
+                'current_guard' => Auth::getDefaultDriver(),
+                'session' => session()->all()
+            ]);
+        }
+
+        $produto = \App\Models\Produto::where('id', $produtoId)
+            ->where('empresa_id', $user->empresa_id)
+            ->first();
+
+        if (!$produto) {
+            return response()->json([
+                'error' => 'Produto não encontrado ou não pertence à empresa',
+                'produto_id' => $produtoId,
+                'empresa_id' => $user->empresa_id,
+                'user_id' => $user->id
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'produto' => $produto->nome,
+            'empresa_id' => $user->empresa_id,
+            'user_id' => $user->id,
+            'relacionados_count' => \App\Models\ProdutoRelacionado::where('produto_id', $produtoId)->count()
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+});
 
 Route::get('/', function () {
     return redirect('/admin');
@@ -1732,3 +1780,6 @@ Route::get('/debug/empresa/{id}/usuarios', function ($id) {
 Route::get('/debug/web-usuarios', function () {
     include base_path('debug_web_usuarios.php');
 });
+
+// Incluir rotas do sistema financeiro
+require_once __DIR__ . '/financial.php';

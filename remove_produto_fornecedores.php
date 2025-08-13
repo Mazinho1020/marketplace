@@ -14,11 +14,11 @@ try {
         // Remover a tabela
         $pdo->exec('DROP TABLE produto_fornecedores');
         echo "✅ Tabela 'produto_fornecedores' removida com sucesso!\n";
-        
+
         // Verificar se foi removida
         $stmt = $pdo->query("SHOW TABLES LIKE 'produto_fornecedores'");
         $stillExists = $stmt->fetch();
-        
+
         if (!$stillExists) {
             echo "✅ Confirmado: Tabela foi removida do banco de dados.\n";
         }
@@ -30,13 +30,12 @@ try {
     echo "\n=== Tabelas de Produtos Restantes ===\n";
     $stmt = $pdo->query("SHOW TABLES LIKE '%produto%'");
     $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
-    
+
     foreach ($tables as $table) {
         echo "- $table\n";
     }
-    
-    echo "\nTotal: " . count($tables) . " tabelas\n";
 
+    echo "\nTotal: " . count($tables) . " tabelas\n";
 } catch (Exception $e) {
     echo "❌ Erro: " . $e->getMessage() . "\n";
 }

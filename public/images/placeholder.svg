@@ -1,0 +1,5 @@
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="300" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2"/>
+  <text x="150" y="140" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#6c757d">Sem Imagem</text>
+  <text x="150" y="165" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#6c757d">300 × 300</text>
+</svg>

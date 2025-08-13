@@ -39,6 +39,12 @@
                         Gerenciar Usuários
                     </a>
                 </li>
+                <li>
+                    <a class="dropdown-item" href="{{ route('comerciantes.empresas.financeiro.dashboard', $empresa) }}">
+                        <i class="fas fa-coins me-2"></i>
+                        Sistema Financeiro
+                    </a>
+                </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <a class="dropdown-item text-danger" href="#" onclick="confirmarExclusao()">
@@ -122,6 +128,48 @@
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-motorcycle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card de Acesso Rápido ao Sistema Financeiro -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-left-primary shadow h-100" style="border-left: 4px solid #28a745 !important;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="card-title text-success mb-2">
+                                <i class="fas fa-coins me-2"></i>
+                                Sistema Financeiro
+                            </h5>
+                            <p class="card-text text-muted mb-3">
+                                Gerencie plano de contas, categorias e movimentações financeiras da empresa.
+                                Acesse relatórios e controle as finanças de forma completa.
+                            </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{{ route('comerciantes.empresas.financeiro.dashboard', $empresa) }}" 
+                                   class="btn btn-success btn-sm">
+                                    <i class="fas fa-chart-pie me-1"></i>
+                                    Dashboard Financeiro
+                                </a>
+                                <a href="{{ route('comerciantes.empresas.financeiro.contas.index', $empresa) }}" 
+                                   class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-list-alt me-1"></i>
+                                    Plano de Contas
+                                </a>
+                                <a href="{{ route('comerciantes.empresas.financeiro.categorias.index', $empresa) }}" 
+                                   class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-folder-open me-1"></i>
+                                    Categorias
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-chart-line fa-4x text-success opacity-25"></i>
                         </div>
                     </div>
                 </div>

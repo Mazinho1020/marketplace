@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class Produto extends Model
 {
@@ -159,12 +160,62 @@ class Produto extends Model
 
     public function relacionados()
     {
-        return $this->hasMany(ProdutoRelacionado::class);
+        return $this->hasMany(ProdutoRelacionado::class, 'produto_id');
+    }
+
+    public function relacionadosComo()
+    {
+        return $this->hasMany(ProdutoRelacionado::class, 'produto_relacionado_id');
+    }
+
+    // Métodos específicos para tipos de relacionamento
+    public function produtosSimilares()
+    {
+        return $this->relacionados()
+            ->where('tipo_relacao', 'similar')
+            ->where('ativo', true)
+            ->with('produtoRelacionado')
+            ->orderBy('ordem');
+    }
+
+    public function produtosComplementares()
+    {
+        return $this->relacionados()
+            ->where('tipo_relacao', 'complementar')
+            ->where('ativo', true)
+            ->with('produtoRelacionado')
+            ->orderBy('ordem');
+    }
+
+    public function produtosCrossSell()
+    {
+        return $this->relacionados()
+            ->where('tipo_relacao', 'cross-sell')
+            ->where('ativo', true)
+            ->with('produtoRelacionado')
+            ->orderBy('ordem');
+    }
+
+    public function produtosUpSell()
+    {
+        return $this->relacionados()
+            ->where('tipo_relacao', 'up-sell')
+            ->where('ativo', true)
+            ->with('produtoRelacionado')
+            ->orderBy('ordem');
     }
 
     public function kits()
     {
         return $this->hasMany(ProdutoKit::class, 'produto_principal_id');
+    }
+
+    public function kitsItens()
+    {
+        return $this->hasMany(ProdutoKit::class, 'produto_principal_id')
+            ->with('produtoItem')
+            ->where('ativo', true)
+            ->orderBy('ordem');
     }
 
     public function itensKit()
@@ -174,6 +225,11 @@ class Produto extends Model
 
     // Scopes
     public function scopeAtivos($query)
+    {
+        return $query->where('ativo', true);
+    }
+
+    public function scopeAtivo($query)
     {
         return $query->where('ativo', true);
     }
@@ -233,10 +289,23 @@ class Produto extends Model
     {
         $imagem = $this->imagemPrincipal;
         if ($imagem) {
-            return asset('storage/produtos/' . $imagem->arquivo);
+            $caminhoCompleto = storage_path('app/public/produtos/' . $imagem->arquivo);
+
+            // Verifica se o arquivo realmente existe no sistema de arquivos
+            if (file_exists($caminhoCompleto)) {
+                return asset('storage/produtos/' . $imagem->arquivo);
+            }
+
+            // Se a imagem está no banco mas não existe o arquivo, usar placeholder
+            Log::warning("Imagem referenciada no banco não existe no sistema de arquivos", [
+                'produto_id' => $this->id,
+                'arquivo' => $imagem->arquivo,
+                'caminho' => $caminhoCompleto
+            ]);
         }
 
-        return asset('images/produto-sem-foto.png');
+        // Retorna um placeholder local caso não tenha imagem ou arquivo não existe
+        return asset('images/placeholder.svg');
     }
 
     public function calcularMargem()
@@ -306,6 +375,36 @@ class Produto extends Model
         ]);
 
         return true;
+    }
+
+    public function registrarMovimentacao($tipo, $quantidade, $motivo, $observacoes = null)
+    {
+        $estoqueAnterior = $this->estoque_atual;
+
+        // Atualizar estoque se controla
+        if ($this->controla_estoque) {
+            if ($tipo === 'entrada' || $tipo === 'ajuste') {
+                $this->estoque_atual += $quantidade;
+            } elseif ($tipo === 'saida') {
+                $this->estoque_atual -= $quantidade;
+            }
+            $this->save();
+        }
+
+        // Registrar movimentação
+        return $this->movimentacoes()->create([
+            'empresa_id' => $this->empresa_id,
+            'tipo' => $tipo,
+            'quantidade' => $quantidade,
+            'valor_unitario' => $tipo === 'entrada' ? ($this->preco_compra ?? 0) : $this->preco_venda,
+            'valor_total' => $quantidade * ($tipo === 'entrada' ? ($this->preco_compra ?? 0) : $this->preco_venda),
+            'estoque_anterior' => $estoqueAnterior,
+            'estoque_posterior' => $this->estoque_atual,
+            'motivo' => $motivo,
+            'observacoes' => $observacoes,
+            'data_movimento' => now(),
+            'sync_status' => 'pendente'
+        ]);
     }
 
     // Boot method para eventos

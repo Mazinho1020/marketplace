@@ -149,10 +149,11 @@
                                     <label for="preco_compra" class="form-label">Preço de Compra</label>
                                     <div class="input-group">
                                         <span class="input-group-text">R$</span>
-                                        <input type="number" name="preco_compra" id="preco_compra" 
-                                               class="form-control" step="0.01" min="0" 
+                                        <input type="text" name="preco_compra" id="preco_compra" 
+                                               class="form-control money-mask" 
                                                value="{{ old('preco_compra') }}">
                                     </div>
+                                    <small class="text-muted">Custo de aquisição do produto</small>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -160,13 +161,14 @@
                                     <label for="preco_venda" class="form-label">Preço de Venda <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text">R$</span>
-                                        <input type="number" name="preco_venda" id="preco_venda" 
-                                               class="form-control @error('preco_venda') is-invalid @enderror" 
-                                               step="0.01" min="0" value="{{ old('preco_venda') }}" required>
+                                        <input type="text" name="preco_venda" id="preco_venda" 
+                                               class="form-control money-mask @error('preco_venda') is-invalid @enderror" 
+                                               value="{{ old('preco_venda') }}" required>
                                     </div>
                                     @error('preco_venda')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                    <small class="text-muted">Preço regular de venda</small>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -174,10 +176,11 @@
                                     <label for="preco_promocional" class="form-label">Preço Promocional</label>
                                     <div class="input-group">
                                         <span class="input-group-text">R$</span>
-                                        <input type="number" name="preco_promocional" id="preco_promocional" 
-                                               class="form-control" step="0.01" min="0" 
+                                        <input type="text" name="preco_promocional" id="preco_promocional" 
+                                               class="form-control money-mask" 
                                                value="{{ old('preco_promocional') }}">
                                     </div>
+                                    <small class="text-muted">Preço em promoção (opcional)</small>
                                 </div>
                             </div>
                         </div>
@@ -356,7 +359,36 @@
 </div>
 
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 <script>
+$(document).ready(function() {
+    // Máscara para valores monetários
+    $('.money-mask').mask('#.##0,00', {
+        reverse: true,
+        translation: {
+            '#': {pattern: /[0-9]/}
+        }
+    });
+
+    // Atualizar função de cálculo de margem para trabalhar com valores mascarados
+    function calcularMargem() {
+        const precoCompraText = document.getElementById('preco_compra').value;
+        const precoVendaText = document.getElementById('preco_venda').value;
+        
+        // Converter formato brasileiro para número
+        const precoCompra = parseFloat(precoCompraText.replace(/\./g, '').replace(',', '.')) || 0;
+        const precoVenda = parseFloat(precoVendaText.replace(/\./g, '').replace(',', '.')) || 0;
+        
+        if (precoCompra > 0 && precoVenda > 0) {
+            const margem = ((precoVenda - precoCompra) / precoCompra) * 100;
+            console.log('Margem calculada:', margem.toFixed(2) + '%');
+        }
+    }
+
+    // Eventos para cálculo de margem
+    $('#preco_compra, #preco_venda').on('input', calcularMargem);
+});
+
     // Controle de exibição dos campos de estoque
     document.getElementById('controla_estoque').addEventListener('change', function() {
         const camposEstoque = document.getElementById('campos_estoque');
@@ -394,20 +426,15 @@
             }
         }
     });
-
-    // Cálculo da margem de lucro
-    function calcularMargem() {
-        const precoCompra = parseFloat(document.getElementById('preco_compra').value) || 0;
-        const precoVenda = parseFloat(document.getElementById('preco_venda').value) || 0;
-        
-        if (precoCompra > 0 && precoVenda > 0) {
-            const margem = ((precoVenda - precoCompra) / precoCompra) * 100;
-            console.log('Margem calculada:', margem.toFixed(2) + '%');
-        }
-    }
-
-    document.getElementById('preco_compra').addEventListener('input', calcularMargem);
-    document.getElementById('preco_venda').addEventListener('input', calcularMargem);
 </script>
 @endpush
+
+@push('styles')
+<style>
+.money-mask {
+    text-align: right;
+}
+</style>
+@endpush
+
 @endsection

@@ -283,6 +283,34 @@
                             Empresas
                         </a>
                     </li>
+                    
+                    <!-- Sistema Financeiro - Disponível quando empresa está sendo acessada -->
+                    @if(request()->route('empresa') || session('empresa_atual_id'))
+                        @php
+                            $empresaId = request()->route('empresa') ?? session('empresa_atual_id') ?? 1;
+                        @endphp
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {{ request()->routeIs('comerciantes.empresas.*.financeiro.*') ? 'active' : '' }}" 
+                               href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-coins me-1"></i>
+                                Financeiro
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('comerciantes.empresas.financeiro.dashboard', ['empresa' => $empresaId]) }}">
+                                    <i class="fas fa-chart-pie me-2"></i>Dashboard Financeiro</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ route('comerciantes.empresas.financeiro.categorias.index', ['empresa' => $empresaId]) }}">
+                                    <i class="fas fa-folder-open me-2"></i>Categorias de Contas</a></li>
+                                <li><a class="dropdown-item" href="{{ route('comerciantes.empresas.financeiro.contas.index', ['empresa' => $empresaId]) }}">
+                                    <i class="fas fa-list-alt me-2"></i>Plano de Contas</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ route('comerciantes.empresas.financeiro.contas.create', ['empresa' => $empresaId]) }}">
+                                    <i class="fas fa-plus me-2"></i>Nova Conta</a></li>
+                                <li><a class="dropdown-item" href="{{ route('comerciantes.empresas.financeiro.categorias.create', ['empresa' => $empresaId]) }}">
+                                    <i class="fas fa-plus me-2"></i>Nova Categoria</a></li>
+                            </ul>
+                        </li>
+                    @endif
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('comerciantes.notificacoes.*') ? 'active' : '' }}" 
                            href="{{ route('comerciantes.notificacoes.index') }}">
@@ -396,6 +424,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>

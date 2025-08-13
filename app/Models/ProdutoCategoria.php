@@ -67,6 +67,11 @@ class ProdutoCategoria extends Model
         return $query->where('empresa_id', $empresaId);
     }
 
+    public function scopeOrdenado($query)
+    {
+        return $query->orderBy('ordem')->orderBy('nome');
+    }
+
     // Métodos auxiliares
     public function getQuantidadeProdutosAttribute()
     {

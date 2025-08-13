@@ -157,6 +157,12 @@
                                             Usuários
                                         </a>
                                     </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('comerciantes.empresas.financeiro.dashboard', $empresa) }}">
+                                            <i class="fas fa-coins me-2"></i>
+                                            Sistema Financeiro
+                                        </a>
+                                    </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form method="POST" action="{{ route('comerciantes.empresas.destroy', $empresa) }}" 

@@ -67,6 +67,22 @@ class ProdutoController extends Controller
     {
         $empresaId = session('empresa_id', 1);
 
+        // Converter valores monetários do formato brasileiro para americano
+        if ($request->has('preco_venda')) {
+            $precoVenda = str_replace(['.', ','], ['', '.'], $request->preco_venda);
+            $request->merge(['preco_venda' => $precoVenda]);
+        }
+
+        if ($request->has('preco_compra')) {
+            $precoCompra = str_replace(['.', ','], ['', '.'], $request->preco_compra);
+            $request->merge(['preco_compra' => $precoCompra]);
+        }
+
+        if ($request->has('preco_promocional')) {
+            $precoPromocional = str_replace(['.', ','], ['', '.'], $request->preco_promocional);
+            $request->merge(['preco_promocional' => $precoPromocional]);
+        }
+
         $request->validate([
             'nome' => 'required|string|max:255',
             'categoria_id' => 'required|exists:produto_categorias,id',
@@ -168,6 +184,22 @@ class ProdutoController extends Controller
     public function update(Request $request, Produto $produto)
     {
         $this->verificarEmpresaProduto($produto);
+
+        // Converter valores monetários do formato brasileiro para americano
+        if ($request->has('preco_venda')) {
+            $precoVenda = str_replace(['.', ','], ['', '.'], $request->preco_venda);
+            $request->merge(['preco_venda' => $precoVenda]);
+        }
+
+        if ($request->has('preco_compra')) {
+            $precoCompra = str_replace(['.', ','], ['', '.'], $request->preco_compra);
+            $request->merge(['preco_compra' => $precoCompra]);
+        }
+
+        if ($request->has('preco_promocional')) {
+            $precoPromocional = str_replace(['.', ','], ['', '.'], $request->preco_promocional);
+            $request->merge(['preco_promocional' => $precoPromocional]);
+        }
 
         $request->validate([
             'nome' => 'required|string|max:255',
