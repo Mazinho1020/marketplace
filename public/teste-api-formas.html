@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste API Formas de Pagamento</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .resultado { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .sucesso { background: #d4edda; border: 1px solid #c3e6cb; }
+        .erro { background: #f8d7da; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1>Teste da API de Formas de Pagamento</h1>
+    <p>Esta página testa se a API está retornando apenas as formas corretas para contas a receber.</p>
+    
+    <button onclick="testarAPI()">Testar API</button>
+    
+    <div id="resultado"></div>
+
+    <script>
+        async function testarAPI() {
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = '<p>Carregando...</p>';
+            
+            try {
+                const response = await fetch('/financial/1/formas-pagamento');
+                const data = await response.json();
+                
+                let html = '<div class="resultado sucesso">';
+                html += '<h3>✅ API funcionando!</h3>';
+                html += `<p><strong>Total de formas retornadas:</strong> ${data.length}</p>`;
+                html += '<h4>Formas de pagamento disponíveis:</h4>';
+                html += '<ul>';
+                
+                data.forEach(forma => {
+                    html += `<li><strong>ID ${forma.id}:</strong> ${forma.nome} (${forma.tipo}/${forma.origem})</li>`;
+                });
+                
+                html += '</ul>';
+                
+                // Verificar se apenas formas corretas estão sendo retornadas
+                const formasCorretas = data.every(forma => 
+                    forma.tipo === 'recebimento' && 
+                    forma.origem === 'sistema' &&
+                    !forma.nome.toLowerCase().includes('online') // As formas com is_gateway=1 geralmente têm "Online" no nome
+                );
+                
+                if (formasCorretas) {
+                    html += '<p style="color: green;"><strong>✅ FILTROS CORRETOS!</strong> Apenas formas administrativas (não-gateway) estão sendo retornadas.</p>';
+                } else {
+                    html += '<p style="color: orange;"><strong>⚠️ VERIFICAR FILTROS!</strong> Pode haver formas de gateway na lista.</p>';
+                    
+                    // Mostrar quais formas podem ser problemáticas
+                    const problemáticas = data.filter(forma => 
+                        forma.nome.toLowerCase().includes('online') ||
+                        forma.tipo !== 'recebimento' ||
+                        forma.origem !== 'sistema'
+                    );
+                    
+                    if (problemáticas.length > 0) {
+                        html += '<p><strong>Formas que podem ser problemáticas:</strong></p><ul>';
+                        problemáticas.forEach(forma => {
+                            html += `<li>${forma.nome} (${forma.tipo}/${forma.origem})</li>`;
+                        });
+                        html += '</ul>';
+                    }
+                }
+                
+                html += '</div>';
+                resultadoDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultadoDiv.innerHTML = `<div class="resultado erro">
+                    <h3>❌ Erro na API</h3>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        }
+    </script>
+</body>
+</html>

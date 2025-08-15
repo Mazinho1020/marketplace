@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('layouts.comerciante')
 
 @section('title', 'Nova Conta a Receber')
 
@@ -106,33 +106,6 @@
                                            value="{{ old('numero_documento') }}" 
                                            placeholder="Ex: NF-001">
                                     @error('numero_documento')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="numero_documento" class="form-label">Número do Documento</label>
-                                    <input type="text" name="numero_documento" id="numero_documento" 
-                                           class="form-control @error('numero_documento') is-invalid @enderror" 
-                                           value="{{ old('numero_documento') }}" 
-                                           placeholder="Ex: NF-001">
-                                    @error('numero_documento')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="observacoes" class="form-label">Observações</label>
-                                    <textarea name="observacoes" id="observacoes" 
-                                              class="form-control @error('observacoes') is-invalid @enderror" 
-                                              rows="2" 
-                                              placeholder="Informações adicionais">{{ old('observacoes') }}</textarea>
-                                    @error('observacoes')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('layouts.comerciante')
 
 @section('title', 'Contas a Pagar')
 
@@ -221,11 +221,6 @@
                                            class="btn btn-outline-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        
-                                        <button type="button" class="btn btn-outline-success" 
-                                                onclick="abrirModalPagamento({{ $conta->id }})" title="Pagar">
-                                            <i class="fas fa-dollar-sign"></i>
-                                        </button>
                                     @endif
                                     
                                     <button type="button" class="btn btn-outline-danger" 
@@ -257,41 +252,42 @@
     </div>
 </div>
 
-<!-- Modal de Pagamento -->
-<div class="modal fade" id="modalPagamento" tabindex="-1">
+<!-- Modal de Exclusão -->
+<div class="modal fade" id="modalExclusao" tabindex="-1" aria-labelledby="modalExclusaoLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Registrar Pagamento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="modalExclusaoLabel">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
-            <form id="formPagamento" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="valor_pago" class="form-label">Valor Pago</label>
-                        <input type="number" name="valor_pago" id="valor_pago" class="form-control" 
-                               step="0.01" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="data_pagamento" class="form-label">Data do Pagamento</label>
-                        <input type="date" name="data_pagamento" id="data_pagamento" class="form-control" 
-                               value="{{ date('Y-m-d') }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="observacoes_pagamento" class="form-label">Observações</label>
-                        <textarea name="observacoes_pagamento" id="observacoes_pagamento" 
-                                  class="form-control" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Registrar Pagamento</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir esta conta a pagar?</p>
+                <p class="text-muted">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="formExclusao" method="POST" style="display: inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+@endsection
+
+@section('scripts')
+<script>
+function excluirConta(contaId) {
+    const form = document.getElementById('formExclusao');
+    form.action = '{{ route("comerciantes.empresas.financeiro.contas-pagar.destroy", ["empresa" => $empresa, "id" => "__ID__"]) }}'.replace('__ID__', contaId);
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalExclusao'));
+    modal.show();
+}
+</script>
 @endsection
 
 @push('styles')
@@ -322,16 +318,125 @@
 
 @push('scripts')
 <script>
+// URLs da API para o contexto de comerciantes
+const apiBaseUrl = '/comerciantes/empresas/{{ $empresa->id }}/financeiro';
+
+// Carregar formas de pagamento ao abrir o modal
+function carregarFormasPagamento() {
+    console.log('📋 Carregando formas de pagamento...');
+    const select = document.getElementById('forma_pagamento_id');
+    select.innerHTML = '<option value="">Carregando...</option>';
+
+    const url = `${apiBaseUrl}/api/formas-pagamento-saida`;
+    console.log('🌐 URL da requisição:', url);
+
+    fetch(url)
+        .then(response => {
+            console.log('📡 Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Dados recebidos:', data);
+            select.innerHTML = '<option value="">Selecione uma forma de pagamento</option>';
+            
+            if (data.length === 0) {
+                select.innerHTML = '<option value="">Nenhuma forma de pagamento disponível</option>';
+                return;
+            }
+
+            data.forEach(forma => {
+                const option = document.createElement('option');
+                option.value = forma.id;
+                option.textContent = forma.nome;
+                option.dataset.isGateway = forma.is_gateway ? '1' : '0';
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('❌ Erro ao carregar formas de pagamento:', error);
+            select.innerHTML = '<option value="">Erro ao carregar formas de pagamento</option>';
+        });
+}
+
+// Carregar bandeiras baseado na forma de pagamento selecionada
+function carregarBandeiras(formaId) {
+    const bandeiraSelect = document.getElementById('bandeira_id');
+    const bandeiraContainer = document.getElementById('bandeiraContainer');
+
+    if (!formaId) {
+        bandeiraContainer.style.display = 'none';
+        bandeiraSelect.innerHTML = '<option value="">Selecione uma bandeira</option>';
+        return;
+    }
+
+    // Sempre tentar carregar bandeiras quando uma forma de pagamento for selecionada
+    bandeiraContainer.style.display = 'block';
+    bandeiraSelect.innerHTML = '<option value="">Carregando bandeiras...</option>';
+
+    fetch(`${apiBaseUrl}/api/formas-pagamento/${formaId}/bandeiras`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            bandeiraSelect.innerHTML = '<option value="">Selecione uma bandeira</option>';
+            
+            if (data.length === 0) {
+                // Se não há bandeiras, oculta o container
+                bandeiraContainer.style.display = 'none';
+                bandeiraSelect.innerHTML = '<option value="">Nenhuma bandeira disponível</option>';
+                return;
+            }
+
+            data.forEach(bandeira => {
+                const option = document.createElement('option');
+                option.value = bandeira.id;
+                option.textContent = bandeira.nome;
+                bandeiraSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Erro ao carregar bandeiras:', error);
+            bandeiraSelect.innerHTML = '<option value="">Erro ao carregar bandeiras</option>';
+            // Em caso de erro, manter visível para debug
+        });
+}
+
+// Event listener para mudança na forma de pagamento
+document.getElementById('forma_pagamento_id').addEventListener('change', function() {
+    carregarBandeiras(this.value);
+});
+
 function abrirModalPagamento(contaId) {
+    console.log('🚀 Abrindo modal de pagamento para conta:', contaId);
+    
     const form = document.getElementById('formPagamento');
     const action = '{{ route("comerciantes.empresas.financeiro.contas-pagar.pagar", ["empresa" => $empresa, "id" => "__ID__"]) }}';
     form.action = action.replace('__ID__', contaId);
+    
+    console.log('🔗 URL da API base:', apiBaseUrl);
+    
+    // Carregar formas de pagamento quando o modal for aberto
+    carregarFormasPagamento();
+    
+    // Limpar campos do formulário
+    document.getElementById('valor_pago').value = '';
+    document.getElementById('data_pagamento').value = '{{ date('Y-m-d') }}';
+    document.getElementById('observacoes_pagamento').value = '';
+    document.getElementById('forma_pagamento_id').value = '';
+    document.getElementById('bandeira_id').value = '';
+    document.getElementById('bandeiraContainer').style.display = 'none';
     
     new bootstrap.Modal(document.getElementById('modalPagamento')).show();
 }
 
 function excluirConta(contaId) {
-    if (confirm('Tem certeza que deseja excluir esta conta?')) {
+    if (confirm('Tem certeza que deseja excluir esta conta?\n\nEsta ação não pode ser desfeita.')) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '{{ route("comerciantes.empresas.financeiro.contas-pagar.destroy", ["empresa" => $empresa, "id" => "__ID__"]) }}'.replace('__ID__', contaId);
@@ -352,6 +457,29 @@ function excluirConta(contaId) {
         form.submit();
     }
 }
+
+// Validação do formulário antes do envio
+document.getElementById('formPagamento').addEventListener('submit', function(e) {
+    const valorPago = document.getElementById('valor_pago').value;
+    const formaPagamento = document.getElementById('forma_pagamento_id').value;
+    
+    if (!valorPago || parseFloat(valorPago) <= 0) {
+        e.preventDefault();
+        alert('Por favor, informe um valor válido para o pagamento.');
+        return;
+    }
+    
+    if (!formaPagamento) {
+        e.preventDefault();
+        alert('Por favor, selecione uma forma de pagamento.');
+        return;
+    }
+    
+    // Confirmar antes de enviar
+    if (!confirm('Confirma o registro deste pagamento?\n\nValor: R$ ' + parseFloat(valorPago).toFixed(2).replace('.', ','))) {
+        e.preventDefault();
+    }
+});
 </script>
 @endpush
 

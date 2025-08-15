@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('layouts.comerciante')
 
 @section('title', 'Nova Marca de Produto')
 

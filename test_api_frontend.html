@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste API Formas de Pagamento</title>
+    <meta name="csrf-token" content="test-token">
+</head>
+<body>
+    <h1>Teste da API de Formas de Pagamento</h1>
+    <button onclick="testarAPI()">Testar API</button>
+    <div id="resultado"></div>
+
+    <script>
+        function testarAPI() {
+            const empresaId = 1;
+            const url = `http://127.0.0.1:8000/comerciantes/empresas/${empresaId}/financeiro/api/formas-pagamento-saida`;
+            
+            console.log('🔍 Testando URL:', url);
+            
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = '<p>Carregando...</p>';
+            
+            fetch(url)
+                .then(response => {
+                    console.log('📡 Response status:', response.status);
+                    console.log('📡 Response headers:', response.headers);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✅ Dados recebidos:', data);
+                    
+                    let html = '<h3>Formas de Pagamento Carregadas:</h3><ul>';
+                    data.forEach(forma => {
+                        html += `<li>ID: ${forma.id} - ${forma.nome}</li>`;
+                    });
+                    html += '</ul>';
+                    
+                    resultado.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('❌ Erro:', error);
+                    resultado.innerHTML = `<p style="color: red;">Erro: ${error.message}</p>`;
+                });
+        }
+        
+        // Testar automaticamente ao carregar a página
+        window.addEventListener('load', function() {
+            console.log('Página carregada, testando API...');
+            testarAPI();
+        });
+    </script>
+</body>
+</html>

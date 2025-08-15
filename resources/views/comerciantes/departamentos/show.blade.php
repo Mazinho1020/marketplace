@@ -1,4 +1,4 @@
-@extends('comerciantes.layout')
+@extends('layouts.comerciante')
 
 @section('title', 'Visualizar Departamento')
 
@@ -12,23 +12,23 @@
                     <h1 class="h3 mb-0">{{ $departamento->nome }}</h1>
                     <p class="text-muted mb-0">
                         @if($departamento->codigo)
-                            Código: <span class="badge bg-primary">{{ $departamento->codigo }}</span>
+                        Código: <span class="badge bg-primary">{{ $departamento->codigo }}</span>
                         @endif
-                        Status: 
+                        Status:
                         @if($departamento->ativo)
-                            <span class="badge bg-success">Ativo</span>
+                        <span class="badge bg-success">Ativo</span>
                         @else
-                            <span class="badge bg-secondary">Inativo</span>
+                        <span class="badge bg-secondary">Inativo</span>
                         @endif
                     </p>
                 </div>
                 <div>
-                    <a href="/comerciantes/clientes/departamentos?empresa_id={{ $departamento->empresa_id }}" 
-                       class="btn btn-outline-secondary me-2">
+                    <a href="/comerciantes/clientes/departamentos?empresa_id={{ $departamento->empresa_id }}"
+                        class="btn btn-outline-secondary me-2">
                         <i class="fas fa-arrow-left"></i> Voltar
                     </a>
-                    <a href="/comerciantes/clientes/departamentos/{{ $departamento->id }}/edit" 
-                       class="btn btn-warning me-2">
+                    <a href="/comerciantes/clientes/departamentos/{{ $departamento->id }}/edit"
+                        class="btn btn-warning me-2">
                         <i class="fas fa-edit"></i> Editar
                     </a>
                     <button type="button" class="btn btn-danger" onclick="confirmarExclusao({{ $departamento->id }})">
@@ -89,9 +89,9 @@
                                         <label class="form-label fw-bold">Relacionado à Produção:</label>
                                         <p class="form-control-plaintext">
                                             @if($departamento->relacionado_producao)
-                                                <span class="badge bg-success">Sim</span>
+                                            <span class="badge bg-success">Sim</span>
                                             @else
-                                                <span class="badge bg-secondary">Não</span>
+                                            <span class="badge bg-secondary">Não</span>
                                             @endif
                                         </p>
                                     </div>
@@ -101,9 +101,9 @@
                                         <label class="form-label fw-bold">Status:</label>
                                         <p class="form-control-plaintext">
                                             @if($departamento->ativo)
-                                                <span class="badge bg-success">Ativo</span>
+                                            <span class="badge bg-success">Ativo</span>
                                             @else
-                                                <span class="badge bg-secondary">Inativo</span>
+                                            <span class="badge bg-secondary">Inativo</span>
                                             @endif
                                         </p>
                                     </div>
@@ -169,20 +169,20 @@
                                     <td>
                                         <strong>{{ $funcionario->nome }}</strong>
                                         @if($funcionario->sobrenome)
-                                            {{ $funcionario->sobrenome }}
+                                        {{ $funcionario->sobrenome }}
                                         @endif
                                     </td>
                                     <td>{{ $funcionario->email ?? 'Não informado' }}</td>
                                     <td>
                                         @if($funcionario->status == 'ativo')
-                                            <span class="badge bg-success">Ativo</span>
+                                        <span class="badge bg-success">Ativo</span>
                                         @else
-                                            <span class="badge bg-secondary">{{ $funcionario->status }}</span>
+                                        <span class="badge bg-secondary">{{ $funcionario->status }}</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="/comerciantes/clientes/pessoas/{{ $funcionario->id }}" 
-                                           class="btn btn-sm btn-outline-primary">
+                                        <a href="/comerciantes/clientes/pessoas/{{ $funcionario->id }}"
+                                            class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i> Ver
                                         </a>
                                     </td>
@@ -221,14 +221,14 @@
                                     <td>{{ Str::limit($cargo->descricao ?? 'Sem descrição', 50) }}</td>
                                     <td>
                                         @if($cargo->ativo)
-                                            <span class="badge bg-success">Ativo</span>
+                                        <span class="badge bg-success">Ativo</span>
                                         @else
-                                            <span class="badge bg-secondary">Inativo</span>
+                                        <span class="badge bg-secondary">Inativo</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="/comerciantes/clientes/cargos/{{ $cargo->id }}" 
-                                           class="btn btn-sm btn-outline-primary">
+                                        <a href="/comerciantes/clientes/cargos/{{ $cargo->id }}"
+                                            class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i> Ver
                                         </a>
                                     </td>
@@ -257,7 +257,7 @@
                 <p class="text-warning"><strong>Atenção:</strong> Esta ação não pode ser desfeita.</p>
                 @if($funcionarios->count() > 0 || $cargos->count() > 0)
                 <div class="alert alert-danger">
-                    <strong>Aviso:</strong> Este departamento possui 
+                    <strong>Aviso:</strong> Este departamento possui
                     {{ $funcionarios->count() }} funcionário(s) e {{ $cargos->count() }} cargo(s) vinculados.
                     Não será possível excluir enquanto houver vínculos.
                 </div>
@@ -284,14 +284,14 @@
 
 @push('scripts')
 <script>
-function confirmarExclusao(id) {
-    const form = document.getElementById('formExclusao');
-    if (form) {
-        form.action = `/comerciantes/clientes/departamentos/${id}`;
+    function confirmarExclusao(id) {
+        const form = document.getElementById('formExclusao');
+        if (form) {
+            form.action = `/comerciantes/clientes/departamentos/${id}`;
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('modalExclusao'));
+        modal.show();
     }
-    
-    const modal = new bootstrap.Modal(document.getElementById('modalExclusao'));
-    modal.show();
-}
 </script>
 @endpush

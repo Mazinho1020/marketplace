@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Modal Pagamento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Teste Modal de Pagamento</h2>
+        <button class="btn btn-success" onclick="testarModal()">Abrir Modal de Pagamento</button>
+        
+        <div class="mt-3">
+            <h4>Log de Testes:</h4>
+            <div id="log" style="background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px; height: 300px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <script>
+    function log(message) {
+        const logDiv = document.getElementById('log');
+        const timestamp = new Date().toLocaleTimeString();
+        logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        console.log(message);
+    }
+
+    function testarModal() {
+        log('=== INICIANDO TESTE DO MODAL ===');
+        
+        const modalHtml = `
+            <div class="modal fade" id="modalRecebimento" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Registrar Recebimento - TESTE</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Forma de Pagamento *</label>
+                                <select name="forma_pagamento_id" class="form-control" id="forma_pagamento_select" required>
+                                    <option value="">Carregando...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <strong>Teste:</strong> Este modal vai tentar carregar as formas de pagamento via API.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Adicionar modal ao DOM
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        $('#modalRecebimento').modal('show');
+        log('Modal adicionado ao DOM e exibido');
+        
+        // Testar API
+        const apiUrl = 'http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/api/formas-pagamento';
+        log(`Fazendo requisição para: ${apiUrl}`);
+        
+        fetch(apiUrl)
+            .then(response => {
+                log(`Resposta recebida com status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                log(`Dados recebidos: ${JSON.stringify(data, null, 2)}`);
+                
+                const select = document.getElementById('forma_pagamento_select');
+                if (!select) {
+                    log('ERRO: Select não encontrado!');
+                    return;
+                }
+                
+                select.innerHTML = '<option value="">Selecione...</option>';
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    data.forEach(forma => {
+                        const option = document.createElement('option');
+                        option.value = forma.id;
+                        option.textContent = forma.nome;
+                        select.appendChild(option);
+                        log(`✅ Adicionada: ${forma.nome} (ID: ${forma.id})`);
+                    });
+                    log(`🎉 SUCESSO: ${data.length} formas de pagamento carregadas!`);
+                } else {
+                    select.innerHTML = '<option value="">Nenhuma forma disponível</option>';
+                    log('⚠️ Nenhuma forma de pagamento encontrada');
+                }
+            })
+            .catch(error => {
+                log(`❌ ERRO: ${error.message}`);
+                const select = document.getElementById('forma_pagamento_select');
+                if (select) {
+                    select.innerHTML = '<option value="">Erro ao carregar</option>';
+                }
+            });
+        
+        // Remover modal após fechar
+        $('#modalRecebimento').on('hidden.bs.modal', function () {
+            $(this).remove();
+            log('Modal removido do DOM');
+        });
+    }
+    
+    // Testar API diretamente ao carregar a página
+    log('=== TESTE DIRETO DA API ===');
+    fetch('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/api/formas-pagamento')
+        .then(response => response.json())
+        .then(data => {
+            log(`API funcionando! ${data.length} formas encontradas:`);
+            data.slice(0, 5).forEach(forma => {
+                log(`  - ${forma.nome} (ID: ${forma.id})`);
+            });
+            if (data.length > 5) {
+                log(`  ... e mais ${data.length - 5} formas`);
+            }
+        })
+        .catch(error => {
+            log(`Erro no teste direto da API: ${error.message}`);
+        });
+    </script>
+</body>
+</html>

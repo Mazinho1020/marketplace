@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('layouts.comerciante')
 
 @section('title', 'Produtos Relacionados')
 
@@ -613,14 +613,18 @@
                         if (data && data.results) {
                             return data;
                         } else if (Array.isArray(data)) {
-                            return { results: data };
+                            return {
+                                results: data
+                            };
                         } else {
-                            return { results: [] };
+                            return {
+                                results: []
+                            };
                         }
                     },
                     error: function(xhr, status, error) {
                         console.error('❌ Erro na busca:', error);
-                        
+
                         if (xhr.responseText && xhr.responseText.indexOf('<!DOCTYPE') === 0) {
                             alert('⚠️ Sessão expirada! Redirecionando...');
                             setTimeout(() => {
@@ -643,7 +647,7 @@
 
         } catch (error) {
             console.error('❌ Erro ao configurar Select2:', error);
-            
+
             // Fallback: Select2 básico
             try {
                 elemento.select2({
@@ -1240,4 +1244,4 @@
     console.log('testarSelect2:', typeof testarSelect2 !== 'undefined' ? '✅' : '❌');
     console.log('initializeSelect2:', typeof initializeSelect2 !== 'undefined' ? '✅' : '❌');
 
-@endpush
+    @endpush

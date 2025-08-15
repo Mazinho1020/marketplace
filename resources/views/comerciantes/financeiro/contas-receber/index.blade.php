@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('layouts.comerciante')
 
 @section('title', 'Contas a Receber')
 
@@ -221,11 +221,6 @@
                                            class="btn btn-outline-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        
-                                        <button type="button" class="btn btn-outline-success" 
-                                                onclick="abrirModalRecebimento({{ $conta->id }})" title="Receber">
-                                            <i class="fas fa-dollar-sign"></i>
-                                        </button>
 
                                         <button type="button" class="btn btn-outline-info" 
                                                 onclick="gerarBoleto({{ $conta->id }})" title="Gerar Boleto">
@@ -261,42 +256,6 @@
         </div>
     </div>
 </div>
-
-<!-- Modal de Recebimento -->
-<div class="modal fade" id="modalRecebimento" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Registrar Recebimento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="formRecebimento" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="valor_recebido" class="form-label">Valor Recebido</label>
-                        <input type="number" name="valor_recebido" id="valor_recebido" class="form-control" 
-                               step="0.01" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="data_recebimento" class="form-label">Data do Recebimento</label>
-                        <input type="date" name="data_recebimento" id="data_recebimento" class="form-control" 
-                               value="{{ date('Y-m-d') }}" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="observacoes_recebimento" class="form-label">Observações</label>
-                        <textarea name="observacoes_recebimento" id="observacoes_recebimento" 
-                                  class="form-control" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Registrar Recebimento</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 @endsection
 
 @push('styles')
@@ -327,14 +286,6 @@
 
 @push('scripts')
 <script>
-function abrirModalRecebimento(contaId) {
-    const form = document.getElementById('formRecebimento');
-    const action = '{{ route("comerciantes.empresas.financeiro.contas-receber.receber", ["empresa" => $empresa, "id" => "__ID__"]) }}';
-    form.action = action.replace('__ID__', contaId);
-    
-    new bootstrap.Modal(document.getElementById('modalRecebimento')).show();
-}
-
 function gerarBoleto(contaId) {
     if (confirm('Deseja gerar o boleto para esta conta?')) {
         const form = document.createElement('form');
@@ -354,6 +305,7 @@ function gerarBoleto(contaId) {
 
 function excluirConta(contaId) {
     if (confirm('Tem certeza que deseja excluir esta conta?')) {
+        // Usar form submit tradicional
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '{{ route("comerciantes.empresas.financeiro.contas-receber.destroy", ["empresa" => $empresa, "id" => "__ID__"]) }}'.replace('__ID__', contaId);

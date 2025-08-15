@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('layouts.comerciante')
 
 @section('title', 'Relatório de Estoque')
 
@@ -91,43 +91,43 @@
                                 <div class="col-md-8">
                                     <div class="progress" style="height: 30px;">
                                         @php
-                                            $total = $relatorio['resumo']['total_produtos'];
-                                            $percZerado = $total > 0 ? ($relatorio['resumo']['total_zerado'] / $total) * 100 : 0;
-                                            $percBaixo = $total > 0 ? ($relatorio['resumo']['total_baixo'] / $total) * 100 : 0;
-                                            $percCritico = $total > 0 ? ($relatorio['resumo']['total_critico'] / $total) * 100 : 0;
-                                            $percNormal = $total > 0 ? ($relatorio['resumo']['total_normal'] / $total) * 100 : 0;
+                                        $total = $relatorio['resumo']['total_produtos'];
+                                        $percZerado = $total > 0 ? ($relatorio['resumo']['total_zerado'] / $total) * 100 : 0;
+                                        $percBaixo = $total > 0 ? ($relatorio['resumo']['total_baixo'] / $total) * 100 : 0;
+                                        $percCritico = $total > 0 ? ($relatorio['resumo']['total_critico'] / $total) * 100 : 0;
+                                        $percNormal = $total > 0 ? ($relatorio['resumo']['total_normal'] / $total) * 100 : 0;
                                         @endphp
                                         @if($percZerado > 0)
-                                            <div class="progress-bar bg-danger" 
-                                                 role="progressbar" 
-                                                 style="width: {{ $percZerado }}%"
-                                                 title="Esgotado: {{ number_format($percZerado, 1) }}%">
-                                                @if($percZerado > 10){{ number_format($percZerado, 1) }}%@endif
-                                            </div>
+                                        <div class="progress-bar bg-danger"
+                                            role="progressbar"
+                                            style="width: {{ $percZerado }}%"
+                                            title="Esgotado: {{ number_format($percZerado, 1) }}%">
+                                            @if($percZerado > 10){{ number_format($percZerado, 1) }}%@endif
+                                        </div>
                                         @endif
                                         @if($percBaixo > 0)
-                                            <div class="progress-bar bg-warning" 
-                                                 role="progressbar" 
-                                                 style="width: {{ $percBaixo }}%"
-                                                 title="Baixo: {{ number_format($percBaixo, 1) }}%">
-                                                @if($percBaixo > 10){{ number_format($percBaixo, 1) }}%@endif
-                                            </div>
+                                        <div class="progress-bar bg-warning"
+                                            role="progressbar"
+                                            style="width: {{ $percBaixo }}%"
+                                            title="Baixo: {{ number_format($percBaixo, 1) }}%">
+                                            @if($percBaixo > 10){{ number_format($percBaixo, 1) }}%@endif
+                                        </div>
                                         @endif
                                         @if($percCritico > 0)
-                                            <div class="progress-bar bg-info" 
-                                                 role="progressbar" 
-                                                 style="width: {{ $percCritico }}%"
-                                                 title="Crítico: {{ number_format($percCritico, 1) }}%">
-                                                @if($percCritico > 10){{ number_format($percCritico, 1) }}%@endif
-                                            </div>
+                                        <div class="progress-bar bg-info"
+                                            role="progressbar"
+                                            style="width: {{ $percCritico }}%"
+                                            title="Crítico: {{ number_format($percCritico, 1) }}%">
+                                            @if($percCritico > 10){{ number_format($percCritico, 1) }}%@endif
+                                        </div>
                                         @endif
                                         @if($percNormal > 0)
-                                            <div class="progress-bar bg-success" 
-                                                 role="progressbar" 
-                                                 style="width: {{ $percNormal }}%"
-                                                 title="Normal: {{ number_format($percNormal, 1) }}%">
-                                                @if($percNormal > 10){{ number_format($percNormal, 1) }}%@endif
-                                            </div>
+                                        <div class="progress-bar bg-success"
+                                            role="progressbar"
+                                            style="width: {{ $percNormal }}%"
+                                            title="Normal: {{ number_format($percNormal, 1) }}%">
+                                            @if($percNormal > 10){{ number_format($percNormal, 1) }}%@endif
+                                        </div>
                                         @endif
                                     </div>
                                 </div>
@@ -162,57 +162,57 @@
                 <div class="card-header bg-white">
                     <ul class="nav nav-tabs card-header-tabs" id="estoqueTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active position-relative" 
-                                    id="zerado-tab" 
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#zerado" 
-                                    type="button" 
-                                    role="tab">
+                            <button class="nav-link active position-relative"
+                                id="zerado-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#zerado"
+                                type="button"
+                                role="tab">
                                 <i class="fas fa-times-circle text-danger me-2"></i>Estoque Esgotado
                                 @if($relatorio['resumo']['total_zerado'] > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        {{ $relatorio['resumo']['total_zerado'] }}
-                                    </span>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ $relatorio['resumo']['total_zerado'] }}
+                                </span>
                                 @endif
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link position-relative" 
-                                    id="baixo-tab" 
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#baixo" 
-                                    type="button" 
-                                    role="tab">
+                            <button class="nav-link position-relative"
+                                id="baixo-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#baixo"
+                                type="button"
+                                role="tab">
                                 <i class="fas fa-exclamation-triangle text-warning me-2"></i>Estoque Baixo
                                 @if($relatorio['resumo']['total_baixo'] > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
-                                        {{ $relatorio['resumo']['total_baixo'] }}
-                                    </span>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
+                                    {{ $relatorio['resumo']['total_baixo'] }}
+                                </span>
                                 @endif
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link position-relative" 
-                                    id="critico-tab" 
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#critico" 
-                                    type="button" 
-                                    role="tab">
+                            <button class="nav-link position-relative"
+                                id="critico-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#critico"
+                                type="button"
+                                role="tab">
                                 <i class="fas fa-exclamation text-info me-2"></i>Estoque Crítico
                                 @if($relatorio['resumo']['total_critico'] > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info">
-                                        {{ $relatorio['resumo']['total_critico'] }}
-                                    </span>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info">
+                                    {{ $relatorio['resumo']['total_critico'] }}
+                                </span>
                                 @endif
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" 
-                                    id="normal-tab" 
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#normal" 
-                                    type="button" 
-                                    role="tab">
+                            <button class="nav-link"
+                                id="normal-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#normal"
+                                type="button"
+                                role="tab">
                                 <i class="fas fa-check-circle text-success me-2"></i>Estoque Normal
                             </button>
                         </li>
@@ -223,36 +223,36 @@
                         <!-- Estoque Esgotado -->
                         <div class="tab-pane fade show active" id="zerado" role="tabpanel">
                             @include('comerciantes.produtos.partials.tabela-estoque', [
-                                'produtos' => $relatorio['estoque_zerado'],
-                                'tipo' => 'zerado',
-                                'mensagemVazia' => 'Nenhum produto com estoque esgotado! 🎉'
+                            'produtos' => $relatorio['estoque_zerado'],
+                            'tipo' => 'zerado',
+                            'mensagemVazia' => 'Nenhum produto com estoque esgotado! 🎉'
                             ])
                         </div>
 
                         <!-- Estoque Baixo -->
                         <div class="tab-pane fade" id="baixo" role="tabpanel">
                             @include('comerciantes.produtos.partials.tabela-estoque', [
-                                'produtos' => $relatorio['estoque_baixo'],
-                                'tipo' => 'baixo',
-                                'mensagemVazia' => 'Nenhum produto com estoque baixo! 👍'
+                            'produtos' => $relatorio['estoque_baixo'],
+                            'tipo' => 'baixo',
+                            'mensagemVazia' => 'Nenhum produto com estoque baixo! 👍'
                             ])
                         </div>
 
                         <!-- Estoque Crítico -->
                         <div class="tab-pane fade" id="critico" role="tabpanel">
                             @include('comerciantes.produtos.partials.tabela-estoque', [
-                                'produtos' => $relatorio['estoque_critico'],
-                                'tipo' => 'critico',
-                                'mensagemVazia' => 'Nenhum produto com estoque crítico! ✅'
+                            'produtos' => $relatorio['estoque_critico'],
+                            'tipo' => 'critico',
+                            'mensagemVazia' => 'Nenhum produto com estoque crítico! ✅'
                             ])
                         </div>
 
                         <!-- Estoque Normal -->
                         <div class="tab-pane fade" id="normal" role="tabpanel">
                             @include('comerciantes.produtos.partials.tabela-estoque', [
-                                'produtos' => $relatorio['estoque_normal']->take(50), // Limitar para performance
-                                'tipo' => 'normal',
-                                'mensagemVazia' => 'Nenhum produto com estoque normal encontrado.'
+                            'produtos' => $relatorio['estoque_normal']->take(50), // Limitar para performance
+                            'tipo' => 'normal',
+                            'mensagemVazia' => 'Nenhum produto com estoque normal encontrado.'
                             ])
                         </div>
                     </div>
@@ -265,69 +265,69 @@
 
 @push('scripts')
 <script>
-function verificarEstoqueBaixo() {
-    const btn = event.target;
-    const originalText = btn.innerHTML;
-    
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Verificando...';
-    
-    $.ajax({
-        url: '{{ route("comerciantes.produtos.verificar-estoque-baixo") }}',
-        type: 'POST',
-        data: {
-            _token: '{{ csrf_token() }}'
-        },
-        success: function(response) {
-            if (response.success) {
-                toastr.success(response.message);
-                if (response.dados.total_notificacoes_criadas > 0) {
-                    setTimeout(() => location.reload(), 2000);
-                }
-            } else {
-                toastr.error(response.message || 'Erro ao verificar estoque');
-            }
-        },
-        error: function() {
-            toastr.error('Erro ao verificar estoque');
-        },
-        complete: function() {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
-    });
-}
+    function verificarEstoqueBaixo() {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
 
-// Auto-refresh a cada 5 minutos
-setInterval(function() {
-    verificarEstoqueBaixo();
-}, 300000);
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Verificando...';
+
+        $.ajax({
+            url: '{{ route("comerciantes.produtos.verificar-estoque-baixo") }}',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    if (response.dados.total_notificacoes_criadas > 0) {
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                } else {
+                    toastr.error(response.message || 'Erro ao verificar estoque');
+                }
+            },
+            error: function() {
+                toastr.error('Erro ao verificar estoque');
+            },
+            complete: function() {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        });
+    }
+
+    // Auto-refresh a cada 5 minutos
+    setInterval(function() {
+        verificarEstoqueBaixo();
+    }, 300000);
 </script>
 @endpush
 
 @push('styles')
 <style>
-.nav-tabs .nav-link {
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: #6c757d;
-}
+    .nav-tabs .nav-link {
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: #6c757d;
+    }
 
-.nav-tabs .nav-link.active {
-    border-bottom-color: #0d6efd;
-    color: #0d6efd;
-}
+    .nav-tabs .nav-link.active {
+        border-bottom-color: #0d6efd;
+        color: #0d6efd;
+    }
 
-.progress {
-    border-radius: 15px;
-}
+    .progress {
+        border-radius: 15px;
+    }
 
-.progress-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
+    .progress-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
 </style>
 @endpush

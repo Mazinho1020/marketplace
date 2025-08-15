@@ -1783,3 +1783,8 @@ Route::get('/debug/web-usuarios', function () {
 
 // Incluir rotas do sistema financeiro
 require_once __DIR__ . '/financial.php';
+
+// Rota de teste temporária para API de pagamentos
+Route::get('/test-api-pagamentos', function () {
+    return view('test_api_pagamentos');
+})->name('test.api.pagamentos');

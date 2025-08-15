@@ -1,0 +1,1579 @@
+@extends('layouts.comerciante')
+
+@section('title', 'Detalhes da Conta a Receber')
+
+@push('styles')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+@endpush
+
+@section('content')
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ route('comerciantes.dashboard.empresa', $empresa) }}">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('comerciantes.empresas.financeiro.dashboard', $empresa) }}">Financeiro</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.index', $empresa) }}">Contas a Receber</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ $contaReceber->descricao }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">{{ $contaReceber->descricao }}</h1>
+        <div class="btn-group">
+            @if($contaReceber->situacao_financeira->value == 'pendente')
+                <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.edit', ['empresa' => $empresa, 'id' => $contaReceber->id]) }}" 
+                   class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+            @endif
+            <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.index', $empresa) }}" 
+               class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Dados Principais -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> Informações Gerais
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Situação:</dt>
+                        <dd class="col-sm-9">
+                            @php
+                                $badgeClass = match($contaReceber->situacao_financeira->value) {
+                                    'pendente' => 'warning',
+                                    'pago' => 'success',
+                                    'vencido' => 'danger',
+                                    'cancelado' => 'secondary',
+                                    'em_negociacao' => 'info',
+                                    default => 'secondary'
+                                };
+                            @endphp
+                            <span class="badge bg-{{ $badgeClass }}">
+                                {{ $contaReceber->situacao_financeira->label() }}
+                            </span>
+                            @if($contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente')
+                                <span class="badge bg-danger ms-2">Vencida</span>
+                            @endif
+                        </dd>
+
+                        <dt class="col-sm-3">Cliente:</dt>
+                        <dd class="col-sm-9">
+                            @if($contaReceber->pessoa)
+                                {{ $contaReceber->pessoa->nome }}
+                                @if($contaReceber->pessoa->cpf_cnpj)
+                                    <small class="text-muted">({{ $contaReceber->pessoa->cpf_cnpj }})</small>
+                                @endif
+                            @else
+                                <span class="text-muted">Não informado</span>
+                            @endif
+                        </dd>
+
+                        <dt class="col-sm-3">Conta Gerencial:</dt>
+                        <dd class="col-sm-9">
+                            @if($contaReceber->contaGerencial)
+                                {{ $contaReceber->contaGerencial->codigo }} - {{ $contaReceber->contaGerencial->nome }}
+                            @else
+                                <span class="text-muted">Não informado</span>
+                            @endif
+                        </dd>
+
+                        <dt class="col-sm-3">Número do Documento:</dt>
+                        <dd class="col-sm-9">
+                            {{ $contaReceber->numero_documento ?: 'Não informado' }}
+                        </dd>
+
+                        <dt class="col-sm-3">Observações:</dt>
+                        <dd class="col-sm-9">
+                            {{ $contaReceber->observacoes ?: 'Não informado' }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Valores -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-dollar-sign"></i> Valores Financeiros
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-6">Valor Original:</dt>
+                                <dd class="col-6">R$ {{ number_format($contaReceber->valor_original, 2, ',', '.') }}</dd>
+
+                                @if($contaReceber->valor_desconto > 0)
+                                    <dt class="col-6">Desconto:</dt>
+                                    <dd class="col-6 text-success">- R$ {{ number_format($contaReceber->valor_desconto, 2, ',', '.') }}</dd>
+                                @endif
+
+                                @if($contaReceber->valor_acrescimo > 0)
+                                    <dt class="col-6">Acréscimo:</dt>
+                                    <dd class="col-6 text-warning">+ R$ {{ number_format($contaReceber->valor_acrescimo, 2, ',', '.') }}</dd>
+                                @endif
+
+                                @if($contaReceber->valor_juros > 0)
+                                    <dt class="col-6">Juros:</dt>
+                                    <dd class="col-6 text-warning">+ R$ {{ number_format($contaReceber->valor_juros, 2, ',', '.') }}</dd>
+                                @endif
+
+                                @if($contaReceber->valor_multa > 0)
+                                    <dt class="col-6">Multa:</dt>
+                                    <dd class="col-6 text-danger">+ R$ {{ number_format($contaReceber->valor_multa, 2, ',', '.') }}</dd>
+                                @endif
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-6"><strong>Valor Final:</strong></dt>
+                                <dd class="col-6"><strong class="fs-5 text-primary">R$ {{ number_format($contaReceber->valor_final, 2, ',', '.') }}</strong></dd>
+
+                                @if($contaReceber->situacao_financeira->value == 'pago' && $contaReceber->data_pagamento)
+                                    <dt class="col-6">Data do Recebimento:</dt>
+                                    <dd class="col-6">{{ $contaReceber->data_pagamento->format('d/m/Y H:i') }}</dd>
+                                @endif
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histórico de Recebimentos -->
+            <div class="card mb-4" id="historicoRecebimentos">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history"></i> Histórico de Recebimentos
+                    </h5>
+                    <span class="badge bg-info">{{ $resumoRecebimentos['total_recebimentos'] }} recebimento(s)</span>
+                </div>
+                <div class="card-body">
+                    @if($resumoRecebimentos['total_recebimentos'] > 0)
+                        <!-- Resumo Geral -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h6 class="text-muted mb-1">Valor Total</h6>
+                                    <h5 class="text-primary mb-0">R$ {{ number_format($resumoRecebimentos['valor_total'], 2, ',', '.') }}</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h6 class="text-muted mb-1">Total Recebido</h6>
+                                    <h5 class="text-success mb-0">R$ {{ number_format($resumoRecebimentos['valor_recebido'], 2, ',', '.') }}</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h6 class="text-muted mb-1">Saldo Devedor</h6>
+                                    <h5 class="{{ $resumoRecebimentos['saldo_devedor'] > 0 ? 'text-warning' : 'text-success' }} mb-0">
+                                        R$ {{ number_format($resumoRecebimentos['saldo_devedor'], 2, ',', '.') }}
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h6 class="text-muted mb-1">Percentual Recebido</h6>
+                                    <h5 class="text-info mb-0">{{ number_format($resumoRecebimentos['percentual_recebido'], 1) }}%</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Barra de Progresso -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>Progresso do Recebimento</small>
+                                <small>{{ number_format($resumoRecebimentos['percentual_recebido'], 1) }}%</small>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar {{ $resumoRecebimentos['percentual_recebido'] >= 100 ? 'bg-success' : 'bg-primary' }}" 
+                                     role="progressbar" 
+                                     style="width: {{ min($resumoRecebimentos['percentual_recebido'], 100) }}%"
+                                     aria-valuenow="{{ $resumoRecebimentos['percentual_recebido'] }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lista de Recebimentos -->
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="tabelaRecebimentos">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Valor</th>
+                                        <th>Forma de Pagamento</th>
+                                        <th>Bandeira</th>
+                                        <th>Conta Bancária</th>
+                                        <th>Observações</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recebimentos as $recebimento)
+                                    <tr>
+                                        <td>
+                                            <strong>{{ $recebimento->data_pagamento->format('d/m/Y') }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ $recebimento->data_pagamento->format('H:i') }}</small>
+                                        </td>
+                                        <td>
+                                            <strong class="text-success">R$ {{ number_format($recebimento->valor, 2, ',', '.') }}</strong>
+                                            @if($recebimento->valor_principal != $recebimento->valor)
+                                                <br>
+                                                <small class="text-muted">
+                                                    Principal: R$ {{ number_format($recebimento->valor_principal, 2, ',', '.') }}
+                                                    @if($recebimento->valor_juros > 0)
+                                                        <br>Juros: R$ {{ number_format($recebimento->valor_juros, 2, ',', '.') }}
+                                                    @endif
+                                                    @if($recebimento->valor_multa > 0)
+                                                        <br>Multa: R$ {{ number_format($recebimento->valor_multa, 2, ',', '.') }}
+                                                    @endif
+                                                    @if($recebimento->valor_desconto > 0)
+                                                        <br>Desconto: R$ {{ number_format($recebimento->valor_desconto, 2, ',', '.') }}
+                                                    @endif
+                                                </small>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($recebimento->formaPagamento)
+                                                <span class="badge bg-secondary">{{ $recebimento->formaPagamento->nome }}</span>
+                                            @else
+                                                <span class="text-muted">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($recebimento->bandeira)
+                                                <span class="badge bg-info">{{ $recebimento->bandeira->nome }}</span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($recebimento->contaBancaria)
+                                                <small>{{ $recebimento->contaBancaria->nome_banco ?? 'Conta ' . $recebimento->conta_bancaria_id }}</small>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($recebimento->observacao)
+                                                <small>{{ Str::limit($recebimento->observacao, 50) }}</small>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" 
+                                                        class="btn btn-outline-primary btn-sm" 
+                                                        onclick="verDetalhesRecebimento({{ $recebimento->id }})"
+                                                        title="Ver detalhes">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                @if($contaReceber->situacao_financeira->value != 'pago')
+                                                <button type="button" 
+                                                        class="btn btn-outline-danger btn-sm" 
+                                                        onclick="confirmarEstorno({{ $recebimento->id }})"
+                                                        title="Estornar recebimento">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">Nenhum recebimento registrado</h6>
+                            <p class="text-muted mb-0">
+                                @if($contaReceber->situacao_financeira->value == 'pendente')
+                                    Clique em "Registrar Recebimento" para registrar o primeiro pagamento.
+                                @else
+                                    Esta conta não possui histórico de recebimentos.
+                                @endif
+                            </p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Datas -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-calendar-alt"></i> Datas Importantes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-6">Data de Emissão:</dt>
+                                <dd class="col-6">
+                                    @if($contaReceber->data_emissao)
+                                        {{ $contaReceber->data_emissao->format('d/m/Y') }}
+                                    @else
+                                        <span class="text-muted">Não informado</span>
+                                    @endif
+                                </dd>
+
+                                <dt class="col-6">Data de Competência:</dt>
+                                <dd class="col-6">
+                                    @if($contaReceber->data_competencia)
+                                        {{ $contaReceber->data_competencia->format('d/m/Y') }}
+                                    @else
+                                        <span class="text-muted">Não informado</span>
+                                    @endif
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-6">Data de Vencimento:</dt>
+                                <dd class="col-6">
+                                    @if($contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente')
+                                        <span class="text-danger fw-bold">
+                                            {{ $contaReceber->data_vencimento->format('d/m/Y') }}
+                                            <small>(Vencida há {{ $contaReceber->data_vencimento->diffForHumans() }})</small>
+                                        </span>
+                                    @else
+                                        {{ $contaReceber->data_vencimento->format('d/m/Y') }}
+                                    @endif
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Status e Ações -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cog"></i> Ações Rápidas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if($contaReceber->situacao_financeira->value == 'pendente')
+                        <div class="d-grid gap-2">
+                            <button type="button" 
+                                    class="btn btn-success w-100" 
+                                    onclick="abrirModalRecebimento({{ $contaReceber->id }})">
+                                <i class="fas fa-check"></i> Registrar Recebimento
+                            </button>
+
+                            <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.edit', ['empresa' => $empresa, 'id' => $contaReceber->id]) }}" 
+                               class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Editar Dados
+                            </a>
+                        </div>
+                    @else
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle"></i>
+                            Esta conta já foi processada e não pode mais ser editada.
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Resumo -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie"></i> Resumo
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <h3 class="text-primary mb-1">
+                            R$ {{ number_format($contaReceber->valor_final, 2, ',', '.') }}
+                        </h3>
+                        <p class="text-muted mb-3">Valor Total</p>
+
+                        @if($contaReceber->situacao_financeira->value == 'pendente')
+                            @if($contaReceber->data_vencimento->isFuture())
+                                <p class="text-success mb-0">
+                                    <i class="fas fa-clock"></i>
+                                    Vence em {{ $contaReceber->data_vencimento->diffForHumans() }}
+                                </p>
+                            @else
+                                <p class="text-danger mb-0">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Vencida há {{ $contaReceber->data_vencimento->diffForHumans() }}
+                                </p>
+                            @endif
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alertas -->
+            @if($contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente')
+                <div class="card border-danger mb-4">
+                    <div class="card-header bg-danger text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-exclamation-triangle"></i> Conta Vencida
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">Esta conta está vencida há {{ $contaReceber->data_vencimento->diffForHumans() }}.</p>
+                        <p class="mb-0 small text-muted">
+                            Considere entrar em contato com o cliente para regularização.
+                        </p>
+                    </div>
+                </div>
+            @endif
+
+            @if($contaReceber->data_vencimento->isToday() && $contaReceber->situacao_financeira->value == 'pendente')
+                <div class="card border-warning mb-4">
+                    <div class="card-header bg-warning">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-clock"></i> Vence Hoje
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">Esta conta vence hoje. Monitore o recebimento.</p>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Recebimento -->
+<div class="modal fade" id="modalRecebimento" tabindex="-1" aria-labelledby="modalRecebimentoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalRecebimentoLabel">
+                    <i class="fas fa-money-bill-wave"></i> Registrar Recebimento
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formRecebimento">
+                @csrf
+                <div class="modal-body">
+                    <!-- Resumo da Conta -->
+                    <div class="card mb-3 bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">Resumo da Conta</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Valor Total:</strong> R$ {{ number_format($contaReceber->valor_final, 2, ',', '.') }}</p>
+                                    <p class="mb-1" id="valorRecebidoInfo"><strong>Valor Recebido:</strong> R$ 0,00</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1" id="saldoDevedorInfo"><strong>Saldo em Aberto:</strong> R$ {{ number_format($contaReceber->valor_final, 2, ',', '.') }}</p>
+                                    <p class="mb-1" id="percentualInfo"><strong>Percentual Recebido:</strong> 0%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Dados básicos do recebimento -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="valor" class="form-label">Valor do Recebimento *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="valor" 
+                                           name="valor" 
+                                           step="0.01" 
+                                           min="0.01" 
+                                           max="{{ $contaReceber->valor_final }}"
+                                           value="{{ $contaReceber->valor_final }}"
+                                           required>
+                                </div>
+                                <div class="form-text">Valor máximo: R$ {{ number_format($contaReceber->valor_final, 2, ',', '.') }}</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="data_pagamento" class="form-label">Data do Recebimento *</label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="data_pagamento" 
+                                       name="data_pagamento" 
+                                       value="{{ date('Y-m-d') }}"
+                                       required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="forma_pagamento_id" class="form-label">Forma de Pagamento *</label>
+                                <select class="form-select" id="forma_pagamento_id" name="forma_pagamento_id" required>
+                                    <option value="">Carregando...</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3" id="container_bandeira" style="display: none;">
+                                <label for="bandeira_id" class="form-label">Bandeira/Operadora</label>
+                                <select class="form-select" id="bandeira_id" name="bandeira_id">
+                                    <option value="">Selecione uma bandeira...</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="conta_bancaria_id" class="form-label">Conta de Destino *</label>
+                                <select class="form-select" id="conta_bancaria_id" name="conta_bancaria_id" required>
+                                    <option value="1">Conta Principal</option>
+                                    <option value="2">Conta Secundária</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Valores detalhados -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="valor_principal" class="form-label">Valor Principal</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="valor_principal" 
+                                           name="valor_principal" 
+                                           step="0.01" 
+                                           min="0">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="valor_juros" class="form-label">Valor de Juros</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="valor_juros" 
+                                           name="valor_juros" 
+                                           step="0.01" 
+                                           min="0"
+                                           value="0">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="valor_multa" class="form-label">Valor de Multa</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="valor_multa" 
+                                           name="valor_multa" 
+                                           step="0.01" 
+                                           min="0"
+                                           value="0">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="valor_desconto" class="form-label">Valor de Desconto</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="valor_desconto" 
+                                           name="valor_desconto" 
+                                           step="0.01" 
+                                           min="0"
+                                           value="0">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="data_compensacao" class="form-label">Data de Compensação</label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="data_compensacao" 
+                                       name="data_compensacao">
+                                <div class="form-text">Data em que o dinheiro cairá na conta</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informações adicionais -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="taxa" class="form-label">Taxa (%)</label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="taxa" 
+                                       name="taxa" 
+                                       step="0.01" 
+                                       min="0" 
+                                       max="100"
+                                       value="0">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="valor_taxa" class="form-label">Valor da Taxa</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="valor_taxa" 
+                                           name="valor_taxa" 
+                                           step="0.01" 
+                                           min="0"
+                                           value="0"
+                                           readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="referencia_externa" class="form-label">Referência Externa</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="referencia_externa" 
+                                       name="referencia_externa" 
+                                       maxlength="100"
+                                       placeholder="ID da transação, número do comprovante, etc.">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="comprovante_pagamento" class="form-label">Comprovante</label>
+                                <textarea class="form-control" 
+                                          id="comprovante_pagamento" 
+                                          name="comprovante_pagamento" 
+                                          rows="2"
+                                          placeholder="Cole aqui o comprovante ou referência do recebimento"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="observacao" class="form-label">Observações</label>
+                        <textarea class="form-control" 
+                                  id="observacao" 
+                                  name="observacao" 
+                                  rows="3"
+                                  placeholder="Observações sobre este recebimento..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success" id="btnSalvarRecebimento">
+                        <i class="fas fa-check"></i> Registrar Recebimento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Dados das formas de pagamento como backup
+const formasBackup = [
+    {id: 3, nome: 'DINHEIRO'},
+    {id: 15, nome: 'PIX'},
+    {id: 1, nome: 'Cartão de Crédito'},
+    {id: 16, nome: 'Cartão de Débito'},
+    {id: 17, nome: 'Boleto'},
+    {id: 19, nome: 'Cheque'},
+    {id: 18, nome: 'Transferência Bancária'}
+];
+
+// Variáveis globais (padrão do contas-pagar)
+const empresaId = {{ $empresa->id ?? 1 }};
+const contaReceberId = {{ $contaReceber->id }};
+const baseUrl = '{{ url("/") }}';
+
+function carregarFormasPagamento(selectElement) {
+    console.log('🔄 Carregando formas de pagamento...');
+    
+    // URL da API usando variáveis globais
+    const apiUrl = `${baseUrl}/comerciantes/empresas/${empresaId}/financeiro/api/formas-pagamento`;
+    
+    console.log('📡 URL da API:', apiUrl);
+    console.log('🏢 Empresa ID:', empresaId);
+    
+    // Carregar via fetch
+    fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        console.log('📥 Status da resposta:', response.status);
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('✅ Dados recebidos:', data);
+        popularSelect(selectElement, data);
+        
+        // Adicionar evento para carregar bandeiras
+        selectElement.addEventListener('change', function() {
+            const formaId = this.value;
+            const containerBandeira = document.getElementById('container_bandeira');
+            const selectBandeira = document.getElementById('bandeira_id');
+            
+            if (formaId) {
+                console.log('🎯 Forma selecionada:', formaId);
+                carregarBandeiras(formaId, selectBandeira, containerBandeira);
+            } else {
+                containerBandeira.style.display = 'none';
+                selectBandeira.innerHTML = '<option value="">Selecione uma bandeira...</option>';
+            }
+        });
+    })
+    .catch(error => {
+        console.error('❌ Erro na API:', error);
+        console.log('🔄 Usando formas de backup...');
+        popularSelect(selectElement, formasBackup);
+    });
+}
+
+function carregarBandeiras(formaId, selectBandeira, containerBandeira) {
+    console.log('🏷️ Carregando bandeiras para forma:', formaId);
+    
+    const apiUrl = `${baseUrl}/comerciantes/empresas/${empresaId}/financeiro/api/formas-pagamento/${formaId}/bandeiras`;
+    
+    // Mostrar loading
+    selectBandeira.innerHTML = '<option value="">Carregando bandeiras...</option>';
+    containerBandeira.style.display = 'block';
+    
+    fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(bandeiras => {
+        console.log('🏷️ Bandeiras recebidas:', bandeiras);
+        
+        selectBandeira.innerHTML = '<option value="">Selecione uma bandeira...</option>';
+        
+        if (Array.isArray(bandeiras) && bandeiras.length > 0) {
+            bandeiras.forEach((bandeira, index) => {
+                const option = document.createElement('option');
+                option.value = bandeira.id;
+                option.textContent = `${bandeira.nome} (Taxa: ${bandeira.taxa}% - ${bandeira.dias_para_receber} dias)`;
+                selectBandeira.appendChild(option);
+                console.log(`✅ ${index + 1}. ${bandeira.nome} (Taxa: ${bandeira.taxa}%)`);
+            });
+            console.log(`🎉 Total de ${bandeiras.length} bandeiras carregadas!`);
+        } else {
+            selectBandeira.innerHTML = '<option value="">Nenhuma bandeira disponível</option>';
+            console.log('⚠️ Nenhuma bandeira encontrada para esta forma de pagamento');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Erro ao carregar bandeiras:', error);
+        selectBandeira.innerHTML = '<option value="">Erro ao carregar bandeiras</option>';
+        // Manter o container visível para o usuário ver o erro
+    });
+}
+
+function popularSelect(selectElement, formas) {
+    if (!selectElement) {
+        console.error('❌ Elemento select não encontrado!');
+        return;
+    }
+    
+    // Limpar e adicionar opção padrão
+    selectElement.innerHTML = '<option value="">Selecione uma forma de pagamento...</option>';
+    
+    if (!Array.isArray(formas) || formas.length === 0) {
+        selectElement.innerHTML += '<option value="">Nenhuma forma disponível</option>';
+        console.warn('⚠️ Nenhuma forma de pagamento disponível');
+        return;
+    }
+    
+    // Adicionar cada forma
+    formas.forEach((forma, index) => {
+        const option = document.createElement('option');
+        option.value = forma.id;
+        option.textContent = forma.nome;
+        selectElement.appendChild(option);
+        console.log(`✅ ${index + 1}. ${forma.nome} (ID: ${forma.id})`);
+    });
+    
+    console.log(`🎉 Total de ${formas.length} formas carregadas com sucesso!`);
+}
+
+function abrirModalRecebimento(contaReceberId) {
+    console.log('🚀 Abrindo modal de recebimento para conta:', contaReceberId);
+    
+    // Limpar formulário antes de abrir
+    limparFormularioRecebimento();
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalRecebimento'));
+    modal.show();
+    
+    // Carregar dados da conta
+    carregarResumoContaReceber(contaReceberId);
+    
+    // Carregar formas de pagamento
+    const selectForma = document.getElementById('forma_pagamento_id');
+    if (selectForma) {
+        carregarFormasPagamento(selectForma);
+    }
+    
+    // Configurar formulário
+    setupFormularioRecebimento(contaReceberId);
+}
+
+function limparFormularioRecebimento() {
+    console.log('🧹 Limpando formulário do modal');
+    
+    const form = document.getElementById('formRecebimento');
+    if (form) {
+        form.reset();
+    }
+    
+    // Resetar campos específicos
+    document.getElementById('valor').value = '';
+    document.getElementById('valor_principal').value = '';
+    document.getElementById('valor_juros').value = '0';
+    document.getElementById('valor_multa').value = '0';
+    document.getElementById('valor_desconto').value = '0';
+    document.getElementById('taxa').value = '0';
+    document.getElementById('valor_taxa').value = '0';
+    document.getElementById('data_pagamento').value = new Date().toISOString().split('T')[0];
+    
+    // Resetar selects
+    const selectForma = document.getElementById('forma_pagamento_id');
+    const selectBandeira = document.getElementById('bandeira_id');
+    const containerBandeira = document.getElementById('container_bandeira');
+    
+    if (selectForma) {
+        selectForma.innerHTML = '<option value="">Carregando...</option>';
+    }
+    
+    if (selectBandeira) {
+        selectBandeira.innerHTML = '<option value="">Selecione uma bandeira...</option>';
+    }
+    
+    if (containerBandeira) {
+        containerBandeira.style.display = 'none';
+    }
+    
+    // Limpar resumo
+    document.getElementById('valorRecebidoInfo').innerHTML = '<strong>Valor Recebido:</strong> R$ 0,00';
+    document.getElementById('saldoDevedorInfo').innerHTML = '<strong>Saldo em Aberto:</strong> R$ 0,00';
+    document.getElementById('percentualInfo').innerHTML = '<strong>Percentual Recebido:</strong> 0%';
+}
+
+function carregarResumoContaReceber(contaReceberId) {
+    const apiUrl = `${baseUrl}/comerciantes/empresas/${empresaId}/financeiro/contas-receber/${contaReceberId}/recebimentos/resumo`;
+    
+    fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const summary = data.summary;
+            
+            // Atualizar campos do resumo
+            document.getElementById('valorRecebidoInfo').innerHTML = 
+                `<strong>Valor Recebido:</strong> R$ ${summary.valor_recebido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            
+            document.getElementById('saldoDevedorInfo').innerHTML = 
+                `<strong>Saldo em Aberto:</strong> R$ ${summary.saldo_devedor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            
+            document.getElementById('percentualInfo').innerHTML = 
+                `<strong>Percentual Recebido:</strong> ${summary.percentual_recebido}%`;
+            
+            // Atualizar valor máximo e padrão do campo valor
+            const campoValor = document.getElementById('valor');
+            const campoValorPrincipal = document.getElementById('valor_principal');
+            
+            // Definir valor padrão como o saldo devedor (para pagamento total)
+            // Mas permitir pagamento parcial modificando o valor
+            campoValor.max = summary.saldo_devedor;
+            campoValor.value = summary.saldo_devedor.toFixed(2);
+            
+            // Inicializar valor principal igual ao valor total (sem juros/multa inicialmente)
+            campoValorPrincipal.value = summary.saldo_devedor.toFixed(2);
+            
+            // Atualizar texto de ajuda
+            const helpText = campoValor.parentNode.nextElementSibling;
+            if (helpText && helpText.classList.contains('form-text')) {
+                helpText.textContent = `Valor máximo: R$ ${summary.saldo_devedor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            }
+            
+            console.log('✅ Resumo carregado:', summary);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Erro ao carregar resumo:', error);
+    });
+}
+
+function setupFormularioRecebimento(contaReceberId) {
+    const form = document.getElementById('formRecebimento');
+    
+    // Remover listeners antigos se existirem para evitar duplicação
+    const campos = ['valor', 'valor_juros', 'valor_multa', 'valor_desconto', 'taxa'];
+    campos.forEach(campo => {
+        const elemento = document.getElementById(campo);
+        if (elemento) {
+            // Clonar elemento para remover todos os event listeners
+            const novoElemento = elemento.cloneNode(true);
+            elemento.parentNode.replaceChild(novoElemento, elemento);
+        }
+    });
+    
+    // Configurar cálculos automáticos
+    setupCalculosAutomaticos();
+    
+    // Submit do formulário
+    const novoForm = document.getElementById('formRecebimento');
+    novoForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        processarRecebimento(contaReceberId);
+    });
+}
+
+function setupCalculosAutomaticos() {
+    console.log('⚙️ Configurando cálculos automáticos');
+    
+    const campoValor = document.getElementById('valor');
+    const campoValorPrincipal = document.getElementById('valor_principal');
+    const campoValorJuros = document.getElementById('valor_juros');
+    const campoValorMulta = document.getElementById('valor_multa');
+    const campoValorDesconto = document.getElementById('valor_desconto');
+    const campoTaxa = document.getElementById('taxa');
+    const campoValorTaxa = document.getElementById('valor_taxa');
+    
+    // Função para calcular valor total baseado nos componentes
+    function calcularValorTotal() {
+        const valorPrincipal = parseFloat(campoValorPrincipal.value) || 0;
+        const valorJuros = parseFloat(campoValorJuros.value) || 0;
+        const valorMulta = parseFloat(campoValorMulta.value) || 0;
+        const valorDesconto = parseFloat(campoValorDesconto.value) || 0;
+        const valorTaxa = parseFloat(campoValorTaxa.value) || 0;
+        
+        // Cálculo: Principal + Juros + Multa - Desconto + Taxa = Total
+        // TAXA SOMA no valor do recebimento
+        const valorTotal = valorPrincipal + valorJuros + valorMulta - valorDesconto + valorTaxa;
+        campoValor.value = Math.max(0, valorTotal).toFixed(2);
+        
+        console.log('💰 Valor total calculado:', {
+            principal: valorPrincipal,
+            juros: valorJuros,
+            multa: valorMulta,
+            desconto: valorDesconto,
+            taxa: valorTaxa,
+            total: valorTotal,
+            observacao: 'Taxa SOMA no valor do recebimento'
+        });
+    }
+    
+    // Função para calcular valor principal baseado no total
+    function calcularValorPrincipal() {
+        const valorTotal = parseFloat(campoValor.value) || 0;
+        const valorJuros = parseFloat(campoValorJuros.value) || 0;
+        const valorMulta = parseFloat(campoValorMulta.value) || 0;
+        const valorDesconto = parseFloat(campoValorDesconto.value) || 0;
+        const valorTaxa = parseFloat(campoValorTaxa.value) || 0;
+        
+        // Cálculo reverso: Total - Juros - Multa - Taxa + Desconto = Principal
+        // TAXA SOMA no valor do recebimento, então para calcular o principal precisamos SUBTRAIR a taxa
+        const valorPrincipal = valorTotal - valorJuros - valorMulta - valorTaxa + valorDesconto;
+        campoValorPrincipal.value = Math.max(0, valorPrincipal).toFixed(2);
+        
+        console.log('💵 Valor principal calculado:', {
+            total: valorTotal,
+            juros: valorJuros,
+            multa: valorMulta,
+            desconto: valorDesconto,
+            taxa: valorTaxa,
+            principal: valorPrincipal,
+            observacao: 'Taxa SOMA no recebimento, então subtraímos para calcular o principal'
+        });
+    }
+    
+    // Função para calcular taxa
+    function calcularTaxa() {
+        const taxa = parseFloat(campoTaxa.value) || 0;
+        const valorPrincipal = parseFloat(campoValorPrincipal.value) || 0;
+        
+        // Taxa deve ser calculada sobre o valor principal, não sobre o valor total
+        const valorTaxa = (valorPrincipal * taxa) / 100;
+        campoValorTaxa.value = valorTaxa.toFixed(2);
+        
+        console.log('💳 Taxa calculada:', {
+            valorPrincipal: valorPrincipal,
+            percentual: taxa,
+            valorTaxa: valorTaxa,
+            observacao: 'Taxa calculada sobre o valor principal'
+        });
+    }
+    
+    // Eventos para cálculo do valor total quando componentes mudam
+    campoValorJuros.addEventListener('input', function() {
+        console.log('💰 Juros alterado - recalculando total...');
+        calcularValorTotal();
+    });
+    campoValorMulta.addEventListener('input', function() {
+        console.log('⚠️ Multa alterada - recalculando total...');
+        calcularValorTotal();
+    });
+    campoValorDesconto.addEventListener('input', function() {
+        console.log('💸 Desconto alterado - recalculando total...');
+        calcularValorTotal();
+    });
+    
+    // Eventos para cálculo do valor principal quando total muda
+    campoValor.addEventListener('input', function() {
+        console.log('💰 Valor do recebimento alterado - recalculando principal...');
+        calcularValorPrincipal();
+    });
+    
+    // Eventos para cálculo da taxa
+    campoTaxa.addEventListener('input', function() {
+        console.log('💳 Taxa alterada - recalculando...');
+        calcularTaxa();
+        // Após calcular a taxa, recalcular o total
+        calcularValorTotal();
+    });
+    
+    // Quando o valor principal é alterado diretamente, recalcular o total
+    campoValorPrincipal.addEventListener('input', function() {
+        console.log('💵 Principal alterado - recalculando total...');
+        // Primeiro calcular a taxa com o novo principal
+        calcularTaxa();
+        // Depois calcular o total
+        calcularValorTotal();
+    });
+    
+    console.log('✅ Cálculos automáticos configurados');
+}
+
+function processarRecebimento(contaReceberId) {
+    const form = document.getElementById('formRecebimento');
+    const btnSalvar = document.getElementById('btnSalvarRecebimento');
+    const formData = new FormData(form);
+    
+    // Preparar dados
+    const dados = Object.fromEntries(formData.entries());
+    
+    // Validações antes do envio
+    const valor = parseFloat(dados.valor) || 0;
+    const valorMaximo = parseFloat(document.getElementById('valor').max) || 0;
+    
+    if (valor <= 0) {
+        console.warn('⚠️ Valor deve ser maior que zero');
+        return;
+    }
+    
+    if (valor > valorMaximo) {
+        console.warn('⚠️ Valor excede o saldo devedor');
+        return;
+    }
+    
+    if (!dados.forma_pagamento_id) {
+        console.warn('⚠️ Forma de pagamento não selecionada');
+        return;
+    }
+    
+    // Desabilitar botão durante o processamento
+    btnSalvar.disabled = true;
+    btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+    
+    console.log('📤 Enviando dados do recebimento:', dados);
+    
+    const apiUrl = `${baseUrl}/comerciantes/empresas/${empresaId}/financeiro/contas-receber/${contaReceberId}/recebimentos`;
+    
+    fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(dados)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('✅ Recebimento registrado com sucesso!');
+            
+            // Fechar modal após 1 segundo
+            setTimeout(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalRecebimento'));
+                modal.hide();
+                
+                // Atualizar dados específicos sem recarregar a página
+                atualizarDadosAposRecebimento(contaReceberId);
+            }, 1000);
+        } else {
+            console.error('❌ Erro no servidor:', data.message);
+        }
+        } else {
+            console.error('❌ Erro no servidor:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Erro na requisição:', error);
+    })
+    .finally(() => {
+        // Reabilitar botão
+        btnSalvar.disabled = false;
+        btnSalvar.innerHTML = '<i class="fas fa-check"></i> Registrar Recebimento';
+    });
+}
+
+// Função para atualizar dados após recebimento
+function atualizarDadosAposRecebimento(contaReceberId) {
+    console.log('🔄 Atualizando dados após recebimento...');
+    
+    const apiUrl = `${baseUrl}/comerciantes/empresas/${empresaId}/financeiro/contas-receber/${contaReceberId}/recebimentos/resumo`;
+    
+    fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('✅ Dados atualizados com sucesso!');
+            
+            // Atualizar seção de histórico de recebimentos
+            atualizarHistoricoRecebimentos(data.summary, data.recebimentos);
+            
+            // Atualizar resumo no card lateral se existir
+            atualizarResumoLateral(data.summary);
+            
+            // Atualizar badge de situação se necessário
+            atualizarSituacaoLancamento(data.summary);
+            
+        } else {
+            console.error('❌ Erro ao atualizar dados:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Erro na requisição de atualização:', error);
+    });
+}
+
+// Função para atualizar o histórico de recebimentos
+function atualizarHistoricoRecebimentos(summary, recebimentos) {
+    const historicoCard = document.getElementById('historicoRecebimentos');
+    if (!historicoCard) return;
+    
+    // Atualizar badge do cabeçalho
+    const badge = historicoCard.querySelector('.badge');
+    if (badge) {
+        badge.textContent = `${summary.total_recebimentos} recebimento(s)`;
+    }
+    
+    const cardBody = historicoCard.querySelector('.card-body');
+    
+    if (summary.total_recebimentos > 0) {
+        cardBody.innerHTML = `
+            <!-- Resumo Geral -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h6 class="text-muted mb-1">Valor Total</h6>
+                        <h5 class="text-primary mb-0">R$ ${summary.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h5>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h6 class="text-muted mb-1">Total Recebido</h6>
+                        <h5 class="text-success mb-0">R$ ${summary.valor_recebido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</h5>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h6 class="text-muted mb-1">Saldo Devedor</h6>
+                        <h5 class="${summary.saldo_devedor > 0 ? 'text-warning' : 'text-success'} mb-0">
+                            R$ ${summary.saldo_devedor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+                        </h5>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h6 class="text-muted mb-1">Percentual Recebido</h6>
+                        <h5 class="text-info mb-0">${summary.percentual_recebido.toFixed(1)}%</h5>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra de Progresso -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between mb-1">
+                    <small>Progresso do Recebimento</small>
+                    <small>${summary.percentual_recebido.toFixed(1)}%</small>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar ${summary.percentual_recebido >= 100 ? 'bg-success' : 'bg-primary'}" 
+                         role="progressbar" 
+                         style="width: ${Math.min(summary.percentual_recebido, 100)}%"
+                         aria-valuenow="${summary.percentual_recebido}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Recebimentos -->
+            <div class="table-responsive">
+                <table class="table table-hover" id="tabelaRecebimentos">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Valor</th>
+                            <th>Forma de Pagamento</th>
+                            <th>Bandeira</th>
+                            <th>Conta Bancária</th>
+                            <th>Observações</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recebimentos.map(recebimento => {
+                            const dataRecebimento = new Date(recebimento.data_pagamento);
+                            return `
+                                <tr>
+                                    <td>
+                                        <strong>${dataRecebimento.toLocaleDateString('pt-BR')}</strong>
+                                        <br>
+                                        <small class="text-muted">${dataRecebimento.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</small>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">R$ ${recebimento.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">${recebimento.forma_pagamento?.nome || 'N/A'}</span>
+                                    </td>
+                                    <td>
+                                        ${recebimento.bandeira ? `<span class="badge bg-info">${recebimento.bandeira.nome}</span>` : '<span class="text-muted">-</span>'}
+                                    </td>
+                                    <td>
+                                        <small>Conta ${recebimento.conta_bancaria_id}</small>
+                                    </td>
+                                    <td>
+                                        ${recebimento.observacao ? `<small>${recebimento.observacao.substring(0, 50)}${recebimento.observacao.length > 50 ? '...' : ''}</small>` : '<span class="text-muted">-</span>'}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" 
+                                                    class="btn btn-outline-primary btn-sm" 
+                                                    onclick="verDetalhesRecebimento(${recebimento.id})"
+                                                    title="Ver detalhes">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn btn-outline-danger btn-sm" 
+                                                    onclick="confirmarEstorno(${recebimento.id})"
+                                                    title="Estornar recebimento">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+}
+
+// Função para atualizar resumo lateral
+function atualizarResumoLateral(summary) {
+    // Esta função pode ser expandida se houver um card de resumo lateral
+    console.log('📊 Resumo atualizado:', summary);
+}
+
+// Função para atualizar situação do lançamento
+function atualizarSituacaoLancamento(summary) {
+    // Atualizar badge de situação se necessário
+    if (summary.saldo_devedor <= 0) {
+        const situacaoBadge = document.querySelector('dd .badge');
+        if (situacaoBadge && situacaoBadge.textContent.includes('Pendente')) {
+            situacaoBadge.className = 'badge bg-success';
+            situacaoBadge.textContent = 'Pago';
+        }
+    }
+}
+
+// Função para testar o recebimento (debugging)
+function testarRecebimento() {
+    console.log('🧪 Testando sistema de recebimento...');
+    const contaId = {{ $contaReceber->id }};
+    
+    const dadosTeste = {
+        forma_pagamento_id: 15, // PIX
+        conta_bancaria_id: 1,
+        valor: 100.00,
+        valor_principal: 100.00,
+        valor_juros: 0,
+        valor_multa: 0,
+        valor_desconto: 0,
+        data_pagamento: '{{ date("Y-m-d") }}',
+        observacao: 'Teste de recebimento via console'
+    };
+    
+    console.log('� Dados do teste:', dadosTeste);
+    console.log('🎯 Para executar: abrirModalRecebimento(' + contaId + ')');
+    
+    return dadosTeste;
+}
+
+// Função para ver detalhes de um recebimento
+function verDetalhesRecebimento(recebimentoId) {
+    console.log('👁️ Visualizando detalhes do recebimento:', recebimentoId);
+    
+    const apiUrl = `${baseUrl}/comerciantes/empresas/${empresaId}/financeiro/contas-receber/${contaReceberId}/recebimentos/${recebimentoId}`;
+    
+    fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarDetalhesRecebimento(data.recebimento);
+        } else {
+            console.warn('❌ Erro ao carregar detalhes do recebimento');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Erro ao carregar detalhes:', error);
+    });
+}
+
+// Função para mostrar modal com detalhes do recebimento
+function mostrarDetalhesRecebimento(recebimento) {
+    const dataRecebimento = new Date(recebimento.data_pagamento);
+    
+    const modalHtml = `
+        <div class="modal fade" id="modalDetalhesRecebimento" tabindex="-1" aria-labelledby="modalDetalhesRecebimentoLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalDetalhesRecebimentoLabel">
+                            <i class="fas fa-receipt"></i> Detalhes do Recebimento #${recebimento.id}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <dl>
+                                    <dt>Valor Total:</dt>
+                                    <dd class="text-success fw-bold">R$ ${recebimento.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</dd>
+                                    
+                                    <dt>Data do Recebimento:</dt>
+                                    <dd>${dataRecebimento.toLocaleDateString('pt-BR')} às ${dataRecebimento.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</dd>
+                                    
+                                    <dt>Forma de Pagamento:</dt>
+                                    <dd><span class="badge bg-secondary">${recebimento.forma_pagamento?.nome || 'N/A'}</span></dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <dl>
+                                    <dt>Valor Principal:</dt>
+                                    <dd>R$ ${recebimento.valor_principal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</dd>
+                                    
+                                    ${recebimento.valor_juros > 0 ? `
+                                    <dt>Juros:</dt>
+                                    <dd class="text-warning">R$ ${recebimento.valor_juros.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</dd>
+                                    ` : ''}
+                                    
+                                    ${recebimento.valor_multa > 0 ? `
+                                    <dt>Multa:</dt>
+                                    <dd class="text-danger">R$ ${recebimento.valor_multa.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</dd>
+                                    ` : ''}
+                                    
+                                    ${recebimento.valor_desconto > 0 ? `
+                                    <dt>Desconto:</dt>
+                                    <dd class="text-success">R$ ${recebimento.valor_desconto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</dd>
+                                    ` : ''}
+                                    
+                                    ${recebimento.valor_taxa > 0 ? `
+                                    <dt>Taxa:</dt>
+                                    <dd class="text-info">R$ ${recebimento.valor_taxa.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</dd>
+                                    ` : ''}
+                                </dl>
+                            </div>
+                        </div>
+                        
+                        ${recebimento.bandeira ? `
+                        <div class="row">
+                            <div class="col-12">
+                                <dt>Bandeira:</dt>
+                                <dd><span class="badge bg-info">${recebimento.bandeira.nome}</span></dd>
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        ${recebimento.observacao ? `
+                        <div class="row">
+                            <div class="col-12">
+                                <dt>Observações:</dt>
+                                <dd class="border p-2 bg-light">${recebimento.observacao}</dd>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remover modal anterior se existir
+    const modalAnterior = document.getElementById('modalDetalhesRecebimento');
+    if (modalAnterior) {
+        modalAnterior.remove();
+    }
+    
+    // Adicionar novo modal
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Aguardar o modal estar totalmente aberto antes de qualquer ação
+    const modalElement = document.getElementById('modalDetalhesRecebimento');
+    const modal = new bootstrap.Modal(modalElement);
+    
+    // Aguardar o modal estar totalmente aberto
+    modalElement.addEventListener('shown.bs.modal', function() {
+        console.log('✅ Modal de detalhes totalmente carregado');
+    }, { once: true });
+    
+    // Mostrar modal
+    modal.show();
+    
+    // Remover modal do DOM quando fechar
+    modalElement.addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    }, { once: true });
+}
+
+// Função para confirmar estorno de recebimento
+function confirmarEstorno(recebimentoId) {
+    console.log('🔄 Solicitando estorno do recebimento:', recebimentoId);
+    
+    const confirmar = confirm('Tem certeza que deseja estornar este recebimento?\n\nEsta ação não pode ser desfeita e afetará o saldo da conta a receber.');
+    
+    if (confirmar) {
+        const motivo = prompt('Digite o motivo do estorno:');
+        if (motivo && motivo.trim()) {
+            executarEstorno(recebimentoId, motivo.trim());
+        } else if (motivo !== null) {
+            console.warn('❌ Motivo do estorno é obrigatório');
+        }
+    }
+}
+
+// Função para executar o estorno
+function executarEstorno(recebimentoId, motivo) {
+    const apiUrl = `${baseUrl}/comerciantes/empresas/${empresaId}/financeiro/contas-receber/${contaReceberId}/recebimentos/${recebimentoId}`;
+    
+    fetch(apiUrl, {
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            motivo_estorno: motivo
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('✅ Recebimento estornado com sucesso!');
+            // Atualizar dados após estorno
+            setTimeout(() => {
+                atualizarDadosAposRecebimento(contaReceberId);
+            }, 1000);
+        } else {
+            console.error('❌ Erro ao estornar recebimento:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Erro no estorno:', error);
+    });
+}
+
+// Teste das formas de pagamento quando a página carregar
+$(document).ready(function() {
+    console.log('📄 Página carregada - testando API das formas de pagamento...');
+    const apiUrl = `${baseUrl}/comerciantes/empresas/${empresaId}/financeiro/api/formas-pagamento`;
+    
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            console.log(`✅ API funcionando! ${data.length} formas disponíveis:`);
+            data.slice(0, 5).forEach(forma => {
+                console.log(`  - ${forma.nome} (ID: ${forma.id})`);
+            });
+        })
+        .catch(error => {
+            console.warn('⚠️ Problema com a API:', error.message);
+        });
+});
+</script>
+@endpush

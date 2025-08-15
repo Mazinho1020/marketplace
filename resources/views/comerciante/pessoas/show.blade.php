@@ -1,4 +1,4 @@
-@extends('comerciantes.layout')
+@extends('layouts.comerciante')
 
 @section('title', 'Visualizar Pessoa')
 
@@ -12,32 +12,32 @@
                     <h1 class="h3 mb-0">{{ $pessoa->nome }} {{ $pessoa->sobrenome }}</h1>
                     <p class="text-muted mb-0">
                         @php
-                            $tipos = explode(',', $pessoa->tipo);
+                        $tipos = explode(',', $pessoa->tipo);
                         @endphp
                         @foreach($tipos as $tipo)
-                            <span class="badge bg-primary me-1">{{ ucfirst(trim($tipo)) }}</span>
+                        <span class="badge bg-primary me-1">{{ ucfirst(trim($tipo)) }}</span>
                         @endforeach
                         @if($pessoa->cargo_nome)
-                            <span class="badge bg-info">{{ $pessoa->cargo_nome }}</span>
+                        <span class="badge bg-info">{{ $pessoa->cargo_nome }}</span>
                         @endif
                         @if($pessoa->departamento_nome)
-                            <span class="badge bg-secondary">{{ $pessoa->departamento_nome }}</span>
+                        <span class="badge bg-secondary">{{ $pessoa->departamento_nome }}</span>
                         @endif
-                        Status: 
+                        Status:
                         @if($pessoa->status == 'ativo')
-                            <span class="badge bg-success">Ativo</span>
+                        <span class="badge bg-success">Ativo</span>
                         @else
-                            <span class="badge bg-warning">{{ ucfirst($pessoa->status) }}</span>
+                        <span class="badge bg-warning">{{ ucfirst($pessoa->status) }}</span>
                         @endif
                     </p>
                 </div>
                 <div>
-                    <a href="/comerciantes/clientes/pessoas?empresa_id={{ $pessoa->empresa_id }}" 
-                       class="btn btn-outline-secondary me-2">
+                    <a href="/comerciantes/clientes/pessoas?empresa_id={{ $pessoa->empresa_id }}"
+                        class="btn btn-outline-secondary me-2">
                         <i class="fas fa-arrow-left"></i> Voltar
                     </a>
-                    <a href="/comerciantes/clientes/pessoas/{{ $pessoa->id }}/edit" 
-                       class="btn btn-warning me-2">
+                    <a href="/comerciantes/clientes/pessoas/{{ $pessoa->id }}/edit"
+                        class="btn btn-warning me-2">
                         <i class="fas fa-edit"></i> Editar
                     </a>
                     <button type="button" class="btn btn-danger" onclick="confirmarExclusao({{ $pessoa->id }})">
@@ -63,7 +63,7 @@
                                         <p class="form-control-plaintext">
                                             {{ $pessoa->nome }} {{ $pessoa->sobrenome }}
                                             @if($pessoa->nome_social)
-                                                <small class="text-muted">"{{ $pessoa->nome_social }}"</small>
+                                            <small class="text-muted">"{{ $pessoa->nome_social }}"</small>
                                             @endif
                                         </p>
                                     </div>
@@ -79,9 +79,9 @@
                                         <label class="form-label fw-bold">Email:</label>
                                         <p class="form-control-plaintext">
                                             @if($pessoa->email)
-                                                <a href="mailto:{{ $pessoa->email }}">{{ $pessoa->email }}</a>
+                                            <a href="mailto:{{ $pessoa->email }}">{{ $pessoa->email }}</a>
                                             @else
-                                                Não informado
+                                            Não informado
                                             @endif
                                         </p>
                                     </div>
@@ -91,9 +91,9 @@
                                         <label class="form-label fw-bold">Telefone:</label>
                                         <p class="form-control-plaintext">
                                             @if($pessoa->telefone)
-                                                <a href="tel:{{ $pessoa->telefone }}">{{ $pessoa->telefone }}</a>
+                                            <a href="tel:{{ $pessoa->telefone }}">{{ $pessoa->telefone }}</a>
                                             @else
-                                                Não informado
+                                            Não informado
                                             @endif
                                         </p>
                                     </div>
@@ -103,24 +103,24 @@
                                         <label class="form-label fw-bold">Data de Nascimento:</label>
                                         <p class="form-control-plaintext">
                                             @if($pessoa->data_nascimento)
-                                                {{ \Carbon\Carbon::parse($pessoa->data_nascimento)->format('d/m/Y') }}
-                                                <small class="text-muted">
-                                                    ({{ \Carbon\Carbon::parse($pessoa->data_nascimento)->age }} anos)
-                                                </small>
+                                            {{ \Carbon\Carbon::parse($pessoa->data_nascimento)->format('d/m/Y') }}
+                                            <small class="text-muted">
+                                                ({{ \Carbon\Carbon::parse($pessoa->data_nascimento)->age }} anos)
+                                            </small>
                                             @else
-                                                Não informado
+                                            Não informado
                                             @endif
                                         </p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                                                                <label class="form-label fw-bold">Gênero:</label>
+                                        <label class="form-label fw-bold">Gênero:</label>
                                         <div class="form-control-plaintext">
                                             @if($pessoa->genero)
-                                                {{ ucfirst($pessoa->genero) }}
+                                            {{ ucfirst($pessoa->genero) }}
                                             @else
-                                                <span class="text-muted">Não informado</span>
+                                            <span class="text-muted">Não informado</span>
                                             @endif
                                         </div>
                                     </div>
@@ -155,12 +155,12 @@
                                         <label class="form-label fw-bold">Departamento:</label>
                                         <p class="form-control-plaintext">
                                             @if($pessoa->departamento_nome && $pessoa->departamento_id)
-                                                <a href="/comerciantes/clientes/departamentos/{{ $pessoa->departamento_id }}" 
-                                                   class="text-decoration-none">
-                                                    {{ $pessoa->departamento_nome }}
-                                                </a>
+                                            <a href="/comerciantes/clientes/departamentos/{{ $pessoa->departamento_id }}"
+                                                class="text-decoration-none">
+                                                {{ $pessoa->departamento_nome }}
+                                            </a>
                                             @else
-                                                Não definido
+                                            Não definido
                                             @endif
                                         </p>
                                     </div>
@@ -170,12 +170,12 @@
                                         <label class="form-label fw-bold">Cargo:</label>
                                         <p class="form-control-plaintext">
                                             @if($pessoa->cargo_nome && $pessoa->cargo_id)
-                                                <a href="/comerciantes/clientes/cargos/{{ $pessoa->cargo_id }}" 
-                                                   class="text-decoration-none">
-                                                    {{ $pessoa->cargo_nome }}
-                                                </a>
+                                            <a href="/comerciantes/clientes/cargos/{{ $pessoa->cargo_id }}"
+                                                class="text-decoration-none">
+                                                {{ $pessoa->cargo_nome }}
+                                            </a>
                                             @else
-                                                Não definido
+                                            Não definido
                                             @endif
                                         </p>
                                     </div>
@@ -185,12 +185,12 @@
                                         <label class="form-label fw-bold">Data de Admissão:</label>
                                         <p class="form-control-plaintext">
                                             @if($pessoa->data_admissao)
-                                                {{ \Carbon\Carbon::parse($pessoa->data_admissao)->format('d/m/Y') }}
-                                                <small class="text-muted">
-                                                    ({{ \Carbon\Carbon::parse($pessoa->data_admissao)->diffForHumans() }})
-                                                </small>
+                                            {{ \Carbon\Carbon::parse($pessoa->data_admissao)->format('d/m/Y') }}
+                                            <small class="text-muted">
+                                                ({{ \Carbon\Carbon::parse($pessoa->data_admissao)->diffForHumans() }})
+                                            </small>
                                             @else
-                                                Não informado
+                                            Não informado
                                             @endif
                                         </p>
                                     </div>
@@ -200,9 +200,9 @@
                                         <label class="form-label fw-bold">Salário Atual:</label>
                                         <p class="form-control-plaintext">
                                             @if($pessoa->salario_atual)
-                                                R$ {{ number_format($pessoa->salario_atual, 2, ',', '.') }}
+                                            R$ {{ number_format($pessoa->salario_atual, 2, ',', '.') }}
                                             @else
-                                                Não informado
+                                            Não informado
                                             @endif
                                         </p>
                                     </div>
@@ -212,15 +212,15 @@
                                         <label class="form-label fw-bold">Status:</label>
                                         <p class="form-control-plaintext">
                                             @if($pessoa->status == 'ativo')
-                                                <span class="badge bg-success">Ativo</span>
+                                            <span class="badge bg-success">Ativo</span>
                                             @elseif($pessoa->status == 'inativo')
-                                                <span class="badge bg-secondary">Inativo</span>
+                                            <span class="badge bg-secondary">Inativo</span>
                                             @elseif($pessoa->status == 'afastado')
-                                                <span class="badge bg-warning">Afastado</span>
+                                            <span class="badge bg-warning">Afastado</span>
                                             @elseif($pessoa->status == 'demitido')
-                                                <span class="badge bg-danger">Demitido</span>
+                                            <span class="badge bg-danger">Demitido</span>
                                             @else
-                                                <span class="badge bg-light text-dark">{{ ucfirst($pessoa->status) }}</span>
+                                            <span class="badge bg-light text-dark">{{ ucfirst($pessoa->status) }}</span>
                                             @endif
                                         </p>
                                     </div>
@@ -244,8 +244,8 @@
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Endereço Principal:</label>
                                         <p class="form-control-plaintext">
-                                            <a href="/comerciantes/enderecos/{{ $pessoa->endereco_principal_id }}" 
-                                               class="text-decoration-none">
+                                            <a href="/comerciantes/enderecos/{{ $pessoa->endereco_principal_id }}"
+                                                class="text-decoration-none">
                                                 Ver endereço completo
                                             </a>
                                         </p>
@@ -291,31 +291,31 @@
                         <div class="card-body">
                             <div class="d-grid gap-2">
                                 @if($pessoa->email)
-                                <a href="mailto:{{ $pessoa->email }}" 
-                                   class="btn btn-outline-primary btn-sm">
+                                <a href="mailto:{{ $pessoa->email }}"
+                                    class="btn btn-outline-primary btn-sm">
                                     <i class="fas fa-envelope"></i> Enviar Email
                                 </a>
                                 @endif
                                 @if($pessoa->telefone)
-                                <a href="tel:{{ $pessoa->telefone }}" 
-                                   class="btn btn-outline-success btn-sm">
+                                <a href="tel:{{ $pessoa->telefone }}"
+                                    class="btn btn-outline-success btn-sm">
                                     <i class="fas fa-phone"></i> Ligar
                                 </a>
                                 @endif
                                 @if($pessoa->departamento_id)
-                                <a href="/comerciantes/clientes/departamentos/{{ $pessoa->departamento_id }}" 
-                                   class="btn btn-outline-info btn-sm">
+                                <a href="/comerciantes/clientes/departamentos/{{ $pessoa->departamento_id }}"
+                                    class="btn btn-outline-info btn-sm">
                                     <i class="fas fa-building"></i> Ver Departamento
                                 </a>
                                 @endif
                                 @if($pessoa->cargo_id)
-                                <a href="/comerciantes/clientes/cargos/{{ $pessoa->cargo_id }}" 
-                                   class="btn btn-outline-secondary btn-sm">
+                                <a href="/comerciantes/clientes/cargos/{{ $pessoa->cargo_id }}"
+                                    class="btn btn-outline-secondary btn-sm">
                                     <i class="fas fa-user-tie"></i> Ver Cargo
                                 </a>
                                 @endif
-                                <a href="/comerciantes/clientes/pessoas/create?empresa_id={{ $pessoa->empresa_id }}" 
-                                   class="btn btn-outline-success btn-sm">
+                                <a href="/comerciantes/clientes/pessoas/create?empresa_id={{ $pessoa->empresa_id }}"
+                                    class="btn btn-outline-success btn-sm">
                                     <i class="fas fa-plus"></i> Nova Pessoa
                                 </a>
                             </div>
@@ -378,12 +378,12 @@
 
 @push('scripts')
 <script>
-function confirmarExclusao(id) {
-    const form = document.getElementById('formExclusao');
-    form.action = `/comerciantes/clientes/pessoas/${id}`;
-    
-    const modal = new bootstrap.Modal(document.getElementById('modalExclusao'));
-    modal.show();
-}
+    function confirmarExclusao(id) {
+        const form = document.getElementById('formExclusao');
+        form.action = `/comerciantes/clientes/pessoas/${id}`;
+
+        const modal = new bootstrap.Modal(document.getElementById('modalExclusao'));
+        modal.show();
+    }
 </script>
 @endpush

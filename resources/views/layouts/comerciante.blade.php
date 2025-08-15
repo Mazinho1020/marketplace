@@ -1,506 +1,678 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <title>@yield('title', 'Painel do Comerciante') - {{ config('app.name', 'Marketplace') }}</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-          integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" 
-          crossorigin="anonymous" referrerpolicy="no-referrer">
-    
-    <!-- Custom Comerciante CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        :root {
+            --navbar-bg: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg: #ffffff;
+            --border-color: #e9ecef;
         }
-        
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            border-radius: 8px;
-            margin: 2px 0;
-            padding: 12px 20px;
+
+        [data-bs-theme="dark"] {
+            --navbar-bg: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --card-bg: #1e1e1e;
+            --border-color: #444444;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
             transition: all 0.3s ease;
         }
-        
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            color: white;
-            background: rgba(255,255,255,0.2);
-            transform: translateX(5px);
-        }
 
-        .sidebar .nav-link .fas.fa-chevron-down {
-            transition: transform 0.3s ease;
-        }
-
-        .sidebar .nav-link[aria-expanded="true"] .fas.fa-chevron-down {
-            transform: rotate(180deg);
-        }
-
-        .sidebar .collapse .nav-link {
-            padding: 8px 20px 8px 40px;
-            font-size: 0.9em;
-        }
-
-        .sidebar .collapse .nav-link:hover {
-            background: rgba(255,255,255,0.15);
-            transform: translateX(3px);
-        }
-        
-        .main-content {
-            background: #f8f9fa;
-            min-height: 100vh;
-        }
-        
         .navbar-comerciante {
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: var(--navbar-bg);
+            min-height: 70px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
         }
-        
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease;
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white !important;
         }
-        
-        .card:hover {
-            transform: translateY(-2px);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
             font-weight: 500;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
-        }
-        
-        .page-header {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .breadcrumb {
-            background: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .breadcrumb-item + .breadcrumb-item::before {
-            content: "›";
-            color: #6c757d;
-        }
-        
-        .stats-card {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .table {
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .table thead th {
-            background: #f8f9fa;
-            border: none;
-            color: #495057;
-            font-weight: 600;
-            padding: 15px;
-        }
-        
-        .table td {
-            padding: 15px;
-            border: none;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .badge {
-            border-radius: 20px;
-            padding: 8px 12px;
-            font-weight: 500;
-        }
-        
-        .form-control, .form-select {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 12px 15px;
+            padding: 10px 15px !important;
+            border-radius: 6px;
             transition: all 0.3s ease;
         }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: #28a745;
-            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.1);
         }
-        
-        .alert {
-            border: none;
-            border-radius: 10px;
-            padding: 15px 20px;
+
+        .navbar-nav .nav-link.active {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.2);
         }
-        
+
         .dropdown-menu {
             border: none;
             border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-        }
-        
-        .dropdown-item {
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin: 2px 5px;
-        }
-        
-        .dropdown-item:hover {
-            background: #f8f9fa;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.3s ease;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
         }
 
-        /* Menu responsivo */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
+        [data-bs-theme="dark"] .dropdown-menu {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .dropdown-item {
+            color: var(--text-color);
+        }
+
+        [data-bs-theme="dark"] .dropdown-item:hover {
+            background-color: #333333;
+            color: var(--text-color);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
             }
-            
-            .sidebar.show {
-                transform: translateX(0);
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
+        }
+
+        .mega-menu {
+            min-width: 600px;
+        }
+
+        .mega-menu-header {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        [data-bs-theme="dark"] .mega-menu-header {
+            color: #ffffff;
+            border-bottom: 2px solid #444444;
+        }
+
+        .mega-menu-item {
+            display: block;
+            padding: 8px 12px;
+            color: #495057;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .mega-menu-item:hover {
+            background: #f8f9fa;
+            color: #2c3e50;
+            transform: translateX(5px);
+        }
+
+        .mega-menu-item i {
+            width: 20px;
+            margin-right: 8px;
+            color: #6c757d;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .navbar-user {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 5px 15px;
+        }
+
+        .main-content {
+            background: var(--bg-color);
+            min-height: calc(100vh - 70px);
+            padding-top: 20px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Botão de modo escuro */
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 20px;
+            padding: 5px 10px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        /* Alertas modo escuro */
+        [data-bs-theme="dark"] .alert {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        /* Dropdown menus no modo escuro */
+        [data-bs-theme="dark"] .dropdown-menu {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .dropdown-item {
+            color: var(--text-color);
+        }
+
+        [data-bs-theme="dark"] .dropdown-item:hover,
+        [data-bs-theme="dark"] .dropdown-item:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+        }
+
+        [data-bs-theme="dark"] .dropdown-header {
+            color: var(--text-color);
+        }
+
+        /* Navbar modo escuro específico */
+        [data-bs-theme="dark"] .navbar-comerciante {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+
+        /* Mega menu modo escuro */
+        [data-bs-theme="dark"] .mega-menu {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .mega-menu-header {
+            color: #fff;
+            border-bottom-color: var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .mega-menu-item {
+            color: var(--text-color);
+        }
+
+        [data-bs-theme="dark"] .mega-menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        /* Seletor de empresas */
+        .empresa-selector .dropdown-item {
+            padding: 0.75rem 1rem;
+        }
+
+        .empresa-selector .dropdown-item.active {
+            background-color: var(--bs-primary);
+            color: white;
+        }
+
+        .empresa-selector .dropdown-item:hover {
+            background-color: rgba(var(--bs-primary-rgb), 0.1);
+        }
+
+        [data-bs-theme="dark"] .empresa-selector .dropdown-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
     </style>
-    
     @stack('styles')
-</head>
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-                <div class="position-sticky pt-3">
-                    <div class="text-center mb-4">
-                        <h4 class="text-white">
-                            <i class="fas fa-store me-2"></i>
-                            Comerciante
-                        </h4>
-                    </div>
-                    
-                    <ul class="nav flex-column">
-                        <!-- Dashboard Principal -->
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('comerciantes.dashboard') ? 'active' : '' }}" href="{{ route('comerciantes.dashboard') }}">
-                                <i class="fas fa-tachometer-alt me-2"></i>
-                                Dashboard
-                            </a>
-                        </li>
 
-                        <!-- Gestão de Produtos -->
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('comerciantes.produtos.*') ? 'active' : '' }}" href="#produtosSubmenu" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('comerciantes.produtos.*') ? 'true' : 'false' }}">
-                                <i class="fas fa-box me-2"></i>
-                                Produtos
-                                <i class="fas fa-chevron-down ms-auto"></i>
-                            </a>
-                            <div class="collapse {{ request()->routeIs('comerciantes.produtos.*') ? 'show' : '' }}" id="produtosSubmenu">
-                                <ul class="list-unstyled ps-3">
-                                    <li><a href="{{ route('comerciantes.produtos.index') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.index') ? 'active' : '' }}"><i class="fas fa-list me-2"></i>Listar Produtos</a></li>
-                                    <li><a href="{{ route('comerciantes.produtos.create') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.create') ? 'active' : '' }}"><i class="fas fa-plus me-2"></i>Novo Produto</a></li>
-                                    <li><hr class="my-2" style="border-color: rgba(255,255,255,0.1);"></li>
-                                    <li><a href="{{ route('comerciantes.produtos.kits.index') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.kits.*') ? 'active' : '' }}"><i class="fas fa-boxes me-2"></i>Kits/Combos</a></li>
-                                    <li><a href="{{ route('comerciantes.produtos.kits.create') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.kits.create') ? 'active' : '' }}"><i class="fas fa-plus-square me-2"></i>Novo Kit/Combo</a></li>
-                                    <li><hr class="my-2" style="border-color: rgba(255,255,255,0.1);"></li>
-                                    <li><a href="{{ route('comerciantes.produtos.categorias.index') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.categorias.*') ? 'active' : '' }}"><i class="fas fa-tags me-2"></i>Categorias</a></li>
-                                    <li><a href="{{ route('comerciantes.produtos.marcas.index') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.marcas.*') ? 'active' : '' }}"><i class="fas fa-copyright me-2"></i>Marcas</a></li>
-                                    <li><a href="{{ route('comerciantes.produtos.subcategorias.index') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.subcategorias.*') ? 'active' : '' }}"><i class="fas fa-sitemap me-2"></i>Subcategorias</a></li>
-                                    <li><hr class="my-2" style="border-color: rgba(255,255,255,0.1);"></li>
-                                    <li><a href="{{ route('comerciantes.produtos.codigos-barras.index') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.codigos-barras.*') ? 'active' : '' }}"><i class="fas fa-barcode me-2"></i>Códigos de Barras</a></li>
-                                    <li><a href="{{ route('comerciantes.produtos.historico-precos.index') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.historico-precos.*') ? 'active' : '' }}"><i class="fas fa-history me-2"></i>Histórico de Preços</a></li>
-                                    <li><hr class="my-2" style="border-color: rgba(255,255,255,0.1);"></li>
-                                    <li><a href="{{ route('comerciantes.produtos.estoque.alertas') }}" class="nav-link {{ request()->routeIs('comerciantes.produtos.estoque.*') ? 'active' : '' }}"><i class="fas fa-exclamation-triangle me-2"></i>Alertas de Estoque</a></li>
-                                </ul>
-                            </div>
-                        </li>
-
-                        <!-- Gestão de Empresas -->
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('comerciantes.empresas.*') ? 'active' : '' }}" href="{{ route('comerciantes.empresas.index') }}">
-                                <i class="fas fa-building me-2"></i>
-                                Empresas
-                            </a>
-                        </li>
-
-                        <!-- Configurações -->
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('comerciantes.config.*') ? 'active' : '' }}" href="#configSubmenu" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('comerciantes.config.*') ? 'true' : 'false' }}">
-                                <i class="fas fa-cog me-2"></i>
-                                Configurações
-                                <i class="fas fa-chevron-down ms-auto"></i>
-                            </a>
-                            <div class="collapse {{ request()->routeIs('comerciantes.config.*') ? 'show' : '' }}" id="configSubmenu">
-                                <ul class="list-unstyled ps-3">
-                                    <li><a href="#" class="nav-link"><i class="fas fa-user me-2"></i>Perfil</a></li>
-                                    <li><a href="#" class="nav-link"><i class="fas fa-shield-alt me-2"></i>Segurança</a></li>
-                                    <li><a href="#" class="nav-link"><i class="fas fa-bell me-2"></i>Notificações</a></li>
-                                </ul>
-                            </div>
-                        </li>
-
-                        <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
-
-                        <!-- Links Externos -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url('/') }}" target="_blank">
-                                <i class="fas fa-external-link-alt me-2"></i>
-                                Ver Site
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-
-            <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
-                <!-- Top navbar -->
-                <nav class="navbar navbar-expand-lg navbar-comerciante sticky-top mb-4">
-                    <div class="container-fluid">
-                        <button class="navbar-toggler d-md-none" type="button" onclick="toggleSidebar()">
-                            <i class="fas fa-bars"></i>
-                        </button>
-                        
-                        <div class="navbar-nav ms-auto">
-                            <!-- Notificações -->
-                            <div class="nav-item dropdown me-3">
-                                <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-bell fa-lg"></i>
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        0
-                                        <span class="visually-hidden">notificações não lidas</span>
-                                    </span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" style="width: 320px;">
-                                    <li class="dropdown-header">Notificações</li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <div class="dropdown-item-text text-center text-muted py-3">
-                                            <i class="fas fa-bell-slash mb-2"></i><br>
-                                            Nenhuma notificação
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <!-- Perfil do Usuário -->
-                            <div class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                                    <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-                                        <i class="fas fa-user text-white"></i>
-                                    </div>
-                                    <span>{{ auth()->user()->name ?? 'Comerciante' }}</span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Perfil</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Configurações</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form method="POST" action="{{ route('comerciantes.logout') }}" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="dropdown-item">
-                                                <i class="fas fa-sign-out-alt me-2"></i>Sair
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </nav>
-
-                <!-- Page header -->
-                @if(isset($pageTitle) || isset($breadcrumbs))
-                <div class="page-header">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            @isset($pageTitle)
-                                <h1 class="h3 mb-0">{{ $pageTitle }}</h1>
-                            @endisset
-                            
-                            @isset($breadcrumbs)
-                                <nav aria-label="breadcrumb">
-                                    <ol class="breadcrumb">
-                                        @foreach($breadcrumbs as $breadcrumb)
-                                            @if($loop->last)
-                                                <li class="breadcrumb-item active">{{ $breadcrumb['title'] }}</li>
-                                            @else
-                                                <li class="breadcrumb-item">
-                                                    <a href="{{ $breadcrumb['url'] }}">{{ $breadcrumb['title'] }}</a>
-                                                </li>
-                                            @endif
-                                        @endforeach
-                                    </ol>
-                                </nav>
-                            @endisset
-                        </div>
-                        
-                        @hasSection('page-actions')
-                            <div class="col-auto">
-                                @yield('page-actions')
-                            </div>
-                        @endif
-                    </div>
-                </div>
-                @endif
-
-                <!-- Alerts -->
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="uil uil-check-circle me-2"></i>
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="uil uil-exclamation-triangle me-2"></i>
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                @if(session('warning'))
-                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <i class="uil uil-exclamation-triangle me-2"></i>
-                        {{ session('warning') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                @if($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="uil uil-exclamation-triangle me-2"></i>
-                        <strong>Ops! Algo deu errado:</strong>
-                        <ul class="mb-0 mt-2">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                <!-- Main content -->
-                @yield('content')
-            </main>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    
-    <!-- Custom Comerciante JS -->
     <script>
-        // Auto-hide alerts after 5 seconds
-        setTimeout(function() {
-            $('.alert').fadeOut('slow');
-        }, 5000);
-        
-        // Add loading state to forms
-        $('form').on('submit', function() {
-            $(this).find('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Processando...');
-        });
-        
-        // Confirm delete actions
-        $('.btn-delete').on('click', function(e) {
-            if (!confirm('Tem certeza que deseja excluir este item?')) {
-                e.preventDefault();
-            }
-        });
-        
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+        // Tema toggle function
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const themeIcon = document.getElementById('theme-icon');
 
-        // Menu responsivo
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('show');
+            if (currentTheme === 'dark') {
+                html.setAttribute('data-bs-theme', 'light');
+                themeIcon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-bs-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            }
         }
 
-        // Fechar sidebar ao clicar fora (mobile)
-        document.addEventListener('click', function(event) {
-            const sidebar = document.querySelector('.sidebar');
-            const toggleButton = document.querySelector('.navbar-toggler');
-            
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(event.target) && !toggleButton.contains(event.target)) {
-                    sidebar.classList.remove('show');
-                }
+        // Carregar tema salvo
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const themeIcon = document.getElementById('theme-icon');
+
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+
+            if (savedTheme === 'dark') {
+                themeIcon.className = 'fas fa-sun';
+            } else {
+                themeIcon.className = 'fas fa-moon';
             }
         });
+    </script>
+</head>
 
-        // Destacar menu ativo
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-comerciante sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ route('comerciantes.dashboard') }}">
+                <i class="fas fa-store me-2"></i>Marketplace
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars text-white"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <!-- Dashboard -->
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('comerciantes.dashboard*') ? 'active' : '' }}"
+                            href="{{ route('comerciantes.dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+
+                    <!-- Produtos -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->routeIs('comerciantes.produtos*') ? 'active' : '' }}"
+                            href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-box me-1"></i>Produtos
+                        </a>
+                        <div class="dropdown-menu mega-menu p-3">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mega-menu-header">
+                                        <i class="fas fa-box"></i> Gestão
+                                    </div>
+                                    <a href="{{ route('comerciantes.produtos.index') }}" class="mega-menu-item">
+                                        <i class="fas fa-list"></i>Todos os Produtos
+                                    </a>
+                                    <a href="{{ route('comerciantes.produtos.create') }}" class="mega-menu-item">
+                                        <i class="fas fa-plus"></i>Novo Produto
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mega-menu-header">
+                                        <i class="fas fa-tags"></i> Organização
+                                    </div>
+                                    <a href="{{ route('comerciantes.produtos.categorias.index') }}" class="mega-menu-item">
+                                        <i class="fas fa-folder"></i>Categorias
+                                    </a>
+                                    <a href="{{ route('comerciantes.produtos.marcas.index') }}" class="mega-menu-item">
+                                        <i class="fas fa-copyright"></i>Marcas
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mega-menu-header">
+                                        <i class="fas fa-boxes"></i> Avançado
+                                    </div>
+                                    <a href="{{ route('comerciantes.produtos.subcategorias.index') }}" class="mega-menu-item">
+                                        <i class="fas fa-sitemap"></i>Subcategorias
+                                    </a>
+                                    <a href="{{ route('comerciantes.produtos.codigos-barras.create') }}" class="mega-menu-item">
+                                        <i class="fas fa-plus"></i>Novo Código
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mega-menu-header">
+                                        <i class="fas fa-warehouse"></i> Controle
+                                    </div>
+                                    <a href="{{ route('comerciantes.produtos.relatorio-estoque') }}" class="mega-menu-item">
+                                        <i class="fas fa-chart-bar"></i>Relatório Estoque
+                                    </a>
+                                    <a href="{{ route('comerciantes.produtos.codigos-barras.index') }}" class="mega-menu-item">
+                                        <i class="fas fa-barcode"></i>Códigos Barras
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- Pessoas -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->routeIs('comerciantes.pessoas*') ? 'active' : '' }}"
+                            href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users me-1"></i>Pessoas
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <h6 class="dropdown-header">Gestão de Pessoas</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.pessoas.index') }}">
+                                    <i class="fas fa-list me-2"></i>Todas as Pessoas
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.pessoas.create') }}">
+                                    <i class="fas fa-user-plus me-2"></i>Nova Pessoa
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.departamentos.index') }}">
+                                    <i class="fas fa-building me-2"></i>Departamentos
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.cargos.index') }}">
+                                    <i class="fas fa-user-tie me-2"></i>Cargos
+                                </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Empresas -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->routeIs('comerciantes.empresas*') ? 'active' : '' }}"
+                            href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-building me-1"></i>Empresas
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <h6 class="dropdown-header">Gestão Empresarial</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.empresas.index') }}">
+                                    <i class="fas fa-list me-2"></i>Minhas Empresas
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.empresas.create') }}">
+                                    <i class="fas fa-plus me-2"></i>Nova Empresa
+                                </a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Financeiro -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-chart-line me-1"></i>Financeiro
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <h6 class="dropdown-header">Gestão Financeira</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.relatorios.financeiro-detalhado') }}">
+                                    <i class="fas fa-chart-bar me-2"></i>Relatório Detalhado
+                                </a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            @if(function_exists('tem_empresa_selecionada') && tem_empresa_selecionada())
+                            <li><a class="dropdown-item" href="{{ route_financeiro('contas-receber.index') }}">
+                                    <i class="fas fa-arrow-up me-2 text-success"></i>Contas a Receber
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ route_financeiro('contas-pagar.index') }}">
+                                    <i class="fas fa-arrow-down me-2 text-danger"></i>Contas a Pagar
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ route_financeiro('dashboard') }}">
+                                    <i class="fas fa-calculator me-2"></i>Dashboard Financeiro
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ route_financeiro('contas.index') }}">
+                                    <i class="fas fa-list me-2"></i>Contas Gerenciais
+                                </a></li>
+                            @else
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.empresas.index') }}">
+                                    <i class="fas fa-exclamation-circle me-2 text-warning"></i>Selecione uma empresa
+                                </a></li>
+                            @endif
+                        </ul>
+                    </li>
+
+                    <!-- Relatórios -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-chart-bar me-1"></i>Relatórios
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <h6 class="dropdown-header">Análises</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.dashboard') }}">
+                                    <i class="fas fa-chart-line me-2"></i>Dashboard
+                                </a></li>
+                            <li><a class="dropdown-item" href="{{ route('comerciantes.produtos.relatorio-estoque') }}">
+                                    <i class="fas fa-boxes me-2"></i>Estoque
+                                </a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Menu Direita -->
+                <ul class="navbar-nav">
+                    <!-- Seletor de Empresa -->
+                    @if(auth('comerciante')->check())
+                    @php
+                        $user = auth('comerciante')->user();
+                        $empresas = $user->todas_empresas ?? collect();
+                        $empresaAtual = $empresas->where('id', session('empresa_atual_id'))->first();
+                    @endphp
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                <i class="fas fa-building text-white" style="font-size: 0.8rem;"></i>
+                            </div>
+                            <span class="text-truncate" style="max-width: 120px;">
+                                {{ $empresaAtual->nome_fantasia ?? 'Selecionar Empresa' }}
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end empresa-selector" style="min-width: 280px;">
+                            <h6 class="dropdown-header">Minhas Empresas</h6>
+                            @if($empresas->count() > 0)
+                                @foreach($empresas as $empresa)
+                                <a class="dropdown-item {{ session('empresa_atual_id') == $empresa->id ? 'active' : '' }}" 
+                                   href="{{ route('comerciantes.dashboard.empresa', $empresa->id) }}">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-{{ session('empresa_atual_id') == $empresa->id ? 'success' : 'secondary' }} rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                             style="width: 25px; height: 25px;">
+                                            <i class="fas fa-building text-white" style="font-size: 0.7rem;"></i>
+                                        </div>
+                                        <div class="flex-fill">
+                                            <div class="fw-semibold">{{ $empresa->nome_fantasia }}</div>
+                                            <small class="text-muted">{{ $empresa->razao_social }}</small>
+                                        </div>
+                                        @if(session('empresa_atual_id') == $empresa->id)
+                                        <i class="fas fa-check text-success ms-2"></i>
+                                        @endif
+                                    </div>
+                                </a>
+                                @endforeach
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ route('comerciantes.dashboard.limpar') }}">
+                                    <i class="fas fa-times-circle me-2 text-danger"></i>Limpar Seleção
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ route('comerciantes.empresas.index') }}">
+                                    <i class="fas fa-cog me-2"></i>Gerenciar Empresas
+                                </a>
+                            @else
+                                <span class="dropdown-item-text text-muted">Nenhuma empresa encontrada</span>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{ route('comerciantes.empresas.create') }}">
+                                    <i class="fas fa-plus me-2"></i>Criar Nova Empresa
+                                </a>
+                            @endif
+                        </div>
+                    </li>
+                    @endif
+
+                    <!-- Modo Escuro/Claro -->
+                    <li class="nav-item me-3">
+                        <button class="btn theme-toggle" onclick="toggleTheme()" title="Alternar modo escuro/claro">
+                            <i class="fas fa-moon" id="theme-icon"></i>
+                        </button>
+                    </li>
+
+                    <!-- Notificações -->
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell fa-lg"></i>
+                            <span class="notification-badge">3</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end" style="width: 300px;">
+                            <h6 class="dropdown-header">Notificações</h6>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ route('comerciantes.produtos.relatorio-estoque') }}">
+                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                Estoque baixo em 5 produtos
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-center" href="{{ route('comerciantes.notificacoes.index') }}">
+                                Ver todas
+                            </a>
+                        </div>
+                    </li>
+
+                    <!-- Usuário -->
+                    <li class="nav-item dropdown">
+                        <div class="navbar-user">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
+                                    <i class="fas fa-user text-dark"></i>
+                                </div>
+                                <span>{{ auth()->user()->name ?? 'Comerciante' }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <h6 class="dropdown-header">Minha Conta</h6>
+                                </li>
+                                <li><a class="dropdown-item" href="{{ route('comerciantes.dashboard') }}"><i class="fas fa-user me-2"></i>Perfil</a></li>
+                                <li><a class="dropdown-item" href="{{ route('comerciantes.dashboard') }}"><i class="fas fa-cog me-2"></i>Configurações</a></li>
+                                <li><a class="dropdown-item" href="{{ route('comerciantes.planos.dashboard') }}"><i class="fas fa-crown me-2"></i>Meu Plano</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="{{ url('/') }}" target="_blank"><i class="fas fa-external-link-alt me-2"></i>Ver Site</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <form method="POST" action="{{ route('comerciantes.logout') }}" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Sair
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Alerts -->
+            @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+            @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>{{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+            @if($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i><strong>Ops! Algo deu errado:</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+
+            @yield('content')
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const currentUrl = window.location.href;
-            const menuLinks = document.querySelectorAll('.sidebar .nav-link');
-            
-            menuLinks.forEach(link => {
-                if (link.href === currentUrl) {
-                    link.classList.add('active');
-                    
-                    // Expandir submenu se necessário
-                    const collapse = link.getAttribute('href');
-                    if (collapse && collapse.startsWith('#')) {
-                        const submenu = document.querySelector(collapse);
-                        if (submenu) {
-                            submenu.classList.add('show');
-                            link.setAttribute('aria-expanded', 'true');
-                        }
-                    }
-                }
-            });
-        });
+            // Auto-hide alerts
+            setTimeout(() => $('.alert').fadeOut('slow'), 5000);
 
-        // Animação dos ícones do menu
-        document.querySelectorAll('.sidebar .nav-link[data-bs-toggle="collapse"]').forEach(link => {
-            link.addEventListener('click', function() {
-                const icon = this.querySelector('.fa-chevron-down');
-                const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                
-                if (icon) {
-                    if (isExpanded) {
-                        icon.style.transform = 'rotate(0deg)';
-                    } else {
-                        icon.style.transform = 'rotate(180deg)';
-                    }
-                }
+            // Form loading states
+            $('form').on('submit', function() {
+                const btn = $(this).find('button[type="submit"]');
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Processando...');
+            });
+
+            // Delete confirmations
+            $('.btn-delete').on('click', function(e) {
+                if (!confirm('Tem certeza que deseja excluir este item?')) e.preventDefault();
+            });
+
+            // Initialize tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+
+            // Highlight active menu
+            const currentUrl = window.location.href;
+            $('.navbar-nav .nav-link').each(function() {
+                if (this.href === currentUrl) $(this).addClass('active');
             });
         });
     </script>
-    
+
     @stack('scripts')
 </body>
+
 </html>

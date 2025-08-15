@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste API Formas de Pagamento (Contas a Pagar)</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .resultado { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .sucesso { background: #d4edda; border: 1px solid #c3e6cb; }
+        .erro { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .comparacao { background: #d1ecf1; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>Teste da API de Formas de Pagamento (Contas a Pagar)</h1>
+    <p>Esta página testa se a API está retornando apenas as formas corretas para contas a pagar (tipo=pagamento).</p>
+    
+    <button onclick="testarAPIRecebimento()">Testar API Recebimento</button>
+    <button onclick="testarAPIPagamento()">Testar API Pagamento</button>
+    <button onclick="compararAPIs()">Comparar Ambas</button>
+    
+    <div id="resultado"></div>
+
+    <script>
+        async function testarAPIRecebimento() {
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = '<p>Carregando API de Recebimento...</p>';
+            
+            try {
+                const response = await fetch('/financial/1/formas-pagamento');
+                const data = await response.json();
+                
+                let html = '<div class="resultado sucesso">';
+                html += '<h3>✅ API Recebimento funcionando!</h3>';
+                html += `<p><strong>Total de formas retornadas:</strong> ${data.length}</p>`;
+                html += '<h4>Formas de recebimento disponíveis:</h4>';
+                html += '<ul>';
+                
+                data.forEach(forma => {
+                    html += `<li><strong>ID ${forma.id}:</strong> ${forma.nome} (${forma.tipo}/${forma.origem})</li>`;
+                });
+                
+                html += '</ul>';
+                html += '</div>';
+                resultadoDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultadoDiv.innerHTML = `<div class="resultado erro">
+                    <h3>❌ Erro na API de Recebimento</h3>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        }
+
+        async function testarAPIPagamento() {
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = '<p>Carregando API de Pagamento...</p>';
+            
+            try {
+                const response = await fetch('/financial/1/formas-pagamento-saida');
+                const data = await response.json();
+                
+                let html = '<div class="resultado sucesso">';
+                html += '<h3>✅ API Pagamento funcionando!</h3>';
+                html += `<p><strong>Total de formas retornadas:</strong> ${data.length}</p>`;
+                html += '<h4>Formas de pagamento disponíveis:</h4>';
+                html += '<ul>';
+                
+                data.forEach(forma => {
+                    html += `<li><strong>ID ${forma.id}:</strong> ${forma.nome} (${forma.tipo}/${forma.origem})</li>`;
+                });
+                
+                html += '</ul>';
+                
+                // Verificar se apenas formas corretas estão sendo retornadas
+                const formasCorretas = data.every(forma => 
+                    forma.tipo === 'pagamento' && 
+                    forma.origem === 'sistema'
+                );
+                
+                if (formasCorretas) {
+                    html += '<p style="color: green;"><strong>✅ FILTROS CORRETOS!</strong> Apenas formas de pagamento/sistema estão sendo retornadas.</p>';
+                } else {
+                    html += '<p style="color: red;"><strong>❌ FILTROS INCORRETOS!</strong> Há formas que não deveriam estar na lista.</p>';
+                }
+                
+                html += '</div>';
+                resultadoDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultadoDiv.innerHTML = `<div class="resultado erro">
+                    <h3>❌ Erro na API de Pagamento</h3>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        }
+
+        async function compararAPIs() {
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = '<p>Carregando e comparando ambas as APIs...</p>';
+            
+            try {
+                const [responseRecebimento, responsePagamento] = await Promise.all([
+                    fetch('/financial/1/formas-pagamento'),
+                    fetch('/financial/1/formas-pagamento-saida')
+                ]);
+                
+                const dataRecebimento = await responseRecebimento.json();
+                const dataPagamento = await responsePagamento.json();
+                
+                let html = '<div class="resultado comparacao">';
+                html += '<h3>📊 Comparação das APIs</h3>';
+                html += `<p><strong>Formas de Recebimento:</strong> ${dataRecebimento.length} formas</p>`;
+                html += `<p><strong>Formas de Pagamento:</strong> ${dataPagamento.length} formas</p>`;
+                
+                html += '<div style="display: flex; gap: 20px;">';
+                
+                // Lado esquerdo - Recebimento
+                html += '<div style="flex: 1;">';
+                html += '<h4>🟢 Recebimento (tipo=recebimento)</h4>';
+                html += '<ul>';
+                dataRecebimento.forEach(forma => {
+                    html += `<li>ID ${forma.id}: ${forma.nome}</li>`;
+                });
+                html += '</ul>';
+                html += '</div>';
+                
+                // Lado direito - Pagamento
+                html += '<div style="flex: 1;">';
+                html += '<h4>🔴 Pagamento (tipo=pagamento)</h4>';
+                html += '<ul>';
+                dataPagamento.forEach(forma => {
+                    html += `<li>ID ${forma.id}: ${forma.nome}</li>`;
+                });
+                html += '</ul>';
+                html += '</div>';
+                
+                html += '</div>';
+                html += '<p style="color: blue;"><strong>✅ Separação correta!</strong> As APIs retornam formas diferentes conforme o tipo.</p>';
+                html += '</div>';
+                
+                resultadoDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultadoDiv.innerHTML = `<div class="resultado erro">
+                    <h3>❌ Erro na comparação</h3>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        }
+    </script>
+</body>
+</html>

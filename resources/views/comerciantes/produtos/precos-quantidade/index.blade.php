@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('layouts.comerciante')
 
 @section('title', $produto ? 'Preços por Quantidade - ' . $produto->nome : 'Preços por Quantidade')
 

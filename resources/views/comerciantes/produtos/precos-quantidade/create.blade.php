@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('layouts.comerciante')
 
 @section('title', $produto ? 'Nova Regra de Preço - ' . $produto->nome : 'Nova Regra de Preço por Quantidade')
 

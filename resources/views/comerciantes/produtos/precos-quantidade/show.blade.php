@@ -1,4 +1,4 @@
-@extends('comerciantes.layouts.app')
+@extends('layouts.comerciante')
 
 @section('title', 'Visualizar Regra de Preço - ' . $precoQuantidade->produto->nome)
 

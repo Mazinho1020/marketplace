@@ -1,4 +1,4 @@
-@extends('comerciantes.layout')
+@extends('layouts.comerciante')
 
 @section('title', 'Novo Horário Padrão')
 

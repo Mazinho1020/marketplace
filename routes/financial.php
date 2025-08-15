@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Financial\ContaGerencialController;
 use App\Http\Controllers\Financial\CategoriaContaGerencialController;
 use App\Http\Controllers\Financial\ContasPagarController;
@@ -72,6 +74,15 @@ Route::prefix('comerciantes/empresas/{empresa}/financeiro')->name('comerciantes.
         Route::put('/{id}', [ContasPagarController::class, 'update'])->name('update');
         Route::delete('/{id}', [ContasPagarController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/pagar', [ContasPagarController::class, 'pagar'])->name('pagar');
+
+        // Rotas de pagamentos
+        Route::prefix('{id}/pagamentos')->name('pagamentos.')->group(function () {
+            Route::post('/', [\App\Http\Controllers\Comerciantes\Financial\PagamentoController::class, 'store'])->name('store');
+            Route::get('/resumo', [\App\Http\Controllers\Comerciantes\Financial\PagamentoController::class, 'getSummary'])->name('summary');
+            Route::get('/{pagamento}', [\App\Http\Controllers\Comerciantes\Financial\PagamentoController::class, 'show'])->name('show');
+            Route::put('/{pagamento}', [\App\Http\Controllers\Comerciantes\Financial\PagamentoController::class, 'update'])->name('update');
+            Route::delete('/{pagamento}', [\App\Http\Controllers\Comerciantes\Financial\PagamentoController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // Rotas para Contas a Receber
@@ -83,8 +94,17 @@ Route::prefix('comerciantes/empresas/{empresa}/financeiro')->name('comerciantes.
         Route::get('/{id}/edit', [ContasReceberController::class, 'edit'])->name('edit');
         Route::put('/{id}', [ContasReceberController::class, 'update'])->name('update');
         Route::delete('/{id}', [ContasReceberController::class, 'destroy'])->name('destroy');
-        Route::post('/{id}/receber', [ContasReceberController::class, 'receber'])->name('receber');
         Route::post('/{id}/gerar-boleto', [ContasReceberController::class, 'gerarBoleto'])->name('gerar-boleto');
+
+        // Rotas para recebimentos (similar às rotas de pagamentos)
+        Route::prefix('{id}/recebimentos')->name('recebimentos.')->group(function () {
+            Route::get('/pagamento', [\App\Http\Controllers\Comerciantes\Financial\RecebimentoController::class, 'showPagamento'])->name('pagamento');
+            Route::post('/', [\App\Http\Controllers\Comerciantes\Financial\RecebimentoController::class, 'store'])->name('store');
+            Route::get('/resumo', [\App\Http\Controllers\Comerciantes\Financial\RecebimentoController::class, 'getSummary'])->name('summary');
+            Route::get('/{recebimento}', [\App\Http\Controllers\Comerciantes\Financial\RecebimentoController::class, 'show'])->name('show');
+            Route::put('/{recebimento}', [\App\Http\Controllers\Comerciantes\Financial\RecebimentoController::class, 'update'])->name('update');
+            Route::delete('/{recebimento}', [\App\Http\Controllers\Comerciantes\Financial\RecebimentoController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // Rotas para APIs gerais do financeiro
@@ -96,5 +116,67 @@ Route::prefix('comerciantes/empresas/{empresa}/financeiro')->name('comerciantes.
         Route::get('/relatorios', function () {
             return response()->json(['message' => 'API de relatórios financeiros']);
         })->name('relatorios');
+
+        // Formas de pagamento para uso em formulários
+        Route::get('/formas-pagamento', function ($empresa) {
+            try {
+                $empresaId = (int) $empresa; // $empresa é o ID, não um objeto
+
+                $formasPagamento = DB::table('formas_pagamento')
+                    ->where('ativo', true)
+                    ->where('empresa_id', $empresaId)
+                    ->where('tipo', 'recebimento') // Apenas formas para recebimento
+                    ->whereIn('origem', ['sistema']) // Apenas origem sistema
+                    ->where('is_gateway', 0) // Excluir formas que são apenas para gateway
+                    ->orderBy('nome')
+                    ->get(['id', 'nome', 'gateway_method', 'tipo', 'origem']);
+
+                return response()->json($formasPagamento);
+            } catch (\Exception $e) {
+                Log::error('Erro na API formas-pagamento: ' . $e->getMessage());
+                return response()->json(['error' => 'Erro ao carregar formas de pagamento: ' . $e->getMessage()], 500);
+            }
+        })->name('formas-pagamento');
+
+        // API específica para formas de pagamento (contas a pagar)
+        Route::get('/formas-pagamento-saida', function ($empresa) {
+            try {
+                $empresaId = (int) $empresa; // $empresa é o ID, não um objeto
+
+                $formasPagamento = DB::table('formas_pagamento')
+                    ->where('ativo', true)
+                    ->where('empresa_id', $empresaId)
+                    ->where('tipo', 'pagamento') // Para contas a pagar, apenas formas de pagamento
+                    ->whereIn('origem', ['sistema']) // Apenas origem sistema para uso administrativo
+                    ->where('is_gateway', 0) // Excluir formas que são apenas para gateway (uso online)
+                    ->orderBy('nome')
+                    ->get(['id', 'nome', 'gateway_method', 'tipo', 'origem']);
+
+                return response()->json($formasPagamento);
+            } catch (\Exception $e) {
+                Log::error('Erro na API formas-pagamento-saida: ' . $e->getMessage());
+                return response()->json(['error' => 'Erro ao carregar formas de pagamento: ' . $e->getMessage()], 500);
+            }
+        })->name('formas-pagamento-saida');        // Bandeiras de uma forma de pagamento específica
+        Route::get('/formas-pagamento/{formaId}/bandeiras', function ($empresa, $formaId) {
+            try {
+                $empresaId = (int) $empresa; // $empresa é o ID, não um objeto
+
+                $bandeiras = DB::table('forma_pag_bandeiras as fpb')
+                    ->select(['fpb.id', 'fpb.nome', 'fpb.dias_para_receber', 'fpb.taxa'])
+                    ->join('forma_pagamento_bandeiras as fpbr', 'fpb.id', '=', 'fpbr.forma_pag_bandeira_id')
+                    ->where('fpbr.forma_pagamento_id', $formaId)
+                    ->where('fpbr.empresa_id', $empresaId) // Filtrar por empresa também
+                    ->where('fpb.ativo', true)
+                    ->where('fpb.empresa_id', $empresaId) // Filtrar bandeiras da empresa
+                    ->orderBy('fpb.nome')
+                    ->get();
+
+                return response()->json($bandeiras);
+            } catch (\Exception $e) {
+                Log::error('Erro na API bandeiras: ' . $e->getMessage());
+                return response()->json(['error' => 'Erro ao carregar bandeiras: ' . $e->getMessage()], 500);
+            }
+        })->name('formas-pagamento.bandeiras');
     });
 });

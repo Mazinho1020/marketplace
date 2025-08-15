@@ -1,0 +1,456 @@
+@extends('layouts.comerciante')
+
+@section('head')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
+
+@section('content')
+<div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('    // Evento de mudança na forma de pagamento
+    selectForma.addEventListener('change', function() {
+        const selectedOption = this.selectedOptions[0];
+        const tipo = selectedOption?.dataset.tipo || '';
+        const formaId = this.value;
+        
+        console.log('🎯 Forma selecionada:', formaId, 'Tipo:', tipo);
+        
+        // Mostrar/ocultar campos baseado no tipo
+        toggleCamposBandeira(tipo === 'cartao_credito' || tipo === 'cartao_debito');
+        toggleCamposContaBancaria(tipo === 'transferencia' || tipo === 'pix');
+    });.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('comerciantes.empresas.financeiro.contas-receber.index', $empresa->id) }}">Contas a Receber</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('comerciantes.empresas.financeiro.contas-receber.show', [$empresa->id, $contaReceber->id]) }}">{{ $contaReceber->descricao }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Registrar Pagamento</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Registrar Pagamento</h1>
+            <p class="text-muted mb-0">{{ $contaReceber->descricao }}</p>
+        </div>
+        <div>
+            <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.show', [$empresa->id, $contaReceber->id]) }}" 
+               class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Coluna Principal - Formulário de Pagamento -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-credit-card"></i> Formulário de Pagamento
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="formPagamento" method="POST">
+                        @csrf
+                        <div class="row">
+                            <!-- Valor do Pagamento -->
+                            <div class="col-md-6 mb-3">
+                                <label for="valor" class="form-label">Valor do Pagamento *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="valor" 
+                                           name="valor" 
+                                           step="0.01" 
+                                           min="0.01" 
+                                           max="{{ $resumoRecebimentos['saldo_devedor'] }}"
+                                           placeholder="0,00" 
+                                           required>
+                                </div>
+                                <div class="form-text">
+                                    Valor máximo: R$ {{ number_format($resumoRecebimentos['saldo_devedor'], 2, ',', '.') }}
+                                </div>
+                            </div>
+
+                            <!-- Data do Pagamento -->
+                            <div class="col-md-6 mb-3">
+                                <label for="data_pagamento" class="form-label">Data do Pagamento *</label>
+                                <input type="datetime-local" 
+                                       class="form-control" 
+                                       id="data_pagamento" 
+                                       name="data_pagamento" 
+                                       value="{{ date('Y-m-d\TH:i') }}"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Forma de Pagamento -->
+                            <div class="col-md-6 mb-3">
+                                <label for="forma_pagamento_id" class="form-label">Forma de Pagamento *</label>
+                                <select class="form-select" id="forma_pagamento_id" name="forma_pagamento_id" required>
+                                    <option value="">Selecione uma forma de pagamento...</option>
+                                    @foreach($formasPagamento as $forma)
+                                        <option value="{{ $forma->id }}" data-tipo="{{ $forma->tipo ?? '' }}">
+                                            {{ $forma->nome }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Bandeira (condicional) -->
+                            <div class="col-md-6 mb-3" id="campo_bandeira" style="display: none;">
+                                <label for="bandeira_id" class="form-label">Bandeira</label>
+                                <select class="form-select" id="bandeira_id" name="bandeira_id">
+                                    <option value="">Selecione a bandeira...</option>
+                                    @foreach($bandeiras as $bandeira)
+                                        <option value="{{ $bandeira->id }}"
+                                                data-taxa="{{ $bandeira->taxa ?? 0 }}"
+                                                data-dias="{{ $bandeira->dias_para_receber ?? 0 }}">
+                                            {{ $bandeira->nome }}
+                                            @if($bandeira->taxa)
+                                                (Taxa: {{ $bandeira->taxa }}% - {{ $bandeira->dias_para_receber ?? 0 }} dias)
+                                            @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Conta Bancária (condicional) -->
+                            <div class="col-md-6 mb-3" id="campo_conta_bancaria" style="display: none;">
+                                <label for="conta_bancaria_id" class="form-label">Conta Bancária</label>
+                                <select class="form-select" id="conta_bancaria_id" name="conta_bancaria_id">
+                                    <option value="">Selecione a conta...</option>
+                                    @foreach($contasBancarias as $conta)
+                                        <option value="{{ $conta->id }}">
+                                            {{ $conta->banco }} - {{ $conta->agencia }}/{{ $conta->numero_conta }}
+                                            ({{ $conta->nome_conta }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Número do Documento -->
+                            <div class="col-md-6 mb-3">
+                                <label for="numero_documento" class="form-label">Número do Documento</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="numero_documento" 
+                                       name="numero_documento" 
+                                       placeholder="Ex: TED123, PIX456">
+                            </div>
+                        </div>
+
+                        <!-- Valores Adicionais -->
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="valor_juros" class="form-label">Juros</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="valor_juros" 
+                                           name="valor_juros" 
+                                           step="0.01" 
+                                           min="0" 
+                                           placeholder="0,00">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label for="valor_multa" class="form-label">Multa</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="valor_multa" 
+                                           name="valor_multa" 
+                                           step="0.01" 
+                                           min="0" 
+                                           placeholder="0,00">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label for="valor_desconto" class="form-label">Desconto</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="valor_desconto" 
+                                           name="valor_desconto" 
+                                           step="0.01" 
+                                           min="0" 
+                                           placeholder="0,00">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label for="valor_taxa" class="form-label">Taxa</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           id="valor_taxa" 
+                                           name="valor_taxa" 
+                                           step="0.01" 
+                                           min="0" 
+                                           placeholder="0,00">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Observações -->
+                        <div class="mb-3">
+                            <label for="observacao" class="form-label">Observações</label>
+                            <textarea class="form-control" 
+                                      id="observacao" 
+                                      name="observacao" 
+                                      rows="3" 
+                                      placeholder="Observações sobre o pagamento (opcional)"></textarea>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.show', [$empresa->id, $contaReceber->id]) }}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success" id="btnRegistrarPagamento">
+                                <i class="fas fa-check"></i> Registrar Pagamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar - Resumo da Conta -->
+        <div class="col-lg-4">
+            <!-- Resumo da Conta -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> Resumo da Conta
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-6">Cliente:</dt>
+                        <dd class="col-6">{{ $contaReceber->pessoa->nome }}</dd>
+                        
+                        <dt class="col-6">Valor Total:</dt>
+                        <dd class="col-6 text-primary fw-bold">
+                            R$ {{ number_format($resumoRecebimentos['valor_total'], 2, ',', '.') }}
+                        </dd>
+                        
+                        <dt class="col-6">Valor Recebido:</dt>
+                        <dd class="col-6 text-success">
+                            R$ {{ number_format($resumoRecebimentos['valor_recebido'], 2, ',', '.') }}
+                        </dd>
+                        
+                        <dt class="col-6">Saldo Devedor:</dt>
+                        <dd class="col-6 {{ $resumoRecebimentos['saldo_devedor'] > 0 ? 'text-warning fw-bold' : 'text-success' }}">
+                            R$ {{ number_format($resumoRecebimentos['saldo_devedor'], 2, ',', '.') }}
+                        </dd>
+                        
+                        <dt class="col-6">Situação:</dt>
+                        <dd class="col-6">
+                            @php
+                                $badgeClass = match($contaReceber->situacao_financeira) {
+                                    App\Enums\SituacaoFinanceiraEnum::PAGO => 'success',
+                                    App\Enums\SituacaoFinanceiraEnum::PARCIALMENTE_PAGO => 'warning',
+                                    default => 'danger'
+                                };
+                            @endphp
+                            <span class="badge bg-{{ $badgeClass }}">
+                                {{ $contaReceber->situacao_financeira->label() }}
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Histórico de Pagamentos -->
+            @if($contaReceber->pagamentos->count() > 0)
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-history"></i> Últimos Pagamentos
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @foreach($contaReceber->pagamentos->take(5) as $pagamento)
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <div>
+                            <div class="fw-bold">R$ {{ number_format($pagamento->valor, 2, ',', '.') }}</div>
+                            <small class="text-muted">{{ $pagamento->data_pagamento->format('d/m/Y H:i') }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-secondary">{{ $pagamento->formaPagamento->nome }}</span>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+// Variáveis globais
+const empresaId = {{ $empresa->id }};
+const contaReceberId = {{ $contaReceber->id }};
+const baseUrl = "{{ url('/') }}";
+const maxValor = {{ $resumoRecebimentos['saldo_devedor'] }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Página de pagamento carregada!');
+    
+    // Configurar eventos do formulário
+    configurarFormulario();
+});
+
+function configurarFormulario() {
+    const form = document.getElementById('formPagamento');
+    const selectForma = document.getElementById('forma_pagamento_id');
+    const selectBandeira = document.getElementById('bandeira_id');
+    const campoValor = document.getElementById('valor');
+    
+    if (!form || !selectForma) return;
+    
+    // Evento de mudança na forma de pagamento
+    selectForma.addEventListener('change', function() {
+        const selectedOption = this.selectedOptions[0];
+        const tipo = selectedOption?.dataset.tipo || '';
+        const formaId = this.value;
+        
+        console.log('� Forma selecionada:', formaId, 'Tipo:', tipo);
+        
+        // Mostrar/ocultar campos baseado no tipo
+        toggleCamposBandeira(tipo === 'cartao_credito' || tipo === 'cartao_debito', formaId);
+        toggleCamposContaBancaria(tipo === 'transferencia' || tipo === 'pix');
+    });
+    
+    // Validação do valor máximo
+    if (campoValor) {
+        campoValor.addEventListener('input', function() {
+            const valor = parseFloat(this.value) || 0;
+            if (valor > maxValor) {
+                this.value = maxValor.toFixed(2);
+            }
+        });
+    }
+    
+    // Submit do formulário
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        registrarPagamento();
+    });
+}
+
+// Toggle campos de bandeira
+function toggleCamposBandeira(mostrar, formaId = null) {
+    const campo = document.getElementById('campo_bandeira');
+    const select = document.getElementById('bandeira_id');
+    
+    if (!campo || !select) return;
+    
+    if (mostrar && formaId) {
+        campo.style.display = 'block';
+        
+        // Filtrar bandeiras pela forma de pagamento
+        const opcoes = select.querySelectorAll('option');
+        opcoes.forEach(opcao => {
+            if (opcao.value === '') {
+                opcao.style.display = 'block'; // Manter opção padrão
+            } else {
+                const formaAssociada = opcao.dataset.forma;
+                opcao.style.display = (formaAssociada == formaId) ? 'block' : 'none';
+            }
+        });
+        
+        // Reset do valor selecionado
+        select.value = '';
+    } else {
+        campo.style.display = 'none';
+        select.value = '';
+    }
+}
+
+// Toggle campos de conta bancária
+function toggleCamposContaBancaria(mostrar) {
+    const campo = document.getElementById('campo_conta_bancaria');
+    const select = document.getElementById('conta_bancaria_id');
+    
+    if (!campo || !select) return;
+    
+    if (mostrar) {
+        campo.style.display = 'block';
+    } else {
+        campo.style.display = 'none';
+        select.value = '';
+    }
+}
+
+// Registrar pagamento
+function registrarPagamento() {
+    const form = document.getElementById('formPagamento');
+    const btn = document.getElementById('btnRegistrarPagamento');
+    
+    if (!form || !btn) return;
+    
+    // Validação básica
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    
+    if (!data.forma_pagamento_id) {
+        alert('Por favor, selecione uma forma de pagamento');
+        return;
+    }
+    
+    if (!data.valor || parseFloat(data.valor) <= 0) {
+        alert('Por favor, informe um valor válido');
+        return;
+    }
+    
+    // Desabilitar botão
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+    
+    fetch(`${baseUrl}/comerciantes/empresas/${empresaId}/financeiro/contas-receber/${contaReceberId}/recebimentos`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Pagamento registrado com sucesso!');
+            // Redirecionar para a página de detalhes
+            window.location.href = `${baseUrl}/comerciantes/empresas/${empresaId}/financeiro/contas-receber/${contaReceberId}`;
+        } else {
+            alert('Erro: ' + (data.message || 'Erro desconhecido'));
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao registrar pagamento:', error);
+        alert('Erro ao processar pagamento');
+    })
+    .finally(() => {
+        // Reabilitar botão
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check"></i> Registrar Pagamento';
+    });
+}
+</script>
+@endsection

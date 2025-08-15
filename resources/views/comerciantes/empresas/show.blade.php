@@ -1,4 +1,4 @@
-@extends('comerciantes.layout')
+@extends('layouts.comerciante')
 
 @section('title', $empresa->razao_social ?: $empresa->nome_fantasia ?: 'Empresa')
 

@@ -22,7 +22,7 @@
     }
 @endphp
 
-@extends('comerciantes.layouts.app')
+@extends('layouts.comerciante')
 
 @section('title', 'Gerenciar Usuários - ' . ($empresa->nome_fantasia ?? 'Empresa'))
 

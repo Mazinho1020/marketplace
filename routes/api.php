@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Api\Financial\ContasPagarApiController;
+use App\Http\Controllers\Api\Financial\ContasReceberApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +19,63 @@ use Illuminate\Support\Facades\DB;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// API FINANCEIRA
+Route::prefix('financial')->middleware(['auth'])->group(function () {
+    // Contas a Pagar
+    Route::prefix('contas-pagar')->group(function () {
+        Route::get('/', [ContasPagarApiController::class, 'index']);
+        Route::post('/', [ContasPagarApiController::class, 'store']);
+        Route::get('/{id}', [ContasPagarApiController::class, 'show']);
+        Route::put('/{id}', [ContasPagarApiController::class, 'update']);
+        Route::delete('/{id}', [ContasPagarApiController::class, 'destroy']);
+        Route::post('/{id}/pagar', [ContasPagarApiController::class, 'pagar']);
+        Route::delete('/pagamentos/{pagamentoId}/estornar', [ContasPagarApiController::class, 'estornarPagamento']);
+        Route::get('/dashboard/resumo', [ContasPagarApiController::class, 'dashboard']);
+        Route::get('/projecao/fluxo-caixa', [ContasPagarApiController::class, 'projecaoFluxoCaixa']);
+        Route::get('/vencendo/proximos-dias', [ContasPagarApiController::class, 'contasVencendo']);
+        Route::get('/vencidas/listar', [ContasPagarApiController::class, 'contasVencidas']);
+        Route::post('/processamento/pagamento-automatico', [ContasPagarApiController::class, 'processarPagamentoAutomatico']);
+        Route::get('/relatorio/pagamentos', [ContasPagarApiController::class, 'relatorioPagamentos']);
+    });
+
+    // Contas a Receber
+    Route::prefix('contas-receber')->group(function () {
+        Route::get('/', [ContasReceberApiController::class, 'index']);
+        Route::post('/', [ContasReceberApiController::class, 'store']);
+        Route::get('/{id}', [ContasReceberApiController::class, 'show']);
+        Route::put('/{id}', [ContasReceberApiController::class, 'update']);
+        Route::delete('/{id}', [ContasReceberApiController::class, 'destroy']);
+        Route::post('/{id}/receber', [ContasReceberApiController::class, 'receber']);
+        Route::delete('/pagamentos/{pagamentoId}/estornar', [ContasReceberApiController::class, 'estornarRecebimento']);
+        Route::get('/dashboard/resumo', [ContasReceberApiController::class, 'dashboard']);
+        Route::get('/projecao/fluxo-caixa', [ContasReceberApiController::class, 'projecaoFluxoCaixa']);
+        Route::get('/vencendo/proximos-dias', [ContasReceberApiController::class, 'contasVencendo']);
+        Route::get('/vencidas/listar', [ContasReceberApiController::class, 'contasVencidas']);
+        Route::post('/processamento/cobranca-automatica', [ContasReceberApiController::class, 'processarCobrancaAutomatica']);
+        Route::get('/relatorio/recebimentos', [ContasReceberApiController::class, 'relatorioRecebimentos']);
+    });
+
+    // Rotas gerais de pagamentos (CRUD de pagamentos independente)
+    Route::prefix('pagamentos')->group(function () {
+        Route::delete('/{id}/estornar', function ($id) {
+            try {
+                $pagamento = \App\Models\Pagamento::findOrFail($id);
+                $pagamento->delete();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pagamento estornado com sucesso'
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erro ao estornar pagamento: ' . $e->getMessage()
+                ], 500);
+            }
+        });
+    });
 });
 
 // ROTAS DE TESTE - API para testes de notificação (sem CSRF)

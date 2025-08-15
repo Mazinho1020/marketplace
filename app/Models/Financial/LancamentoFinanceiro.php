@@ -4,10 +4,12 @@ namespace App\Models\Financial;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use App\Enums\NaturezaFinanceiraEnum;
 use App\Enums\SituacaoFinanceiraEnum;
 use App\Enums\FrequenciaRecorrenciaEnum;
+use App\Models\Financial\Pagamento;
 use Carbon\Carbon;
 
 class LancamentoFinanceiro extends Model
@@ -113,6 +115,18 @@ class LancamentoFinanceiro extends Model
     public function aprovadoPor(): BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'aprovado_por');
+    }
+
+    public function pagamentos(): HasMany
+    {
+        return $this->hasMany(Pagamento::class, 'lancamento_id');
+    }
+
+    public function recebimentos(): HasMany
+    {
+        return $this->hasMany(Pagamento::class, 'lancamento_id')
+            ->where('tipo_id', 2)
+            ->orderBy('data_pagamento', 'desc');
     }
 
     public function parcelasRelacionadas()
@@ -365,5 +379,78 @@ class LancamentoFinanceiro extends Model
         if ($dias <= 7) return 'vencendo';
 
         return 'normal';
+    }
+
+    /**
+     * Adicionar pagamento ao lançamento
+     */
+    public function adicionarPagamento(array $dadosPagamento): Pagamento
+    {
+        $pagamento = $this->pagamentos()->create([
+            'empresa_id' => $this->empresa_id, // Incluir empresa_id do lançamento
+            'tipo_id' => $dadosPagamento['tipo_id'] ?? 1,
+            'forma_pagamento_id' => $dadosPagamento['forma_pagamento_id'],
+            'bandeira_id' => $dadosPagamento['bandeira_id'] ?? null,
+            'conta_bancaria_id' => $dadosPagamento['conta_bancaria_id'] ?? null,
+            'valor' => $dadosPagamento['valor'],
+            'valor_principal' => $dadosPagamento['valor_principal'] ?? $dadosPagamento['valor'],
+            'valor_juros' => $dadosPagamento['valor_juros'] ?? 0,
+            'valor_multa' => $dadosPagamento['valor_multa'] ?? 0,
+            'valor_desconto' => $dadosPagamento['valor_desconto'] ?? 0,
+            'data_pagamento' => $dadosPagamento['data_pagamento'],
+            'data_compensacao' => $dadosPagamento['data_compensacao'] ?? null,
+            'observacao' => $dadosPagamento['observacao'] ?? null,
+            'comprovante_pagamento' => $dadosPagamento['comprovante_pagamento'] ?? null,
+            'usuario_id' => $dadosPagamento['usuario_id'] ?? (\Illuminate\Support\Facades\Auth::id() ?? 1),
+            'taxa' => $dadosPagamento['taxa'] ?? 0,
+            'valor_taxa' => $dadosPagamento['valor_taxa'] ?? 0,
+            'referencia_externa' => $dadosPagamento['referencia_externa'] ?? null,
+            'status_pagamento' => 'confirmado',
+        ]);
+
+        // Atualizar situação do lançamento
+        $this->atualizarSituacao();
+
+        return $pagamento;
+    }
+
+    /**
+     * Atualizar situação financeira baseada nos recebimentos/pagamentos
+     */
+    public function atualizarSituacao(): void
+    {
+        if ($this->isContaReceber()) {
+            $valorRecebido = $this->recebimentos()
+                ->where('status_pagamento', 'confirmado')
+                ->sum('valor');
+
+            $valorTotal = $this->valor_final;
+
+            if ($valorRecebido >= $valorTotal) {
+                $this->situacao_financeira = SituacaoFinanceiraEnum::PAGO;
+            } elseif ($valorRecebido > 0) {
+                // Para pagamento parcial, manter como pendente mas com observação
+                $this->situacao_financeira = SituacaoFinanceiraEnum::PENDENTE;
+            } else {
+                $this->situacao_financeira = SituacaoFinanceiraEnum::PENDENTE;
+            }
+        } elseif ($this->isContaPagar()) {
+            $valorPago = $this->pagamentos()
+                ->where('status_pagamento', 'confirmado')
+                ->sum('valor');
+
+            $valorTotal = $this->valor_final;
+
+            if ($valorPago >= $valorTotal) {
+                $this->situacao_financeira = SituacaoFinanceiraEnum::PAGO;
+            } elseif ($valorPago > 0) {
+                // Para pagamento parcial, manter como pendente
+                $this->situacao_financeira = SituacaoFinanceiraEnum::PENDENTE;
+            } else {
+                $this->situacao_financeira = SituacaoFinanceiraEnum::PENDENTE;
+            }
+        }
+
+        $this->save();
     }
 }

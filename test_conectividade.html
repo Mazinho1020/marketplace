@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste de Conectividade Web</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Teste de Conectividade Web</h1>
+    <div id="resultado"></div>
+    
+    <script>
+        console.log('🧪 Iniciando teste de conectividade...');
+        
+        // Teste 1: Verificar se o servidor está respondendo
+        fetch('http://127.0.0.1:8000')
+            .then(response => {
+                console.log('✅ Servidor respondendo:', response.status);
+                document.getElementById('resultado').innerHTML += `<p>✅ Servidor respondendo: ${response.status}</p>`;
+                
+                // Teste 2: Testar rota específica de pagamento
+                return fetch('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/contas-pagar/377');
+            })
+            .then(response => {
+                console.log('✅ Página de lançamento:', response.status);
+                document.getElementById('resultado').innerHTML += `<p>✅ Página de lançamento: ${response.status}</p>`;
+                
+                // Teste 3: Testar se a API de formas de pagamento funciona
+                return fetch('http://127.0.0.1:8000/comerciantes/empresas/1/financeiro/api/formas-pagamento-saida');
+            })
+            .then(response => {
+                console.log('✅ API formas pagamento:', response.status);
+                document.getElementById('resultado').innerHTML += `<p>✅ API formas pagamento: ${response.status}</p>`;
+                return response.json();
+            })
+            .then(data => {
+                console.log('✅ Dados da API:', data);
+                document.getElementById('resultado').innerHTML += `<p>✅ Formas de pagamento encontradas: ${data.length}</p>`;
+            })
+            .catch(error => {
+                console.error('❌ Erro:', error);
+                document.getElementById('resultado').innerHTML += `<p>❌ Erro: ${error.message}</p>`;
+            });
+    </script>
+</body>
+</html>
