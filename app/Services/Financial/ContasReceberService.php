@@ -144,7 +144,7 @@ class ContasReceberService
 
         // Calcular valor já recebido
         $valorRecebido = $lancamento->recebimentos()
-            ->where('status_recebimento', 'confirmado')
+            ->where('status_pagamento', 'confirmado')
             ->sum('valor');
 
         $valorTotal = $lancamento->valor_final;
