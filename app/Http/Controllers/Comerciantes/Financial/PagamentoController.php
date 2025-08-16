@@ -8,6 +8,7 @@ use App\Models\Financial\LancamentoFinanceiro;
 use App\Models\Empresa;
 use App\Services\Financial\ContasPagarService;
 use App\Enums\SituacaoFinanceiraEnum;
+use App\Enums\NaturezaFinanceiraEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,7 @@ class PagamentoController extends Controller
     {
         $contaPagar = LancamentoFinanceiro::where('empresa_id', $empresa->id)
             ->where('id', $id)
+            ->where('natureza_financeira', NaturezaFinanceiraEnum::PAGAR)
             ->firstOrFail();
 
         // Buscar formas de pagamento da empresa
@@ -46,7 +48,10 @@ class PagamentoController extends Controller
             ->get(['id', 'nome', 'banco', 'agencia', 'conta']);
 
         return view('comerciantes.financeiro.contas-pagar.pagamento', compact(
-            'empresa', 'contaPagar', 'formasPagamento', 'contasBancarias'
+            'empresa',
+            'contaPagar',
+            'formasPagamento',
+            'contasBancarias'
         ));
     }
 
@@ -97,7 +102,6 @@ class PagamentoController extends Controller
             return redirect()
                 ->route('comerciantes.empresas.financeiro.contas-pagar.show', ['empresa' => $empresa, 'id' => $id])
                 ->with('success', 'Pagamento registrado com sucesso!');
-                
         } catch (\InvalidArgumentException $e) {
             return redirect()
                 ->back()

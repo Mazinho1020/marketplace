@@ -34,7 +34,7 @@ class FixNaturezaFinanceiraCommand extends Command
                 DB::table('lancamentos_financeiros')
                     ->whereIn('natureza_financeira', ['despesa', 'custo', 'investimento'])
                     ->update(['natureza_financeira' => 'pagar']);
-                
+
                 $this->info("Corrigidos {$contasPagar} registros para 'pagar'");
             }
 
@@ -47,7 +47,7 @@ class FixNaturezaFinanceiraCommand extends Command
                 DB::table('lancamentos_financeiros')
                     ->whereIn('natureza_financeira', ['receita', 'vendas', 'entrada'])
                     ->update(['natureza_financeira' => 'receber']);
-                
+
                 $this->info("Corrigidos {$contasReceber} registros para 'receber'");
             }
 
@@ -64,7 +64,6 @@ class FixNaturezaFinanceiraCommand extends Command
             }
 
             $this->info('Correção concluída com sucesso!');
-            
         } catch (\Exception $e) {
             $this->error('Erro durante a correção: ' . $e->getMessage());
             return 1;

@@ -4,12 +4,7 @@
 
 @section('content')
 <div class="container-fluid">
-                                     <label for="valor_bruto" class="form-label">Valor Bruto *</label>
-                                    <input type="number" step="0.01" name="valor_bruto" id="valor_bruto" 
-                                           class="form-control @error('valor_bruto') is-invalid @enderror" 
-                                           value="{{ old('valor_bruto') }}" 
-                                           required placeholder="0,00">
-                                    @error('valor_bruto')- Breadcrumb -->
+    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -130,12 +125,12 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="valor_original" class="form-label">Valor Original *</label>
-                                    <input type="number" step="0.01" name="valor_original" id="valor_original" 
-                                           class="form-control @error('valor_original') is-invalid @enderror" 
-                                           value="{{ old('valor_original') }}" 
+                                    <label for="valor_bruto" class="form-label">Valor Bruto *</label>
+                                    <input type="number" step="0.01" name="valor_bruto" id="valor_bruto" 
+                                           class="form-control @error('valor_bruto') is-invalid @enderror" 
+                                           value="{{ old('valor_bruto') }}" 
                                            placeholder="0,00">
-                                    @error('valor_original')
+                                    @error('valor_bruto')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

@@ -1,4 +1,4 @@
-<?php $__env->startSection('title', 'Contas a Pagar'); ?>
+<?php $__env->startSection('title', 'Contas a Receber'); ?>
 
 <?php $__env->startSection('content'); ?>
 <div class="container-fluid">
@@ -11,27 +11,27 @@
             <li class="breadcrumb-item">
                 <a href="<?php echo e(route('comerciantes.empresas.financeiro.dashboard', $empresa)); ?>">Financeiro</a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">Contas a Pagar</li>
+            <li class="breadcrumb-item active" aria-current="page">Contas a Receber</li>
         </ol>
     </nav>
 
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Contas a Pagar</h1>
-        <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-pagar.create', $empresa)); ?>" 
+        <h1 class="h3 mb-0">Contas a Receber</h1>
+        <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.create', $empresa)); ?>" 
            class="btn btn-primary">
-            <i class="fas fa-plus"></i> Nova Conta a Pagar
+            <i class="fas fa-plus"></i> Nova Conta a Receber
         </a>
     </div>
 
     <!-- Cards de Estatísticas -->
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6">
-            <div class="card border-left-danger">
+            <div class="card border-left-info">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Total em Aberto
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
@@ -40,7 +40,7 @@
                             </div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+                            <i class="fas fa-clock fa-2x text-info"></i>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
                             </div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-warning"></i>
+                            <i class="fas fa-calendar-day fa-2x text-warning"></i>
                         </div>
                     </div>
                 </div>
@@ -95,10 +95,10 @@
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Pago Este Mês
+                                Recebido Este Mês
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                R$ <?php echo e(number_format($estatisticas['total_pago'] ?? 0, 2, ',', '.')); ?>
+                                R$ <?php echo e(number_format($estatisticas['total_recebido'] ?? 0, 2, ',', '.')); ?>
 
                             </div>
                         </div>
@@ -114,14 +114,14 @@
     <!-- Filtros -->
     <div class="card mb-4">
         <div class="card-body">
-            <form method="GET" action="<?php echo e(route('comerciantes.empresas.financeiro.contas-pagar.index', $empresa)); ?>">
+            <form method="GET" action="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.index', $empresa)); ?>">
                 <div class="row">
                     <div class="col-md-3">
                         <label for="situacao" class="form-label">Situação</label>
                         <select name="situacao_financeira" id="situacao_financeira" class="form-control">
                             <option value="">Todas</option>
                             <option value="pendente" <?php echo e(request('situacao') == 'pendente' ? 'selected' : ''); ?>>Pendente</option>
-                            <option value="pago" <?php echo e(request('situacao') == 'pago' ? 'selected' : ''); ?>>Pago</option>
+                            <option value="recebido" <?php echo e(request('situacao') == 'pago' ? 'selected' : ''); ?>>Recebido</option>
                             <option value="cancelado" <?php echo e(request('situacao') == 'cancelado' ? 'selected' : ''); ?>>Cancelado</option>
                             <option value="vencido" <?php echo e(request('situacao') == 'vencido' ? 'selected' : ''); ?>>Vencido</option>
                         </select>
@@ -140,7 +140,7 @@
                         <label for="search" class="form-label">Buscar</label>
                         <div class="input-group">
                             <input type="text" name="search" id="search" class="form-control" 
-                                   placeholder="Descrição, pessoa..." value="<?php echo e(request('search')); ?>">
+                                   placeholder="Descrição, cliente..." value="<?php echo e(request('search')); ?>">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-search"></i>
                             </button>
@@ -160,14 +160,14 @@
                         <tr>
                             <th>Data Vencimento</th>
                             <th>Descrição</th>
-                            <th>Pessoa</th>
+                            <th>Cliente</th>
                             <th>Valor</th>
                             <th>Situação</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php $__empty_1 = true; $__currentLoopData = $contasPagar; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $conta): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php $__empty_1 = true; $__currentLoopData = $contasReceber; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $conta): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr class="<?php echo e($conta->situacao_financeira->value == 'vencido' ? 'table-danger' : ''); ?>">
                             <td>
                                 <?php echo e($conta->data_vencimento->format('d/m/Y')); ?>
@@ -195,7 +195,7 @@
                                 <strong>R$ <?php echo e(number_format($conta->valor_liquido, 2, ',', '.')); ?></strong>
                                 <?php if($conta->pagamentos()->where("status_pagamento", "confirmado")->sum("valor") > 0): ?>
                                     <br><small class="text-success">
-                                        Pago: R$ <?php echo e(number_format($conta->pagamentos()->where("status_pagamento", "confirmado")->sum("valor"), 2, ',', '.')); ?>
+                                        Recebido: R$ <?php echo e(number_format($conta->pagamentos()->where("status_pagamento", "confirmado")->sum("valor"), 2, ',', '.')); ?>
 
                                     </small>
                                 <?php endif; ?>
@@ -217,16 +217,21 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-pagar.show', ['empresa' => $empresa, 'id' => $conta->id])); ?>" 
+                                    <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.show', ['empresa' => $empresa, 'id' => $conta->id])); ?>" 
                                        class="btn btn-outline-info" title="Visualizar">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     
                                     <?php if($conta->situacao_financeira->value == 'pendente'): ?>
-                                        <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-pagar.edit', ['empresa' => $empresa, 'id' => $conta->id])); ?>" 
+                                        <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.edit', ['empresa' => $empresa, 'id' => $conta->id])); ?>" 
                                            class="btn btn-outline-primary" title="Editar">
                                             <i class="fas fa-edit"></i>
                                         </a>
+
+                                        <button type="button" class="btn btn-outline-info" 
+                                                onclick="gerarBoleto(<?php echo e($conta->id); ?>)" title="Gerar Boleto">
+                                            <i class="fas fa-barcode"></i>
+                                        </button>
                                     <?php endif; ?>
                                     
                                     <button type="button" class="btn btn-outline-danger" 
@@ -240,7 +245,7 @@
                         <tr>
                             <td colspan="6" class="text-center text-muted py-4">
                                 <i class="fas fa-inbox fa-3x mb-3"></i>
-                                <br>Nenhuma conta a pagar encontrada.
+                                <br>Nenhuma conta a receber encontrada.
                             </td>
                         </tr>
                         <?php endif; ?>
@@ -249,52 +254,15 @@
             </div>
 
             <!-- Paginação -->
-            <?php if($contasPagar->hasPages()): ?>
+            <?php if($contasReceber->hasPages()): ?>
                 <div class="d-flex justify-content-center mt-3">
-                    <?php echo e($contasPagar->appends(request()->query())->links()); ?>
+                    <?php echo e($contasReceber->appends(request()->query())->links()); ?>
 
                 </div>
             <?php endif; ?>
         </div>
     </div>
 </div>
-
-<!-- Modal de Exclusão -->
-<div class="modal fade" id="modalExclusao" tabindex="-1" aria-labelledby="modalExclusaoLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalExclusaoLabel">Confirmar Exclusão</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-            </div>
-            <div class="modal-body">
-                <p>Tem certeza que deseja excluir esta conta a pagar?</p>
-                <p class="text-muted">Esta ação não pode ser desfeita.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <form id="formExclusao" method="POST" style="display: inline;">
-                    <?php echo csrf_field(); ?>
-                    <?php echo method_field('DELETE'); ?>
-                    <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?php $__env->stopSection(); ?>
-
-<?php $__env->startSection('scripts'); ?>
-<script>
-function excluirConta(contaId) {
-    const form = document.getElementById('formExclusao');
-    form.action = '<?php echo e(route("comerciantes.empresas.financeiro.contas-pagar.destroy", ["empresa" => $empresa, "id" => "__ID__"])); ?>'.replace('__ID__', contaId);
-    
-    const modal = new bootstrap.Modal(document.getElementById('modalExclusao'));
-    modal.show();
-}
-</script>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startPush('styles'); ?>
@@ -325,128 +293,29 @@ function excluirConta(contaId) {
 
 <?php $__env->startPush('scripts'); ?>
 <script>
-// URLs da API para o contexto de comerciantes
-const apiBaseUrl = '/comerciantes/empresas/<?php echo e($empresa->id); ?>/financeiro';
-
-// Carregar formas de pagamento ao abrir o modal
-function carregarFormasPagamento() {
-    console.log('📋 Carregando formas de pagamento...');
-    const select = document.getElementById('forma_pagamento_id');
-    select.innerHTML = '<option value="">Carregando...</option>';
-
-    const url = `${apiBaseUrl}/api/formas-pagamento-saida`;
-    console.log('🌐 URL da requisição:', url);
-
-    fetch(url)
-        .then(response => {
-            console.log('📡 Response status:', response.status);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('✅ Dados recebidos:', data);
-            select.innerHTML = '<option value="">Selecione uma forma de pagamento</option>';
-            
-            if (data.length === 0) {
-                select.innerHTML = '<option value="">Nenhuma forma de pagamento disponível</option>';
-                return;
-            }
-
-            data.forEach(forma => {
-                const option = document.createElement('option');
-                option.value = forma.id;
-                option.textContent = forma.nome;
-                option.dataset.isGateway = forma.is_gateway ? '1' : '0';
-                select.appendChild(option);
-            });
-        })
-        .catch(error => {
-            console.error('❌ Erro ao carregar formas de pagamento:', error);
-            select.innerHTML = '<option value="">Erro ao carregar formas de pagamento</option>';
-        });
-}
-
-// Carregar bandeiras baseado na forma de pagamento selecionada
-function carregarBandeiras(formaId) {
-    const bandeiraSelect = document.getElementById('bandeira_id');
-    const bandeiraContainer = document.getElementById('bandeiraContainer');
-
-    if (!formaId) {
-        bandeiraContainer.style.display = 'none';
-        bandeiraSelect.innerHTML = '<option value="">Selecione uma bandeira</option>';
-        return;
+function gerarBoleto(contaId) {
+    if (confirm('Deseja gerar o boleto para esta conta?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '<?php echo e(route("comerciantes.empresas.financeiro.contas-receber.gerar-boleto", ["empresa" => $empresa, "id" => "__ID__"])); ?>'.replace('__ID__', contaId);
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = '<?php echo e(csrf_token()); ?>';
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        form.submit();
     }
-
-    // Sempre tentar carregar bandeiras quando uma forma de pagamento for selecionada
-    bandeiraContainer.style.display = 'block';
-    bandeiraSelect.innerHTML = '<option value="">Carregando bandeiras...</option>';
-
-    fetch(`${apiBaseUrl}/api/formas-pagamento/${formaId}/bandeiras`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            bandeiraSelect.innerHTML = '<option value="">Selecione uma bandeira</option>';
-            
-            if (data.length === 0) {
-                // Se não há bandeiras, oculta o container
-                bandeiraContainer.style.display = 'none';
-                bandeiraSelect.innerHTML = '<option value="">Nenhuma bandeira disponível</option>';
-                return;
-            }
-
-            data.forEach(bandeira => {
-                const option = document.createElement('option');
-                option.value = bandeira.id;
-                option.textContent = bandeira.nome;
-                bandeiraSelect.appendChild(option);
-            });
-        })
-        .catch(error => {
-            console.error('Erro ao carregar bandeiras:', error);
-            bandeiraSelect.innerHTML = '<option value="">Erro ao carregar bandeiras</option>';
-            // Em caso de erro, manter visível para debug
-        });
-}
-
-// Event listener para mudança na forma de pagamento
-document.getElementById('forma_pagamento_id').addEventListener('change', function() {
-    carregarBandeiras(this.value);
-});
-
-function abrirModalPagamento(contaId) {
-    console.log('🚀 Abrindo modal de pagamento para conta:', contaId);
-    
-    const form = document.getElementById('formPagamento');
-    const action = '<?php echo e(route("comerciantes.empresas.financeiro.contas-pagar.pagar", ["empresa" => $empresa, "id" => "__ID__"])); ?>';
-    form.action = action.replace('__ID__', contaId);
-    
-    console.log('🔗 URL da API base:', apiBaseUrl);
-    
-    // Carregar formas de pagamento quando o modal for aberto
-    carregarFormasPagamento();
-    
-    // Limpar campos do formulário
-    document.getElementById('valor_pago').value = '';
-    document.getElementById('data_pagamento').value = '<?php echo e(date('Y-m-d')); ?>';
-    document.getElementById('observacoes_pagamento').value = '';
-    document.getElementById('forma_pagamento_id').value = '';
-    document.getElementById('bandeira_id').value = '';
-    document.getElementById('bandeiraContainer').style.display = 'none';
-    
-    new bootstrap.Modal(document.getElementById('modalPagamento')).show();
 }
 
 function excluirConta(contaId) {
-    if (confirm('Tem certeza que deseja excluir esta conta?\n\nEsta ação não pode ser desfeita.')) {
+    if (confirm('Tem certeza que deseja excluir esta conta?')) {
+        // Usar form submit tradicional
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '<?php echo e(route("comerciantes.empresas.financeiro.contas-pagar.destroy", ["empresa" => $empresa, "id" => "__ID__"])); ?>'.replace('__ID__', contaId);
+        form.action = '<?php echo e(route("comerciantes.empresas.financeiro.contas-receber.destroy", ["empresa" => $empresa, "id" => "__ID__"])); ?>'.replace('__ID__', contaId);
         
         const csrfToken = document.createElement('input');
         csrfToken.type = 'hidden';
@@ -464,29 +333,6 @@ function excluirConta(contaId) {
         form.submit();
     }
 }
-
-// Validação do formulário antes do envio
-document.getElementById('formPagamento').addEventListener('submit', function(e) {
-    const valorPago = document.getElementById('valor_pago').value;
-    const formaPagamento = document.getElementById('forma_pagamento_id').value;
-    
-    if (!valorPago || parseFloat(valorPago) <= 0) {
-        e.preventDefault();
-        alert('Por favor, informe um valor válido para o pagamento.');
-        return;
-    }
-    
-    if (!formaPagamento) {
-        e.preventDefault();
-        alert('Por favor, selecione uma forma de pagamento.');
-        return;
-    }
-    
-    // Confirmar antes de enviar
-    if (!confirm('Confirma o registro deste pagamento?\n\nValor: R$ ' + parseFloat(valorPago).toFixed(2).replace('.', ','))) {
-        e.preventDefault();
-    }
-});
 </script>
 <?php $__env->stopPush(); ?>
 
@@ -498,4 +344,4 @@ document.getElementById('formPagamento').addEventListener('submit', function(e) 
 
 
 
-<?php echo $__env->make('layouts.comerciante', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/comerciantes/financeiro/contas-pagar/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.comerciante', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/comerciantes/financeiro/contas-receber/index.blade.php ENDPATH**/ ?>

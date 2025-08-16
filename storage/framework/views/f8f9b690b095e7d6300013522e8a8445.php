@@ -1,8 +1,9 @@
-<?php $__env->startSection('title', 'Editar Conta a Receber'); ?>
+<?php $__env->startSection('title', 'Nova Conta a Receber'); ?>
 
 <?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
                 <a href="<?php echo e(route('comerciantes.dashboard.empresa', $empresa)); ?>">Dashboard</a>
@@ -13,43 +14,22 @@
             <li class="breadcrumb-item">
                 <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.index', $empresa)); ?>">Contas a Receber</a>
             </li>
-            <li class="breadcrumb-item">
-                <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.show', ['empresa' => $empresa, 'id' => $contaReceber->id])); ?>"><?php echo e($contaReceber->descricao); ?></a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">Editar</li>
+            <li class="breadcrumb-item active" aria-current="page">Nova Conta</li>
         </ol>
     </nav>
 
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Editar Conta a Receber</h1>
-        <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.show', ['empresa' => $empresa, 'id' => $contaReceber->id])); ?>" 
+        <h1 class="h3 mb-0">Nova Conta a Receber</h1>
+        <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.index', $empresa)); ?>" 
            class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Voltar
         </a>
     </div>
 
-    <!-- Alertas -->
-    <?php if(session('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?php echo e(session('success')); ?>
-
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
-    <?php if(session('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <?php echo e(session('error')); ?>
-
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    <?php endif; ?>
-
     <!-- Formulário -->
-    <form method="POST" action="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.update', ['empresa' => $empresa, 'id' => $contaReceber->id])); ?>">
+    <form method="POST" action="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.store', $empresa)); ?>">
         <?php echo csrf_field(); ?>
-        <?php echo method_field('PUT'); ?>
         
         <div class="row">
             <div class="col-lg-8">
@@ -74,7 +54,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                           value="<?php echo e(old('descricao', $contaReceber->descricao)); ?>" 
+                                           value="<?php echo e(old('descricao')); ?>" 
                                            placeholder="Ex: Venda de produto/serviço">
                                     <?php $__errorArgs = ['descricao'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -103,7 +83,7 @@ unset($__errorArgs, $__bag); ?>">
                                         <option value="">Selecione uma conta gerencial</option>
                                         <?php $__currentLoopData = $contasGerenciais; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $conta): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <option value="<?php echo e($conta->id); ?>" 
-                                                    <?php echo e(old('conta_gerencial_id', $contaReceber->conta_gerencial_id) == $conta->id ? 'selected' : ''); ?>>
+                                                    <?php echo e(old('conta_gerencial_id') == $conta->id ? 'selected' : ''); ?>>
                                                 <?php echo e($conta->codigo); ?> - <?php echo e($conta->nome); ?>
 
                                             </option>
@@ -139,7 +119,7 @@ unset($__errorArgs, $__bag); ?>">
                                         <option value="">Selecione um cliente</option>
                                         <?php $__currentLoopData = $pessoas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pessoa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <option value="<?php echo e($pessoa->id); ?>" 
-                                                    <?php echo e(old('pessoa_id', $contaReceber->pessoa_id) == $pessoa->id ? 'selected' : ''); ?>>
+                                                    <?php echo e(old('pessoa_id') == $pessoa->id ? 'selected' : ''); ?>>
                                                 <?php echo e($pessoa->nome); ?> 
                                                 <?php if($pessoa->cpf_cnpj): ?>
                                                     (<?php echo e($pessoa->cpf_cnpj); ?>)
@@ -171,38 +151,9 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                           value="<?php echo e(old('numero_documento', $contaReceber->numero_documento)); ?>" 
+                                           value="<?php echo e(old('numero_documento')); ?>" 
                                            placeholder="Ex: NF-001">
                                     <?php $__errorArgs = ['numero_documento'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label for="observacoes" class="form-label">Observações</label>
-                                    <textarea name="observacoes" id="observacoes" 
-                                              class="form-control <?php $__errorArgs = ['observacoes'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
-                                              rows="2" 
-                                              placeholder="Informações adicionais"><?php echo e(old('observacoes', $contaReceber->observacoes)); ?></textarea>
-                                    <?php $__errorArgs = ['observacoes'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -239,8 +190,8 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                           value="<?php echo e(old('valor_bruto', $contaReceber->valor_bruto)); ?>" 
-                                           required placeholder="0,00">
+                                           value="<?php echo e(old('valor_bruto')); ?>" 
+                                           placeholder="0,00">
                                     <?php $__errorArgs = ['valor_bruto'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -265,7 +216,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                           value="<?php echo e(old('data_vencimento', $contaReceber->data_vencimento->format('Y-m-d'))); ?>">
+                                           value="<?php echo e(old('data_vencimento')); ?>">
                                     <?php $__errorArgs = ['data_vencimento'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -293,7 +244,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                           value="<?php echo e(old('data_emissao', $contaReceber->data_emissao ? $contaReceber->data_emissao->format('Y-m-d') : '')); ?>">
+                                           value="<?php echo e(old('data_emissao', date('Y-m-d'))); ?>">
                                     <?php $__errorArgs = ['data_emissao'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -318,7 +269,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                           value="<?php echo e(old('data_competencia', $contaReceber->data_competencia ? $contaReceber->data_competencia->format('Y-m-d') : '')); ?>">
+                                           value="<?php echo e(old('data_competencia', date('Y-m-d'))); ?>">
                                     <?php $__errorArgs = ['data_competencia'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -346,7 +297,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                           value="<?php echo e(old('valor_desconto', $contaReceber->valor_desconto)); ?>" 
+                                           value="<?php echo e(old('valor_desconto', 0)); ?>" 
                                            placeholder="0,00">
                                     <?php $__errorArgs = ['valor_desconto'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -372,7 +323,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                           value="<?php echo e(old('valor_acrescimo', $contaReceber->valor_acrescimo)); ?>" 
+                                           value="<?php echo e(old('valor_acrescimo', 0)); ?>" 
                                            placeholder="0,00">
                                     <?php $__errorArgs = ['valor_acrescimo'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -391,8 +342,56 @@ unset($__errorArgs, $__bag); ?>
                                     <label for="valor_final" class="form-label">Valor Final</label>
                                     <input type="number" step="0.01" name="valor_final" id="valor_final" 
                                            class="form-control" 
-                                           value="<?php echo e(old('valor_final', $contaReceber->valor_liquido)); ?>" 
+                                           value="<?php echo e(old('valor_final')); ?>" 
                                            readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parcelamento -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calendar-alt"></i> Parcelamento
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="e_parcelado" id="e_parcelado" 
+                                               class="form-check-input" value="1"
+                                               <?php echo e(old('e_parcelado') ? 'checked' : ''); ?>>
+                                        <label class="form-check-label" for="e_parcelado">
+                                            Parcelar esta conta
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="parcelamento-fields" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="numero_parcelas" class="form-label">Número de Parcelas</label>
+                                        <input type="number" name="numero_parcelas" id="numero_parcelas" 
+                                               class="form-control" 
+                                               value="<?php echo e(old('numero_parcelas', 1)); ?>" 
+                                               min="1" max="120">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="intervalo_parcelas" class="form-label">Intervalo entre Parcelas (dias)</label>
+                                        <input type="number" name="intervalo_parcelas" id="intervalo_parcelas" 
+                                               class="form-control" 
+                                               value="<?php echo e(old('intervalo_parcelas', 30)); ?>" 
+                                               min="1">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -401,6 +400,30 @@ unset($__errorArgs, $__bag); ?>
             </div>
 
             <div class="col-lg-4">
+                <!-- Resumo -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calculator"></i> Resumo
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-6">Valor Original:</dt>
+                            <dd class="col-6" id="resumo-original">R$ 0,00</dd>
+                            
+                            <dt class="col-6">Desconto:</dt>
+                            <dd class="col-6" id="resumo-desconto">R$ 0,00</dd>
+                            
+                            <dt class="col-6">Acréscimo:</dt>
+                            <dd class="col-6" id="resumo-acrescimo">R$ 0,00</dd>
+                            
+                            <dt class="col-6"><strong>Total:</strong></dt>
+                            <dd class="col-6"><strong id="resumo-total">R$ 0,00</strong></dd>
+                        </dl>
+                    </div>
+                </div>
+
                 <!-- Configurações -->
                 <div class="card mb-4">
                     <div class="card-header">
@@ -420,7 +443,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>">
-                                <option value="entrada" <?php echo e(old('natureza_financeira', $contaReceber->natureza_financeira) == 'entrada' ? 'selected' : ''); ?>>
+                                <option value="entrada" <?php echo e(old('natureza_financeira', 'entrada') == 'entrada' ? 'selected' : ''); ?>>
                                     Conta a Receber
                                 </option>
                             </select>
@@ -447,13 +470,13 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>">
-                                <option value="pendente" <?php echo e(old('situacao_financeira', $contaReceber->situacao_financeira->value) == 'pendente' ? 'selected' : ''); ?>>
+                                <option value="pendente" <?php echo e(old('situacao_financeira', 'pendente') == 'pendente' ? 'selected' : ''); ?>>
                                     Pendente
                                 </option>
-                                <option value="pago" <?php echo e(old('situacao_financeira', $contaReceber->situacao_financeira->value) == 'pago' ? 'selected' : ''); ?>>
+                                <option value="pago" <?php echo e(old('situacao_financeira', 'pendente') == 'pago' ? 'selected' : ''); ?>>
                                     Recebido
                                 </option>
-                                <option value="cancelado" <?php echo e(old('situacao_financeira', $contaReceber->situacao_financeira->value) == 'cancelado' ? 'selected' : ''); ?>>
+                                <option value="cancelado" <?php echo e(old('situacao_financeira', 'pendente') == 'cancelado' ? 'selected' : ''); ?>>
                                     Cancelado
                                 </option>
                             </select>
@@ -468,59 +491,6 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
-
-                        <?php if($contaReceber->situacao_financeira->value == 'pago'): ?>
-                            <div class="mb-3">
-                                <label for="data_pagamento" class="form-label">Data do Recebimento</label>
-                                <input type="datetime-local" name="data_pagamento" id="data_pagamento" 
-                                       class="form-control <?php $__errorArgs = ['data_pagamento'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
-                                       value="<?php echo e(old('data_pagamento', $contaReceber->data_pagamento ? $contaReceber->data_pagamento->format('Y-m-d\TH:i') : '')); ?>">
-                                <?php $__errorArgs = ['data_pagamento'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- Status Atual -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-info-circle"></i> Status Atual
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center">
-                            <span class="badge badge-<?php echo e($contaReceber->situacao_financeira->value == 'pago' ? 'success' : 'warning'); ?> fs-6 mb-3">
-                                <?php echo e($contaReceber->situacao_financeira->label()); ?>
-
-                            </span>
-                            
-                            <h4 class="text-primary mb-2">
-                                R$ <?php echo e(number_format($contaReceber->valor_liquido ?? 0, 2, ',', '.')); ?>
-
-                            </h4>
-                            
-                            <p class="text-muted mb-0">
-                                Vencimento: <?php echo e($contaReceber->data_vencimento->format('d/m/Y')); ?>
-
-                            </p>
-                        </div>
                     </div>
                 </div>
 
@@ -529,9 +499,9 @@ unset($__errorArgs, $__bag); ?>
                     <div class="card-body">
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save"></i> Salvar Alterações
+                                <i class="fas fa-save"></i> Salvar Conta
                             </button>
-                            <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.show', ['empresa' => $empresa, 'id' => $contaReceber->id])); ?>" 
+                            <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.index', $empresa)); ?>" 
                                class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Cancelar
                             </a>
@@ -550,6 +520,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const valorDesconto = document.getElementById('valor_desconto');
     const valorAcrescimo = document.getElementById('valor_acrescimo');
     const valorFinal = document.getElementById('valor_final');
+    const eParcelado = document.getElementById('e_parcelado');
+    const parcelamentoFields = document.getElementById('parcelamento-fields');
+
+    // Resumo
+    const resumoOriginal = document.getElementById('resumo-original');
+    const resumoDesconto = document.getElementById('resumo-desconto');
+    const resumoAcrescimo = document.getElementById('resumo-acrescimo');
+    const resumoTotal = document.getElementById('resumo-total');
 
     // Função para calcular valores
     function calcularValores() {
@@ -559,6 +537,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const total = original - desconto + acrescimo;
 
         valorFinal.value = total.toFixed(2);
+
+        // Atualizar resumo
+        resumoOriginal.textContent = 'R$ ' + original.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        resumoDesconto.textContent = 'R$ ' + desconto.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        resumoAcrescimo.textContent = 'R$ ' + acrescimo.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        resumoTotal.textContent = 'R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits: 2});
     }
 
     // Eventos
@@ -566,10 +550,20 @@ document.addEventListener('DOMContentLoaded', function() {
     valorDesconto.addEventListener('input', calcularValores);
     valorAcrescimo.addEventListener('input', calcularValores);
 
+    // Controle de parcelamento
+    eParcelado.addEventListener('change', function() {
+        parcelamentoFields.style.display = this.checked ? 'block' : 'none';
+    });
+
     // Calcular valores iniciais
     calcularValores();
+
+    // Mostrar campos de parcelamento se marcado
+    if (eParcelado.checked) {
+        parcelamentoFields.style.display = 'block';
+    }
 });
 </script>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.comerciante', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/comerciantes/financeiro/contas-receber/edit.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.comerciante', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/comerciantes/financeiro/contas-receber/create.blade.php ENDPATH**/ ?>

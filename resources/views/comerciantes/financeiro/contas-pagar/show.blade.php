@@ -45,12 +45,12 @@
                         <div class="col-sm-6">
                             <p><strong>Descrição:</strong><br>{{ $lancamento->descricao }}</p>
                             <p><strong>Número do Documento:</strong><br>{{ $lancamento->numero_documento ?? 'N/A' }}</p>
-                            <p><strong>Data de Emissão:</strong><br>{{ $lancamento->data_emissao ? $lancamento->data_emissao->format('d/m/Y') : 'N/A' }}</p>
+                            <p><strong>Data de Emissão:</strong><br>{{ $lancamento->data_emissao ? \Carbon\Carbon::parse($lancamento->data_emissao)->format('d/m/Y') : 'N/A' }}</p>
                         </div>
                         <div class="col-sm-6">
                             <p><strong>Data de Vencimento:</strong><br>
-                                <span class="@if($lancamento->data_vencimento && $lancamento->data_vencimento->isPast() && $lancamento->situacao_financeira->value !== 'pago') text-danger @endif">
-                                    {{ $lancamento->data_vencimento ? $lancamento->data_vencimento->format('d/m/Y') : 'N/A' }}
+                                <span class="@if($lancamento->data_vencimento && \Carbon\Carbon::parse($lancamento->data_vencimento)->isPast() && $lancamento->situacao_financeira->value !== 'pago') text-danger @endif">
+                                    {{ $lancamento->data_vencimento ? \Carbon\Carbon::parse($lancamento->data_vencimento)->format('d/m/Y') : 'N/A' }}
                                 </span>
                             </p>
                             <p><strong>Situação:</strong><br>

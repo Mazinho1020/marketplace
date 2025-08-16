@@ -1,40 +1,40 @@
-@extends('layouts.comerciante')
 
-@section('title', 'Detalhes da Conta a Receber')
 
-@push('styles')
-<meta name="csrf-token" content="{{ csrf_token() }}">
-@endpush
+<?php $__env->startSection('title', 'Detalhes da Conta a Receber'); ?>
 
-@section('content')
+<?php $__env->startPush('styles'); ?>
+<meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+<?php $__env->stopPush(); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{{ route('comerciantes.dashboard.empresa', $empresa) }}">Dashboard</a>
+                <a href="<?php echo e(route('comerciantes.dashboard.empresa', $empresa)); ?>">Dashboard</a>
             </li>
             <li class="breadcrumb-item">
-                <a href="{{ route('comerciantes.empresas.financeiro.dashboard', $empresa) }}">Financeiro</a>
+                <a href="<?php echo e(route('comerciantes.empresas.financeiro.dashboard', $empresa)); ?>">Financeiro</a>
             </li>
             <li class="breadcrumb-item">
-                <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.index', $empresa) }}">Contas a Receber</a>
+                <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.index', $empresa)); ?>">Contas a Receber</a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page">{{ $contaReceber->descricao }}</li>
+            <li class="breadcrumb-item active" aria-current="page"><?php echo e($contaReceber->descricao); ?></li>
         </ol>
     </nav>
 
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">{{ $contaReceber->descricao }}</h1>
+        <h1 class="h3 mb-0"><?php echo e($contaReceber->descricao); ?></h1>
         <div class="btn-group">
-            @if($contaReceber->situacao_financeira->value == 'pendente')
-            <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.edit', ['empresa' => $empresa, 'id' => $contaReceber->id]) }}"
+            <?php if($contaReceber->situacao_financeira->value == 'pendente'): ?>
+            <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.edit', ['empresa' => $empresa, 'id' => $contaReceber->id])); ?>"
                 class="btn btn-primary">
                 <i class="fas fa-edit"></i> Editar
             </a>
-            @endif
-            <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.index', $empresa) }}"
+            <?php endif; ?>
+            <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.index', $empresa)); ?>"
                 class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Voltar
             </a>
@@ -54,7 +54,7 @@
                     <dl class="row">
                         <dt class="col-sm-3">Situação:</dt>
                         <dd class="col-sm-9">
-                            @php
+                            <?php
                             $badgeClass = match($contaReceber->situacao_financeira) {
                             'pendente' => 'warning',
                             'pago' => 'success',
@@ -63,44 +63,49 @@
                             'em_negociacao' => 'info',
                             default => 'secondary'
                             };
-                            @endphp
-                            <span class="badge bg-{{ $badgeClass }}">
-                                {{ $contaReceber->situacao_financeira->label() }}
+                            ?>
+                            <span class="badge bg-<?php echo e($badgeClass); ?>">
+                                <?php echo e($contaReceber->situacao_financeira->label()); ?>
+
                             </span>
-                            @if($contaReceber->data_vencimento && $contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente')
+                            <?php if($contaReceber->data_vencimento && $contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente'): ?>
                             <span class="badge bg-danger ms-2">Vencida</span>
-                            @endif
+                            <?php endif; ?>
                         </dd>
 
                         <dt class="col-sm-3">Cliente:</dt>
                         <dd class="col-sm-9">
-                            @if($contaReceber->pessoa)
-                            {{ $contaReceber->pessoa->nome }}
-                            @if($contaReceber->pessoa->cpf_cnpj)
-                            <small class="text-muted">({{ $contaReceber->pessoa->cpf_cnpj }})</small>
-                            @endif
-                            @else
+                            <?php if($contaReceber->pessoa): ?>
+                            <?php echo e($contaReceber->pessoa->nome); ?>
+
+                            <?php if($contaReceber->pessoa->cpf_cnpj): ?>
+                            <small class="text-muted">(<?php echo e($contaReceber->pessoa->cpf_cnpj); ?>)</small>
+                            <?php endif; ?>
+                            <?php else: ?>
                             <span class="text-muted">Não informado</span>
-                            @endif
+                            <?php endif; ?>
                         </dd>
 
                         <dt class="col-sm-3">Conta Gerencial:</dt>
                         <dd class="col-sm-9">
-                            @if($contaReceber->contaGerencial)
-                            {{ $contaReceber->contaGerencial->codigo }} - {{ $contaReceber->contaGerencial->nome }}
-                            @else
+                            <?php if($contaReceber->contaGerencial): ?>
+                            <?php echo e($contaReceber->contaGerencial->codigo); ?> - <?php echo e($contaReceber->contaGerencial->nome); ?>
+
+                            <?php else: ?>
                             <span class="text-muted">Não informado</span>
-                            @endif
+                            <?php endif; ?>
                         </dd>
 
                         <dt class="col-sm-3">Número do Documento:</dt>
                         <dd class="col-sm-9">
-                            {{ $contaReceber->numero_documento ?: 'Não informado' }}
+                            <?php echo e($contaReceber->numero_documento ?: 'Não informado'); ?>
+
                         </dd>
 
                         <dt class="col-sm-3">Observações:</dt>
                         <dd class="col-sm-9">
-                            {{ $contaReceber->observacoes ?: 'Não informado' }}
+                            <?php echo e($contaReceber->observacoes ?: 'Não informado'); ?>
+
                         </dd>
                     </dl>
                 </div>
@@ -118,38 +123,38 @@
                         <div class="col-md-6">
                             <dl class="row">
                                 <dt class="col-6">Valor Original:</dt>
-                                <dd class="col-6">R$ {{ number_format($contaReceber->valor_liquido, 2, ',', '.') }}</dd>
+                                <dd class="col-6">R$ <?php echo e(number_format($contaReceber->valor_liquido, 2, ',', '.')); ?></dd>
 
-                                @if($contaReceber->valor_desconto > 0)
+                                <?php if($contaReceber->valor_desconto > 0): ?>
                                 <dt class="col-6">Desconto:</dt>
-                                <dd class="col-6 text-success">- R$ {{ number_format($contaReceber->valor_desconto, 2, ',', '.') }}</dd>
-                                @endif
+                                <dd class="col-6 text-success">- R$ <?php echo e(number_format($contaReceber->valor_desconto, 2, ',', '.')); ?></dd>
+                                <?php endif; ?>
 
-                                @if($contaReceber->valor_acrescimo > 0)
+                                <?php if($contaReceber->valor_acrescimo > 0): ?>
                                 <dt class="col-6">Acréscimo:</dt>
-                                <dd class="col-6 text-warning">+ R$ {{ number_format($contaReceber->valor_acrescimo, 2, ',', '.') }}</dd>
-                                @endif
+                                <dd class="col-6 text-warning">+ R$ <?php echo e(number_format($contaReceber->valor_acrescimo, 2, ',', '.')); ?></dd>
+                                <?php endif; ?>
 
-                                @if($contaReceber->valor_juros > 0)
+                                <?php if($contaReceber->valor_juros > 0): ?>
                                 <dt class="col-6">Juros:</dt>
-                                <dd class="col-6 text-warning">+ R$ {{ number_format($contaReceber->valor_juros, 2, ',', '.') }}</dd>
-                                @endif
+                                <dd class="col-6 text-warning">+ R$ <?php echo e(number_format($contaReceber->valor_juros, 2, ',', '.')); ?></dd>
+                                <?php endif; ?>
 
-                                @if($contaReceber->valor_multa > 0)
+                                <?php if($contaReceber->valor_multa > 0): ?>
                                 <dt class="col-6">Multa:</dt>
-                                <dd class="col-6 text-danger">+ R$ {{ number_format($contaReceber->valor_multa, 2, ',', '.') }}</dd>
-                                @endif
+                                <dd class="col-6 text-danger">+ R$ <?php echo e(number_format($contaReceber->valor_multa, 2, ',', '.')); ?></dd>
+                                <?php endif; ?>
                             </dl>
                         </div>
                         <div class="col-md-6">
                             <dl class="row">
                                 <dt class="col-6"><strong>Valor Final:</strong></dt>
-                                <dd class="col-6"><strong class="fs-5 text-primary">R$ {{ number_format($contaReceber->valor_liquido, 2, ',', '.') }}</strong></dd>
+                                <dd class="col-6"><strong class="fs-5 text-primary">R$ <?php echo e(number_format($contaReceber->valor_liquido, 2, ',', '.')); ?></strong></dd>
 
-                                @if($contaReceber->situacao_financeira->value == 'recebido' && $contaReceber->data_pagamento)
+                                <?php if($contaReceber->situacao_financeira->value == 'recebido' && $contaReceber->data_pagamento): ?>
                                 <dt class="col-6">Data do Recebimento:</dt>
-                                <dd class="col-6">{{ $contaReceber->data_pagamento->format('d/m/Y H:i') }}</dd>
-                                @endif
+                                <dd class="col-6"><?php echo e($contaReceber->data_pagamento->format('d/m/Y H:i')); ?></dd>
+                                <?php endif; ?>
                             </dl>
                         </div>
                     </div>
@@ -162,36 +167,37 @@
                     <h5 class="card-title mb-0">
                         <i class="fas fa-history"></i> Histórico de Recebimentos
                     </h5>
-                    <span class="badge bg-info">{{ $resumoRecebimentos['total_recebimentos'] }} recebimento(s)</span>
+                    <span class="badge bg-info"><?php echo e($resumoRecebimentos['total_recebimentos']); ?> recebimento(s)</span>
                 </div>
                 <div class="card-body">
-                    @if($resumoRecebimentos['total_recebimentos'] > 0)
+                    <?php if($resumoRecebimentos['total_recebimentos'] > 0): ?>
                     <!-- Resumo Geral -->
                     <div class="row mb-4">
                         <div class="col-md-3">
                             <div class="text-center">
                                 <h6 class="text-muted mb-1">Valor Total</h6>
-                                <h5 class="text-primary mb-0">R$ {{ number_format($resumoRecebimentos['valor_liquido'], 2, ',', '.') }}</h5>
+                                <h5 class="text-primary mb-0">R$ <?php echo e(number_format($resumoRecebimentos['valor_liquido'], 2, ',', '.')); ?></h5>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-center">
                                 <h6 class="text-muted mb-1">Total Recebido</h6>
-                                <h5 class="text-success mb-0">R$ {{ number_format($resumoRecebimentos['valor_pago'], 2, ',', '.') }}</h5>
+                                <h5 class="text-success mb-0">R$ <?php echo e(number_format($resumoRecebimentos['valor_pago'], 2, ',', '.')); ?></h5>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-center">
                                 <h6 class="text-muted mb-1">Saldo Devedor</h6>
-                                <h5 class="{{ $resumoRecebimentos['saldo_devedor'] > 0 ? 'text-warning' : 'text-success' }} mb-0">
-                                    R$ {{ number_format($resumoRecebimentos['saldo_devedor'], 2, ',', '.') }}
+                                <h5 class="<?php echo e($resumoRecebimentos['saldo_devedor'] > 0 ? 'text-warning' : 'text-success'); ?> mb-0">
+                                    R$ <?php echo e(number_format($resumoRecebimentos['saldo_devedor'], 2, ',', '.')); ?>
+
                                 </h5>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-center">
                                 <h6 class="text-muted mb-1">Percentual Recebido</h6>
-                                <h5 class="text-info mb-0">{{ number_format($resumoRecebimentos['percentual_recebido'], 1) }}%</h5>
+                                <h5 class="text-info mb-0"><?php echo e(number_format($resumoRecebimentos['percentual_recebido'], 1)); ?>%</h5>
                             </div>
                         </div>
                     </div>
@@ -200,13 +206,13 @@
                     <div class="mb-4">
                         <div class="d-flex justify-content-between mb-1">
                             <small>Progresso do Recebimento</small>
-                            <small>{{ number_format($resumoRecebimentos['percentual_recebido'], 1) }}%</small>
+                            <small><?php echo e(number_format($resumoRecebimentos['percentual_recebido'], 1)); ?>%</small>
                         </div>
                         <div class="progress">
-                            <div class="progress-bar {{ $resumoRecebimentos['percentual_recebido'] >= 100 ? 'bg-success' : 'bg-primary' }}"
+                            <div class="progress-bar <?php echo e($resumoRecebimentos['percentual_recebido'] >= 100 ? 'bg-success' : 'bg-primary'); ?>"
                                 role="progressbar"
-                                style="width: {{ min($resumoRecebimentos['percentual_recebido'], 100) }}%"
-                                aria-valuenow="{{ $resumoRecebimentos['percentual_recebido'] }}"
+                                style="width: <?php echo e(min($resumoRecebimentos['percentual_recebido'], 100)); ?>%"
+                                aria-valuenow="<?php echo e($resumoRecebimentos['percentual_recebido']); ?>"
                                 aria-valuemin="0"
                                 aria-valuemax="100">
                             </div>
@@ -228,95 +234,99 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($recebimentos as $recebimento)
+                                <?php $__currentLoopData = $recebimentos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $recebimento): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
                                     <td>
-                                        <strong>{{ $recebimento->data_pagamento->format('d/m/Y') }}</strong>
+                                        <strong><?php echo e($recebimento->data_pagamento->format('d/m/Y')); ?></strong>
                                         <br>
-                                        <small class="text-muted">{{ $recebimento->data_pagamento->format('H:i') }}</small>
+                                        <small class="text-muted"><?php echo e($recebimento->data_pagamento->format('H:i')); ?></small>
                                     </td>
                                     <td>
-                                        <strong class="text-success">R$ {{ number_format($recebimento->valor, 2, ',', '.') }}</strong>
-                                        @if($recebimento->valor_principal != $recebimento->valor)
+                                        <strong class="text-success">R$ <?php echo e(number_format($recebimento->valor, 2, ',', '.')); ?></strong>
+                                        <?php if($recebimento->valor_principal != $recebimento->valor): ?>
                                         <br>
                                         <small class="text-muted">
-                                            Principal: R$ {{ number_format($recebimento->valor_principal, 2, ',', '.') }}
-                                            @if($recebimento->valor_juros > 0)
-                                            <br>Juros: R$ {{ number_format($recebimento->valor_juros, 2, ',', '.') }}
-                                            @endif
-                                            @if($recebimento->valor_multa > 0)
-                                            <br>Multa: R$ {{ number_format($recebimento->valor_multa, 2, ',', '.') }}
-                                            @endif
-                                            @if($recebimento->valor_desconto > 0)
-                                            <br>Desconto: R$ {{ number_format($recebimento->valor_desconto, 2, ',', '.') }}
-                                            @endif
+                                            Principal: R$ <?php echo e(number_format($recebimento->valor_principal, 2, ',', '.')); ?>
+
+                                            <?php if($recebimento->valor_juros > 0): ?>
+                                            <br>Juros: R$ <?php echo e(number_format($recebimento->valor_juros, 2, ',', '.')); ?>
+
+                                            <?php endif; ?>
+                                            <?php if($recebimento->valor_multa > 0): ?>
+                                            <br>Multa: R$ <?php echo e(number_format($recebimento->valor_multa, 2, ',', '.')); ?>
+
+                                            <?php endif; ?>
+                                            <?php if($recebimento->valor_desconto > 0): ?>
+                                            <br>Desconto: R$ <?php echo e(number_format($recebimento->valor_desconto, 2, ',', '.')); ?>
+
+                                            <?php endif; ?>
                                         </small>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td>
-                                        @if($recebimento->formaPagamento)
-                                        <span class="badge bg-secondary">{{ $recebimento->formaPagamento->nome }}</span>
-                                        @else
+                                        <?php if($recebimento->formaPagamento): ?>
+                                        <span class="badge bg-secondary"><?php echo e($recebimento->formaPagamento->nome); ?></span>
+                                        <?php else: ?>
                                         <span class="text-muted">N/A</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td>
-                                        @if($recebimento->bandeira)
-                                        <span class="badge bg-info">{{ $recebimento->bandeira->nome }}</span>
-                                        @else
+                                        <?php if($recebimento->bandeira): ?>
+                                        <span class="badge bg-info"><?php echo e($recebimento->bandeira->nome); ?></span>
+                                        <?php else: ?>
                                         <span class="text-muted">-</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td>
-                                        @if($recebimento->contaBancaria)
-                                        <small>{{ $recebimento->contaBancaria->nome_banco ?? 'Conta ' . $recebimento->conta_bancaria_id }}</small>
-                                        @else
+                                        <?php if($recebimento->contaBancaria): ?>
+                                        <small><?php echo e($recebimento->contaBancaria->nome_banco ?? 'Conta ' . $recebimento->conta_bancaria_id); ?></small>
+                                        <?php else: ?>
                                         <span class="text-muted">-</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td>
-                                        @if($recebimento->observacao)
-                                        <small>{{ Str::limit($recebimento->observacao, 50) }}</small>
-                                        @else
+                                        <?php if($recebimento->observacao): ?>
+                                        <small><?php echo e(Str::limit($recebimento->observacao, 50)); ?></small>
+                                        <?php else: ?>
                                         <span class="text-muted">-</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
                                             <button type="button"
                                                 class="btn btn-outline-primary btn-sm"
-                                                onclick="verDetalhesRecebimento({{ $recebimento->id }})"
+                                                onclick="verDetalhesRecebimento(<?php echo e($recebimento->id); ?>)"
                                                 title="Ver detalhes">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            @if($contaReceber->situacao_financeira != 'pago')
+                                            <?php if($contaReceber->situacao_financeira != 'pago'): ?>
                                             <button type="button"
                                                 class="btn btn-outline-danger btn-sm"
-                                                onclick="confirmarEstorno({{ $recebimento->id }})"
+                                                onclick="confirmarEstorno(<?php echo e($recebimento->id); ?>)"
                                                 title="Estornar recebimento">
                                                 <i class="fas fa-undo"></i>
                                             </button>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </div>
-                    @else
+                    <?php else: ?>
                     <div class="text-center py-4">
                         <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
                         <h6 class="text-muted">Nenhum recebimento registrado</h6>
                         <p class="text-muted mb-0">
-                            @if($contaReceber->situacao_financeira->value == 'pendente')
+                            <?php if($contaReceber->situacao_financeira->value == 'pendente'): ?>
                             Clique em "Registrar Recebimento" para registrar o primeiro pagamento.
-                            @else
+                            <?php else: ?>
                             Esta conta não possui histórico de recebimentos.
-                            @endif
+                            <?php endif; ?>
                         </p>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -333,20 +343,22 @@
                             <dl class="row">
                                 <dt class="col-6">Data de Emissão:</dt>
                                 <dd class="col-6">
-                                    @if($contaReceber->data_emissao)
-                                    {{ $contaReceber->data_emissao->format('d/m/Y') }}
-                                    @else
+                                    <?php if($contaReceber->data_emissao): ?>
+                                    <?php echo e($contaReceber->data_emissao->format('d/m/Y')); ?>
+
+                                    <?php else: ?>
                                     <span class="text-muted">Não informado</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </dd>
 
                                 <dt class="col-6">Data de Competência:</dt>
                                 <dd class="col-6">
-                                    @if($contaReceber->data_competencia)
-                                    {{ $contaReceber->data_competencia->format('d/m/Y') }}
-                                    @else
+                                    <?php if($contaReceber->data_competencia): ?>
+                                    <?php echo e($contaReceber->data_competencia->format('d/m/Y')); ?>
+
+                                    <?php else: ?>
                                     <span class="text-muted">Não informado</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </dd>
                             </dl>
                         </div>
@@ -354,14 +366,16 @@
                             <dl class="row">
                                 <dt class="col-6">Data de Vencimento:</dt>
                                 <dd class="col-6">
-                                    @if($contaReceber->data_vencimento && $contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente')
+                                    <?php if($contaReceber->data_vencimento && $contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente'): ?>
                                     <span class="text-danger fw-bold">
-                                        {{ $contaReceber->data_vencimento->format('d/m/Y') }}
-                                        <small>(Vencida há {{ $contaReceber->data_vencimento->diffForHumans() }})</small>
+                                        <?php echo e($contaReceber->data_vencimento->format('d/m/Y')); ?>
+
+                                        <small>(Vencida há <?php echo e($contaReceber->data_vencimento->diffForHumans()); ?>)</small>
                                     </span>
-                                    @else
-                                    {{ $contaReceber->data_vencimento->format('d/m/Y') }}
-                                    @endif
+                                    <?php else: ?>
+                                    <?php echo e($contaReceber->data_vencimento->format('d/m/Y')); ?>
+
+                                    <?php endif; ?>
                                 </dd>
                             </dl>
                         </div>
@@ -379,24 +393,24 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    @if($contaReceber->situacao_financeira->value == 'pendente')
+                    <?php if($contaReceber->situacao_financeira->value == 'pendente'): ?>
                     <div class="d-grid gap-2">
-                        <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.recebimentos.pagamento', ['empresa' => $empresa, 'id' => $contaReceber->id]) }}"
+                        <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.recebimentos.pagamento', ['empresa' => $empresa, 'id' => $contaReceber->id])); ?>"
                             class="btn btn-success w-100">
                             <i class="fas fa-check"></i> Registrar Recebimento
                         </a>
 
-                        <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.edit', ['empresa' => $empresa, 'id' => $contaReceber->id]) }}"
+                        <a href="<?php echo e(route('comerciantes.empresas.financeiro.contas-receber.edit', ['empresa' => $empresa, 'id' => $contaReceber->id])); ?>"
                             class="btn btn-primary">
                             <i class="fas fa-edit"></i> Editar Dados
                         </a>
                     </div>
-                    @else
+                    <?php else: ?>
                     <div class="alert alert-info mb-0">
                         <i class="fas fa-info-circle"></i>
                         Esta conta já foi processada e não pode mais ser editada.
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -410,29 +424,32 @@
                 <div class="card-body">
                     <div class="text-center">
                         <h3 class="text-primary mb-1">
-                            R$ {{ number_format($contaReceber->valor_liquido, 2, ',', '.') }}
+                            R$ <?php echo e(number_format($contaReceber->valor_liquido, 2, ',', '.')); ?>
+
                         </h3>
                         <p class="text-muted mb-3">Valor Total</p>
 
-                        @if($contaReceber->situacao_financeira->value == 'pendente')
-                        @if($contaReceber->data_vencimento->isFuture())
+                        <?php if($contaReceber->situacao_financeira->value == 'pendente'): ?>
+                        <?php if($contaReceber->data_vencimento->isFuture()): ?>
                         <p class="text-success mb-0">
                             <i class="fas fa-clock"></i>
-                            Vence em {{ $contaReceber->data_vencimento->diffForHumans() }}
+                            Vence em <?php echo e($contaReceber->data_vencimento->diffForHumans()); ?>
+
                         </p>
-                        @else
+                        <?php else: ?>
                         <p class="text-danger mb-0">
                             <i class="fas fa-exclamation-triangle"></i>
-                            Vencida há {{ $contaReceber->data_vencimento->diffForHumans() }}
+                            Vencida há <?php echo e($contaReceber->data_vencimento->diffForHumans()); ?>
+
                         </p>
-                        @endif
-                        @endif
+                        <?php endif; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
 
             <!-- Alertas -->
-            @if($contaReceber->data_vencimento && $contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente')
+            <?php if($contaReceber->data_vencimento && $contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente'): ?>
             <div class="card border-danger mb-4">
                 <div class="card-header bg-danger text-white">
                     <h6 class="card-title mb-0">
@@ -440,15 +457,15 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <p class="mb-2">Esta conta está vencida há {{ $contaReceber->data_vencimento->diffForHumans() }}.</p>
+                    <p class="mb-2">Esta conta está vencida há <?php echo e($contaReceber->data_vencimento->diffForHumans()); ?>.</p>
                     <p class="mb-0 small text-muted">
                         Considere entrar em contato com o cliente para regularização.
                     </p>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
-            @if($contaReceber->data_vencimento && $contaReceber->data_vencimento->isToday() && $contaReceber->situacao_financeira->value == 'pendente')
+            <?php if($contaReceber->data_vencimento && $contaReceber->data_vencimento->isToday() && $contaReceber->situacao_financeira->value == 'pendente'): ?>
             <div class="card border-warning mb-4">
                 <div class="card-header bg-warning">
                     <h6 class="card-title mb-0">
@@ -459,13 +476,13 @@
                     <p class="mb-0">Esta conta vence hoje. Monitore o recebimento.</p>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
     // JavaScript m�nimo para p�gina de visualiza��o
     console.log(' P�gina de detalhes da conta a receber carregada');
@@ -475,4 +492,5 @@
         location.reload();
     }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('layouts.comerciante', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\marketplace\resources\views/comerciantes/financeiro/contas-receber/show.blade.php ENDPATH**/ ?>

@@ -113,8 +113,7 @@ class ContasReceberController extends Controller
         $empresa = Empresa::findOrFail($empresa);
         $request->validate([
             'descricao' => 'required|string|max:255',
-            'valor_bruto' => 'nullable|numeric|min:0.01',
-            'valor_total' => 'nullable|numeric|min:0.01',
+            'valor_bruto' => 'required|numeric|min:0.01',
             'data_vencimento' => 'required|date',
             'data_emissao' => 'nullable|date',
             'data_competencia' => 'nullable|date',
@@ -137,9 +136,6 @@ class ContasReceberController extends Controller
             'intervalo_parcelas' => 'nullable|integer|min:1',
             'cobranca_automatica' => 'boolean',
             'gerar_boleto' => 'boolean',
-        ], [
-            'valor_bruto.required_without' => 'O valor é obrigatório',
-            'valor_total.required_without' => 'O valor é obrigatório',
         ]);
 
         DB::beginTransaction();
