@@ -322,18 +322,12 @@
                         <div class="mb-3">
                             <label for="natureza" class="form-label">Natureza</label>
                             <select name="natureza_financeira" id="natureza_financeira" 
-                                    class="form-control @error('natureza') is-invalid @enderror">
-                                <option value="despesa" {{ old('natureza_financeira', 'despesa') == 'despesa' ? 'selected' : '' }}>
-                                    Despesa
-                                </option>
-                                <option value="custo" {{ old('natureza_financeira') == 'custo' ? 'selected' : '' }}>
-                                    Custo
-                                </option>
-                                <option value="investimento" {{ old('natureza_financeira') == 'investimento' ? 'selected' : '' }}>
-                                    Investimento
+                                    class="form-control @error('natureza_financeira') is-invalid @enderror">
+                                <option value="pagar" {{ old('natureza_financeira', 'pagar') == 'pagar' ? 'selected' : '' }}>
+                                    Conta a Pagar
                                 </option>
                             </select>
-                            @error('natureza')
+                            @error('natureza_financeira')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

@@ -11,7 +11,7 @@ if (!function_exists('route_financeiro')) {
     function route_financeiro(string $routeName, array $parameters = []): string
     {
         $empresaId = session('empresa_atual_id');
-        
+
         if (!$empresaId) {
             // Se não há empresa selecionada, redireciona para seleção
             return route('comerciantes.empresas.index');
@@ -19,10 +19,10 @@ if (!function_exists('route_financeiro')) {
 
         // Monta o nome completo da rota
         $fullRouteName = 'comerciantes.empresas.financeiro.' . $routeName;
-        
+
         // Adiciona a empresa aos parâmetros
         $parameters = array_merge(['empresa' => $empresaId], $parameters);
-        
+
         return route($fullRouteName, $parameters);
     }
 }
@@ -36,7 +36,7 @@ if (!function_exists('empresa_atual')) {
     function empresa_atual(): ?\App\Comerciantes\Models\Empresa
     {
         $empresaId = session('empresa_atual_id');
-        
+
         if (!$empresaId) {
             return null;
         }
@@ -66,7 +66,7 @@ if (!function_exists('empresas_usuario')) {
     function empresas_usuario(): \Illuminate\Support\Collection
     {
         $user = auth('comerciante')->user();
-        
+
         if (!$user) {
             return collect();
         }

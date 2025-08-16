@@ -119,7 +119,7 @@ class ContasPagarController extends Controller
             'juros' => 'nullable|numeric|min:0',
             'multa' => 'nullable|numeric|min:0',
             'situacao_financeira' => 'nullable|in:pendente,pago,cancelado',
-            'natureza_financeira' => 'nullable|in:pagar',
+            'natureza_financeira' => 'required|in:pagar',
             'e_recorrente' => 'nullable|boolean',
             'parcelado' => 'boolean',
             'numero_parcelas' => 'nullable|integer|min:1|max:360',
@@ -216,7 +216,7 @@ class ContasPagarController extends Controller
             'juros' => 'nullable|numeric|min:0',
             'multa' => 'nullable|numeric|min:0',
             'situacao_financeira' => 'nullable|in:pendente,pago,cancelado',
-            'natureza_financeira' => 'nullable|in:pagar',
+            'natureza_financeira' => 'required|in:pagar',
             'e_recorrente' => 'nullable|boolean',
         ]);
 

@@ -77,6 +77,7 @@ Route::prefix('comerciantes/empresas/{empresa}/financeiro')->name('comerciantes.
 
         // Rotas de pagamentos
         Route::prefix('{id}/pagamentos')->name('pagamentos.')->group(function () {
+            Route::get('/pagamento', [\App\Http\Controllers\Comerciantes\Financial\PagamentoController::class, 'create'])->name('pagamento');
             Route::post('/', [\App\Http\Controllers\Comerciantes\Financial\PagamentoController::class, 'store'])->name('store');
             Route::get('/resumo', [\App\Http\Controllers\Comerciantes\Financial\PagamentoController::class, 'getSummary'])->name('summary');
             Route::get('/{pagamento}', [\App\Http\Controllers\Comerciantes\Financial\PagamentoController::class, 'show'])->name('show');

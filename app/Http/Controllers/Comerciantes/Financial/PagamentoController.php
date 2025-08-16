@@ -24,6 +24,33 @@ class PagamentoController extends Controller
     }
 
     /**
+     * Show the form for creating a new payment.
+     */
+    public function create(Empresa $empresa, $id)
+    {
+        $contaPagar = LancamentoFinanceiro::where('empresa_id', $empresa->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        // Buscar formas de pagamento da empresa
+        $formasPagamento = DB::table('formas_pagamento')
+            ->where('empresa_id', $empresa->id)
+            ->where('ativo', true)
+            ->where('tipo', 'pagamento')
+            ->get(['id', 'nome', 'gateway_method']);
+
+        // Buscar contas bancárias da empresa
+        $contasBancarias = DB::table('contas_bancarias')
+            ->where('empresa_id', $empresa->id)
+            ->where('ativo', true)
+            ->get(['id', 'nome', 'banco', 'agencia', 'conta']);
+
+        return view('comerciantes.financeiro.contas-pagar.pagamento', compact(
+            'empresa', 'contaPagar', 'formasPagamento', 'contasBancarias'
+        ));
+    }
+
+    /**
      * Store a newly created payment.
      */
     public function store(Request $request, Empresa $empresa, $id)
@@ -67,21 +94,20 @@ class PagamentoController extends Controller
                 'usuario_id' => Auth::id(),
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Pagamento registrado com sucesso!',
-                'pagamento' => $pagamento->load(['lancamento'])
-            ]);
+            return redirect()
+                ->route('comerciantes.empresas.financeiro.contas-pagar.show', ['empresa' => $empresa, 'id' => $id])
+                ->with('success', 'Pagamento registrado com sucesso!');
+                
         } catch (\InvalidArgumentException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 422);
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao registrar pagamento: ' . $e->getMessage()
-            ], 500);
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Erro ao registrar pagamento: ' . $e->getMessage());
         }
     }
 

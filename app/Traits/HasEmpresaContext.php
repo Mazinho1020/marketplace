@@ -24,7 +24,7 @@ trait HasEmpresaContext
     public function getEmpresaAtual(): ?Empresa
     {
         $empresaId = $this->getEmpresaAtualId();
-        
+
         if (!$empresaId) {
             return null;
         }
@@ -54,7 +54,7 @@ trait HasEmpresaContext
     public function podeAcessarEmpresa(int $empresaId): bool
     {
         $user = Auth::guard('comerciante')->user();
-        
+
         if (!$user) {
             return false;
         }
@@ -68,7 +68,7 @@ trait HasEmpresaContext
     public function getEmpresasUsuario()
     {
         $user = Auth::guard('comerciante')->user();
-        
+
         if (!$user) {
             return collect();
         }
@@ -82,7 +82,7 @@ trait HasEmpresaContext
     public function routeFinanceiro(string $routeName, array $parameters = []): string
     {
         $empresaId = $this->getEmpresaAtualId();
-        
+
         if (!$empresaId) {
             // Se não há empresa selecionada, redireciona para seleção
             return route('comerciantes.empresas.index');
@@ -90,7 +90,7 @@ trait HasEmpresaContext
 
         // Adiciona a empresa aos parâmetros
         $parameters = array_merge(['empresa' => $empresaId], $parameters);
-        
+
         return route($routeName, $parameters);
     }
 }

@@ -490,9 +490,9 @@
                     <!-- Seletor de Empresa -->
                     <?php if(auth('comerciante')->check()): ?>
                     <?php
-                        $user = auth('comerciante')->user();
-                        $empresas = $user->todas_empresas ?? collect();
-                        $empresaAtual = $empresas->where('id', session('empresa_atual_id'))->first();
+                    $user = auth('comerciante')->user();
+                    $empresas = $user->todas_empresas ?? collect();
+                    $empresaAtual = $empresas->where('id', session('empresa_atual_id'))->first();
                     ?>
                     <li class="nav-item dropdown me-3">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
@@ -507,38 +507,38 @@
                         <div class="dropdown-menu dropdown-menu-end empresa-selector" style="min-width: 280px;">
                             <h6 class="dropdown-header">Minhas Empresas</h6>
                             <?php if($empresas->count() > 0): ?>
-                                <?php $__currentLoopData = $empresas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $empresa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <a class="dropdown-item <?php echo e(session('empresa_atual_id') == $empresa->id ? 'active' : ''); ?>" 
-                                   href="<?php echo e(route('comerciantes.dashboard.empresa', $empresa->id)); ?>">
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-<?php echo e(session('empresa_atual_id') == $empresa->id ? 'success' : 'secondary'); ?> rounded-circle d-flex align-items-center justify-content-center me-2" 
-                                             style="width: 25px; height: 25px;">
-                                            <i class="fas fa-building text-white" style="font-size: 0.7rem;"></i>
-                                        </div>
-                                        <div class="flex-fill">
-                                            <div class="fw-semibold"><?php echo e($empresa->nome_fantasia); ?></div>
-                                            <small class="text-muted"><?php echo e($empresa->razao_social); ?></small>
-                                        </div>
-                                        <?php if(session('empresa_atual_id') == $empresa->id): ?>
-                                        <i class="fas fa-check text-success ms-2"></i>
-                                        <?php endif; ?>
+                            <?php $__currentLoopData = $empresas; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $empresa): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <a class="dropdown-item <?php echo e(session('empresa_atual_id') == $empresa->id ? 'active' : ''); ?>"
+                                href="<?php echo e(route('comerciantes.dashboard.empresa', $empresa->id)); ?>">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-<?php echo e(session('empresa_atual_id') == $empresa->id ? 'success' : 'secondary'); ?> rounded-circle d-flex align-items-center justify-content-center me-2"
+                                        style="width: 25px; height: 25px;">
+                                        <i class="fas fa-building text-white" style="font-size: 0.7rem;"></i>
                                     </div>
-                                </a>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="<?php echo e(route('comerciantes.dashboard.limpar')); ?>">
-                                    <i class="fas fa-times-circle me-2 text-danger"></i>Limpar Seleção
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="<?php echo e(route('comerciantes.empresas.index')); ?>">
-                                    <i class="fas fa-cog me-2"></i>Gerenciar Empresas
-                                </a>
+                                    <div class="flex-fill">
+                                        <div class="fw-semibold"><?php echo e($empresa->nome_fantasia); ?></div>
+                                        <small class="text-muted"><?php echo e($empresa->razao_social); ?></small>
+                                    </div>
+                                    <?php if(session('empresa_atual_id') == $empresa->id): ?>
+                                    <i class="fas fa-check text-success ms-2"></i>
+                                    <?php endif; ?>
+                                </div>
+                            </a>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="<?php echo e(route('comerciantes.dashboard.limpar')); ?>">
+                                <i class="fas fa-times-circle me-2 text-danger"></i>Limpar Seleção
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="<?php echo e(route('comerciantes.empresas.index')); ?>">
+                                <i class="fas fa-cog me-2"></i>Gerenciar Empresas
+                            </a>
                             <?php else: ?>
-                                <span class="dropdown-item-text text-muted">Nenhuma empresa encontrada</span>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="<?php echo e(route('comerciantes.empresas.create')); ?>">
-                                    <i class="fas fa-plus me-2"></i>Criar Nova Empresa
-                                </a>
+                            <span class="dropdown-item-text text-muted">Nenhuma empresa encontrada</span>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="<?php echo e(route('comerciantes.empresas.create')); ?>">
+                                <i class="fas fa-plus me-2"></i>Criar Nova Empresa
+                            </a>
                             <?php endif; ?>
                         </div>
                     </li>
