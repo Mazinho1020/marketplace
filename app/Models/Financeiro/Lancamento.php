@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Models\Financial\Pagamento;
 
 /**
  * Model de Lançamentos Financeiros
@@ -221,27 +222,56 @@ class Lancamento extends Model
         return $this->hasMany(LancamentoItem::class, 'lancamento_id');
     }
 
-    public function movimentacoes(): HasMany
-    {
-        return $this->hasMany(LancamentoMovimentacao::class, 'lancamento_id');
-    }
-
+    /**
+     * Relacionamento com pagamentos (substitui movimentacoes)
+     */
     public function pagamentos(): HasMany
     {
-        return $this->hasMany(LancamentoMovimentacao::class, 'lancamento_id')
-                    ->where('tipo', 'pagamento');
+        return $this->hasMany(Pagamento::class, 'lancamento_id');
     }
 
+    /**
+     * Pagamentos confirmados
+     */
+    public function pagamentosConfirmados(): HasMany
+    {
+        return $this->hasMany(Pagamento::class, 'lancamento_id')
+                    ->where('status_pagamento', 'confirmado');
+    }
+
+    /**
+     * Pagamentos estornados
+     */
+    public function pagamentosEstornados(): HasMany
+    {
+        return $this->hasMany(Pagamento::class, 'lancamento_id')
+                    ->where('status_pagamento', 'estornado');
+    }
+
+    /**
+     * Compatibilidade: manter método movimentacoes mas direcionando para pagamentos
+     * @deprecated Use pagamentos() ao invés
+     */
+    public function movimentacoes(): HasMany
+    {
+        return $this->pagamentos();
+    }
+
+    /**
+     * Compatibilidade: recebimentos baseados no pagamento
+     * Para contas a receber, os "recebimentos" são os pagamentos confirmados
+     */
     public function recebimentos(): HasMany
     {
-        return $this->hasMany(LancamentoMovimentacao::class, 'lancamento_id')
-                    ->where('tipo', 'recebimento');
+        return $this->pagamentosConfirmados();
     }
 
+    /**
+     * Compatibilidade: estornos baseados no pagamento
+     */
     public function estornos(): HasMany
     {
-        return $this->hasMany(LancamentoMovimentacao::class, 'lancamento_id')
-                    ->where('tipo', 'estorno');
+        return $this->pagamentosEstornados();
     }
 
     /**
@@ -409,51 +439,58 @@ class Lancamento extends Model
     /**
      * Métodos para ações
      */
-    public function adicionarPagamento(float $valor, array $dados = []): LancamentoMovimentacao
+    public function adicionarPagamento(float $valor, array $dados = []): Pagamento
     {
-        $tipo = $this->isContaReceber() ? 'recebimento' : 'pagamento';
-        
-        $movimentacao = $this->movimentacoes()->create(array_merge($dados, [
-            'tipo' => $tipo,
-            'valor' => $valor,
-            'data_movimentacao' => now(),
-            'usuario_id' => auth()->id() ?? $this->usuario_id,
+        // Criar pagamento usando a estrutura da tabela pagamentos
+        $dadosPagamento = array_merge([
             'empresa_id' => $this->empresa_id,
-        ]));
+            'tipo_id' => $dados['tipo_id'] ?? 1,
+            'forma_pagamento_id' => $dados['forma_pagamento_id'] ?? null,
+            'bandeira_id' => $dados['bandeira_id'] ?? null,
+            'conta_bancaria_id' => $dados['conta_bancaria_id'] ?? null,
+            'valor' => $valor,
+            'valor_principal' => $dados['valor_principal'] ?? $valor,
+            'valor_juros' => $dados['valor_juros'] ?? 0,
+            'valor_multa' => $dados['valor_multa'] ?? 0,
+            'valor_desconto' => $dados['valor_desconto'] ?? 0,
+            'data_pagamento' => $dados['data_pagamento'] ?? now()->toDateString(),
+            'data_compensacao' => $dados['data_compensacao'] ?? null,
+            'observacao' => $dados['observacao'] ?? null,
+            'comprovante_pagamento' => $dados['comprovante_pagamento'] ?? null,
+            'usuario_id' => $dados['usuario_id'] ?? (auth()->id() ?? $this->usuario_id),
+            'taxa' => $dados['taxa'] ?? 0,
+            'valor_taxa' => $dados['valor_taxa'] ?? 0,
+            'referencia_externa' => $dados['referencia_externa'] ?? null,
+            'status_pagamento' => 'confirmado',
+        ], $dados);
 
-        // Atualizar valor pago
-        $this->valor_pago = $this->movimentacoes()
-                                ->whereIn('tipo', ['pagamento', 'recebimento'])
-                                ->sum('valor');
+        $pagamento = $this->pagamentos()->create($dadosPagamento);
+
+        // Atualizar valor pago - soma dos pagamentos confirmados
+        $this->valor_pago = $this->pagamentosConfirmados()->sum('valor');
         
         $this->data_ultimo_pagamento = now();
         $this->calcularSituacaoFinanceira();
         $this->save();
 
-        return $movimentacao;
+        return $pagamento;
     }
 
-    public function estornarPagamento(LancamentoMovimentacao $movimentacao, string $motivo = null): LancamentoMovimentacao
+    public function estornarPagamento(Pagamento $pagamento, string $motivo = null): bool
     {
-        $estorno = $this->movimentacoes()->create([
-            'tipo' => 'estorno',
-            'valor' => $movimentacao->valor,
-            'data_movimentacao' => now(),
-            'observacoes' => "Estorno do pagamento #{$movimentacao->id}. Motivo: " . ($motivo ?? 'Não informado'),
-            'usuario_id' => auth()->id() ?? $this->usuario_id,
-            'empresa_id' => $this->empresa_id,
+        // Estornar o pagamento alterando seu status
+        $pagamento->update([
+            'status_pagamento' => 'estornado',
+            'observacao' => ($pagamento->observacao ?? '') . "\n[ESTORNO] " . ($motivo ?? 'Não informado')
         ]);
 
-        // Recalcular valor pago
-        $this->valor_pago = $this->movimentacoes()
-                                ->whereIn('tipo', ['pagamento', 'recebimento'])
-                                ->sum('valor')
-                          - $this->estornos()->sum('valor');
+        // Recalcular valor pago - apenas pagamentos confirmados
+        $this->valor_pago = $this->pagamentosConfirmados()->sum('valor');
         
         $this->calcularSituacaoFinanceira();
         $this->save();
 
-        return $estorno;
+        return true;
     }
 
     public function aprovar(int $usuarioId, string $observacoes = null): bool

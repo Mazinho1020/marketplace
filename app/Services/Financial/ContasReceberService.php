@@ -5,7 +5,6 @@ namespace App\Services\Financial;
 use App\DTOs\Financial\ContaReceberDTO;
 use App\Models\Financial\LancamentoFinanceiro;
 use App\Models\Financial\Pagamento;
-use App\Models\Financial\Recebimento;
 use App\Enums\NaturezaFinanceiraEnum;
 use App\Enums\SituacaoFinanceiraEnum;
 use App\Enums\FrequenciaRecorrenciaEnum;
@@ -108,36 +107,28 @@ class ContasReceberService
             // Validações básicas
             $this->validarRecebimento($lancamento, $dados);
 
-            // Incluir o tipo_id baseado na natureza
-            $dados['tipo_id'] = 2; // Tipo "Recebimento" 
-
-            // Criar o recebimento
-            $recebimento = \App\Models\Financial\Recebimento::create([
-                'lancamento_id' => $lancamento->id,
+            // Criar o recebimento usando a tabela pagamentos
+            $pagamento = $lancamento->adicionarPagamento([
+                'tipo_id' => 2, // Tipo "Recebimento" 
                 'forma_pagamento_id' => $dados['forma_pagamento_id'],
                 'bandeira_id' => $dados['bandeira_id'] ?? null,
                 'conta_bancaria_id' => $dados['conta_bancaria_id'],
-                'tipo_id' => $dados['tipo_id'],
                 'valor' => $dados['valor'],
                 'valor_principal' => $dados['valor_principal'] ?? $dados['valor'],
                 'valor_juros' => $dados['valor_juros'] ?? 0,
                 'valor_multa' => $dados['valor_multa'] ?? 0,
                 'valor_desconto' => $dados['valor_desconto'] ?? 0,
-                'data_recebimento' => $dados['data_recebimento'],
+                'data_pagamento' => $dados['data_recebimento'] ?? $dados['data_pagamento'],
                 'data_compensacao' => $dados['data_compensacao'] ?? null,
                 'observacao' => $dados['observacao'] ?? null,
-                'comprovante_recebimento' => $dados['comprovante_recebimento'] ?? null,
+                'comprovante_pagamento' => $dados['comprovante_recebimento'] ?? $dados['comprovante_pagamento'] ?? null,
                 'taxa' => $dados['taxa'] ?? 0,
                 'valor_taxa' => $dados['valor_taxa'] ?? 0,
                 'referencia_externa' => $dados['referencia_externa'] ?? null,
                 'usuario_id' => $dados['usuario_id'],
-                'status_recebimento' => 'confirmado'
             ]);
 
-            // Atualizar situação do lançamento
-            $this->atualizarSituacaoLancamento($lancamento);
-
-            return $recebimento;
+            return $pagamento;
         });
     }
 
@@ -153,7 +144,7 @@ class ContasReceberService
 
         // Calcular valor já recebido
         $valorRecebido = $lancamento->recebimentos()
-            ->where('status_recebimento', 'confirmado')
+            ->where('status_pagamento', 'confirmado')
             ->sum('valor');
 
         $valorTotal = $lancamento->valor_final;
@@ -173,8 +164,10 @@ class ContasReceberService
      */
     private function atualizarSituacaoLancamento($lancamento)
     {
-        $valorRecebido = $lancamento->recebimentos()
-            ->where('status_recebimento', 'confirmado')
+        // Use pagamentos confirmados para recebimentos (tipo_id = 2)
+        $valorRecebido = $lancamento->pagamentos()
+            ->where('status_pagamento', 'confirmado')
+            ->where('tipo_id', 2) // Apenas recebimentos
             ->sum('valor');
 
         $valorTotal = $lancamento->valor_final;
@@ -203,7 +196,8 @@ class ContasReceberService
                 throw new \Exception('Este pagamento não é de uma conta a receber.');
             }
 
-            return $pagamento->delete();
+            // Usar o método estornar do modelo Pagamento
+            return $pagamento->estornar('Estorno via ContasReceberService');
         });
     }
 
