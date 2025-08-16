@@ -1627,6 +1627,34 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
         });
 
         /**
+         * VENDAS
+         * Sistema completo de vendas para comerciantes
+         */
+        Route::prefix('vendas')->name('vendas.')->group(function () {
+            // Rotas básicas do resource
+            Route::get('/', [\App\Http\Controllers\Comerciante\VendaController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Comerciante\VendaController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Comerciante\VendaController::class, 'store'])->name('store');
+            Route::get('/{venda}', [\App\Http\Controllers\Comerciante\VendaController::class, 'show'])->name('show');
+            Route::get('/{venda}/edit', [\App\Http\Controllers\Comerciante\VendaController::class, 'edit'])->name('edit');
+            Route::put('/{venda}', [\App\Http\Controllers\Comerciante\VendaController::class, 'update'])->name('update');
+            Route::delete('/{venda}', [\App\Http\Controllers\Comerciante\VendaController::class, 'destroy'])->name('destroy');
+            
+            // Ações especiais de vendas
+            Route::post('/{venda}/finalizar', [\App\Http\Controllers\Comerciante\VendaController::class, 'finalizar'])->name('finalizar');
+            Route::post('/{venda}/cancelar', [\App\Http\Controllers\Comerciante\VendaController::class, 'cancelar'])->name('cancelar');
+            
+            // Gerenciamento de itens
+            Route::post('/{venda}/itens', [\App\Http\Controllers\Comerciante\VendaController::class, 'adicionarItem'])->name('itens.adicionar');
+            Route::delete('/{venda}/itens/{item}', [\App\Http\Controllers\Comerciante\VendaController::class, 'removerItem'])->name('itens.remover');
+            
+            // APIs para busca e estatísticas
+            Route::get('/api/estatisticas', [\App\Http\Controllers\Comerciante\VendaController::class, 'estatisticas'])->name('api.estatisticas');
+            Route::get('/api/produtos/buscar', [\App\Http\Controllers\Comerciante\VendaController::class, 'buscarProdutos'])->name('api.produtos.buscar');
+            Route::get('/api/clientes/buscar', [\App\Http\Controllers\Comerciante\VendaController::class, 'buscarClientes'])->name('api.clientes.buscar');
+        });
+
+        /**
          * DEPARTAMENTOS
          * Gestão de departamentos da empresa
          */
