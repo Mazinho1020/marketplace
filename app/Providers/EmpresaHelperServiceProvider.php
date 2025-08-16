@@ -11,7 +11,8 @@ class EmpresaHelperServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        require_once app_path('Helpers/EmpresaHelpers.php');
+        // Helper file temporarily disabled until created
+        // require_once app_path('Helpers/EmpresaHelpers.php');
     }
 
     /**
