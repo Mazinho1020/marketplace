@@ -319,12 +319,32 @@
                                 </a>
                             </li>
                             
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    Pedidos
-                                    <span class="badge bg-warning ms-auto">Em breve</span>
+                            <!-- MÓDULO DE VENDAS - IMPLEMENTADO -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle {{ request()->routeIs('comerciantes.empresas.vendas.*') ? 'active' : '' }}" 
+                                   href="#" id="vendasDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cash-register"></i>
+                                    Vendas
                                 </a>
+                                <ul class="dropdown-menu bg-primary border-0" style="margin-left: 1rem;">
+                                    @if(request()->route('empresa'))
+                                        <li><a class="dropdown-item text-white-50" href="{{ route('comerciantes.empresas.vendas.dashboard', request()->route('empresa')) }}">
+                                            <i class="fas fa-chart-bar me-2"></i>Dashboard
+                                        </a></li>
+                                        <li><a class="dropdown-item text-white-50" href="{{ route('comerciantes.empresas.vendas.pdv.index', request()->route('empresa')) }}">
+                                            <i class="fas fa-cash-register me-2"></i>PDV - Nova Venda
+                                        </a></li>
+                                        <li><a class="dropdown-item text-white-50" href="{{ route('comerciantes.empresas.vendas.gerenciar.index', request()->route('empresa')) }}">
+                                            <i class="fas fa-list me-2"></i>Gerenciar Vendas
+                                        </a></li>
+                                        <li><hr class="dropdown-divider border-light border-opacity-25"></li>
+                                        <li><a class="dropdown-item text-white-50" href="{{ route('comerciantes.empresas.vendas.relatorios.vendas-periodo', request()->route('empresa')) }}">
+                                            <i class="fas fa-chart-line me-2"></i>Relatórios
+                                        </a></li>
+                                    @else
+                                        <li><span class="dropdown-item text-white-50"><i class="fas fa-info-circle me-2"></i>Selecione uma empresa</span></li>
+                                    @endif
+                                </ul>
                             </li>
                             
                             <li class="nav-item">

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\Financeiro\LancamentoController;
+// use App\Http\Controllers\Api\Financeiro\LancamentoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +16,8 @@ use App\Http\Controllers\Api\Financeiro\LancamentoController;
 |
 */
 
+// TEMPORARIAMENTE COMENTADO - CONTROLLER NÃO EXISTE
+/*
 Route::prefix('financeiro')->name('financeiro.')->group(function () {
     
     // Rotas principais de lançamentos
@@ -118,4 +120,5 @@ Route::prefix('financeiro')->name('financeiro.')->group(function () {
 | - Dashboard financeiro com totais e estatísticas
 | - Parâmetros: empresa_id
 |
+*/
 */

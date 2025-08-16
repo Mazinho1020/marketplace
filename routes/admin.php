@@ -2,14 +2,14 @@
 
 use App\Http\Controllers\Admin\Financeiro\ContasPagarController;
 use App\Http\Controllers\Admin\Financeiro\ContasReceberController;
-use App\Http\Controllers\Admin\Financeiro\LancamentoController;
+// use App\Http\Controllers\Admin\Financeiro\LancamentoController;
 
 Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     Route::prefix('financeiro')->group(function () {
         
-        // Lançamentos unificados
-        Route::resource('lancamentos', LancamentoController::class);
-        Route::post('lancamentos/{lancamento}/pagamento', [LancamentoController::class, 'processarPagamento']);
+        // Lançamentos unificados (TEMPORARIAMENTE COMENTADO - CONTROLLER NÃO EXISTE)
+        // Route::resource('lancamentos', LancamentoController::class);
+        // Route::post('lancamentos/{lancamento}/pagamento', [LancamentoController::class, 'processarPagamento']);
         
         // Contas a Pagar (wrapper)
         Route::resource('contas-pagar', ContasPagarController::class);
