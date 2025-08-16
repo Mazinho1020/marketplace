@@ -131,13 +131,13 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="valor_original" class="form-label">Valor Original *</label>
+                                    <label for="valor_bruto" class="form-label">Valor Bruto *</label>
                                     <div class="input-group">
                                         <span class="input-group-text">R$</span>
-                                        <input type="number" name="valor_original" id="valor_original" 
-                                               class="form-control @error('valor_original') is-invalid @enderror" 
-                                               step="0.01" value="{{ old('valor_original') }}" required>
-                                        @error('valor_original')
+                                        <input type="number" name="valor_bruto" id="valor_bruto" 
+                                               class="form-control @error('valor_bruto') is-invalid @enderror" 
+                                               step="0.01" value="{{ old('valor_bruto') }}" required>
+                                        @error('valor_bruto')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -323,7 +323,7 @@
                             <label for="natureza" class="form-label">Natureza</label>
                             <select name="natureza_financeira" id="natureza_financeira" 
                                     class="form-control @error('natureza_financeira') is-invalid @enderror">
-                                <option value="pagar" {{ old('natureza_financeira', 'pagar') == 'pagar' ? 'selected' : '' }}>
+                                <option value="saida" {{ old('natureza_financeira', 'saida') == 'saida' ? 'selected' : '' }}>
                                     Conta a Pagar
                                 </option>
                             </select>
@@ -376,7 +376,7 @@ function formatarMoeda(valor) {
 }
 
 function atualizarResumo() {
-    const original = parseFloat(document.getElementById('valor_original').value) || 0;
+    const original = parseFloat(document.getElementById('valor_bruto').value) || 0;
     const desconto = parseFloat(document.getElementById('desconto').value) || 0;
     const juros = parseFloat(document.getElementById('juros').value) || 0;
     const multa = parseFloat(document.getElementById('multa').value) || 0;
@@ -391,7 +391,7 @@ function atualizarResumo() {
 }
 
 // Eventos para atualizar o resumo
-document.getElementById('valor_original').addEventListener('input', atualizarResumo);
+document.getElementById('valor_bruto').addEventListener('input', atualizarResumo);
 document.getElementById('desconto').addEventListener('input', atualizarResumo);
 document.getElementById('juros').addEventListener('input', atualizarResumo);
 document.getElementById('multa').addEventListener('input', atualizarResumo);

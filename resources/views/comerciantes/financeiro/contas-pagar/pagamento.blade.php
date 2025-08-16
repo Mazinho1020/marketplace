@@ -38,13 +38,13 @@
                     </div>
                     <div class="col-md-3">
                         <strong>Valor Total:</strong><br>
-                        <span class="h6 text-danger">R$ {{ number_format($contaPagar->valor_total ?? $contaPagar->valor, 2, ',', '.') }}</span>
+                        <span class="h6 text-danger">R$ {{ number_format($contaPagar->valor_liquido ?? $contaPagar->valor, 2, ',', '.') }}</span>
                     </div>
                     <div class="col-md-3">
                         <strong>Saldo a Pagar:</strong><br>
                         @php
                             $valorPago = $contaPagar->pagamentos()->where('status_pagamento', 'confirmado')->sum('valor') ?? 0;
-                            $saldoPagar = ($contaPagar->valor_total ?? $contaPagar->valor) - $valorPago;
+                            $saldoPagar = ($contaPagar->valor_liquido ?? $contaPagar->valor) - $valorPago;
                         @endphp
                         <span class="h6 text-danger" id="saldoPagar">R$ {{ number_format($saldoPagar, 2, ',', '.') }}</span>
                     </div>

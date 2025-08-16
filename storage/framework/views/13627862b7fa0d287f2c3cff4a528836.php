@@ -192,10 +192,10 @@
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <strong>R$ <?php echo e(number_format($conta->valor_original, 2, ',', '.')); ?></strong>
-                                <?php if($conta->valor_pago > 0): ?>
+                                <strong>R$ <?php echo e(number_format($conta->valor_liquido, 2, ',', '.')); ?></strong>
+                                <?php if($conta->pagamentos()->where("status_pagamento", "confirmado")->sum("valor") > 0): ?>
                                     <br><small class="text-success">
-                                        Pago: R$ <?php echo e(number_format($conta->valor_pago, 2, ',', '.')); ?>
+                                        Pago: R$ <?php echo e(number_format($conta->pagamentos()->where("status_pagamento", "confirmado")->sum("valor"), 2, ',', '.')); ?>
 
                                     </small>
                                 <?php endif; ?>

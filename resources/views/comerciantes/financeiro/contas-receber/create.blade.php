@@ -4,7 +4,12 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Breadcrumb -->
+                                     <label for="valor_bruto" class="form-label">Valor Bruto *</label>
+                                    <input type="number" step="0.01" name="valor_bruto" id="valor_bruto" 
+                                           class="form-control @error('valor_bruto') is-invalid @enderror" 
+                                           value="{{ old('valor_bruto') }}" 
+                                           required placeholder="0,00">
+                                    @error('valor_bruto')- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
@@ -297,7 +302,7 @@
                             <label for="natureza_financeira" class="form-label">Natureza</label>
                             <select name="natureza_financeira" id="natureza_financeira" 
                                     class="form-control @error('natureza_financeira') is-invalid @enderror">
-                                <option value="receber" {{ old('natureza_financeira', 'receber') == 'receber' ? 'selected' : '' }}>
+                                <option value="entrada" {{ old('natureza_financeira', 'entrada') == 'entrada' ? 'selected' : '' }}>
                                     Conta a Receber
                                 </option>
                             </select>
@@ -349,7 +354,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Elementos
-    const valorOriginal = document.getElementById('valor_original');
+    const valorOriginal = document.getElementById('valor_bruto');
     const valorDesconto = document.getElementById('valor_desconto');
     const valorAcrescimo = document.getElementById('valor_acrescimo');
     const valorFinal = document.getElementById('valor_final');

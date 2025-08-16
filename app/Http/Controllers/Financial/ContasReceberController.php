@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Financial;
 
 use App\Http\Controllers\Controller;
-use App\Models\Financial\LancamentoFinanceiro;
+use App\Models\Financeiro\Lancamento;
 use App\Enums\NaturezaFinanceiraEnum;
 use App\Enums\SituacaoFinanceiraEnum;
 use App\Models\Empresa;
@@ -21,7 +21,7 @@ class ContasReceberController extends Controller
         $empresa = Empresa::findOrFail($empresa);
         $empresaId = $empresa->id;
 
-        $query = LancamentoFinanceiro::where('empresa_id', $empresaId)
+        $query = Lancamento::where('empresa_id', $empresaId)
             ->where('natureza_financeira', NaturezaFinanceiraEnum::RECEBER)
             ->with(['empresa', 'contaGerencial', 'pessoa'])
             ->orderBy('data_vencimento', 'asc');
@@ -113,7 +113,7 @@ class ContasReceberController extends Controller
         $empresa = Empresa::findOrFail($empresa);
         $request->validate([
             'descricao' => 'required|string|max:255',
-            'valor_original' => 'nullable|numeric|min:0.01',
+            'valor_bruto' => 'nullable|numeric|min:0.01',
             'valor_total' => 'nullable|numeric|min:0.01',
             'data_vencimento' => 'required|date',
             'data_emissao' => 'nullable|date',
@@ -129,7 +129,7 @@ class ContasReceberController extends Controller
             'juros' => 'nullable|numeric|min:0',
             'multa' => 'nullable|numeric|min:0',
             'situacao_financeira' => 'nullable|in:pendente,pago,cancelado',
-            'natureza_financeira' => 'nullable|in:receber',
+            'natureza_financeira' => 'nullable|in:entrada',
             'e_recorrente' => 'nullable|boolean',
             'parcelado' => 'boolean',
             'tem_parcelamento' => 'boolean',
@@ -138,7 +138,7 @@ class ContasReceberController extends Controller
             'cobranca_automatica' => 'boolean',
             'gerar_boleto' => 'boolean',
         ], [
-            'valor_original.required_without' => 'O valor é obrigatório',
+            'valor_bruto.required_without' => 'O valor é obrigatório',
             'valor_total.required_without' => 'O valor é obrigatório',
         ]);
 
@@ -176,7 +176,7 @@ class ContasReceberController extends Controller
         $empresa = Empresa::findOrFail($empresa);
         $empresaId = $empresa->id;
 
-        $contaReceber = LancamentoFinanceiro::where('empresa_id', $empresaId)
+        $contaReceber = Lancamento::where('empresa_id', $empresaId)
             ->where('id', $id)
             ->where('natureza_financeira', NaturezaFinanceiraEnum::RECEBER)
             ->with(['empresa', 'contaGerencial', 'pessoa', 'parcelasRelacionadas'])
@@ -185,12 +185,11 @@ class ContasReceberController extends Controller
         // Carregar recebimentos realizados
         $recebimentos = $contaReceber->recebimentos()
             ->where('status_pagamento', 'confirmado')
-            ->with(['formaPagamento', 'bandeira', 'contaBancaria'])
             ->orderBy('data_pagamento', 'desc')
             ->get();
 
         // Calcular resumo dos recebimentos
-        $valorTotal = $contaReceber->valor_final;
+        $valorTotal = $contaReceber->valor_liquido;
         $valorRecebido = $recebimentos->sum('valor');
         $saldoDevedor = $valorTotal - $valorRecebido;
 
@@ -211,7 +210,7 @@ class ContasReceberController extends Controller
         $empresa = Empresa::findOrFail($empresa);
         $empresaId = $empresa->id;
 
-        $contaReceber = LancamentoFinanceiro::where('empresa_id', $empresaId)
+        $contaReceber = Lancamento::where('empresa_id', $empresaId)
             ->where('id', $id)
             ->where('natureza_financeira', NaturezaFinanceiraEnum::RECEBER)
             ->firstOrFail();
@@ -243,7 +242,7 @@ class ContasReceberController extends Controller
         $empresa = Empresa::findOrFail($empresa);
         $request->validate([
             'descricao' => 'required|string|max:255',
-            'valor_original' => 'required|numeric|min:0.01',
+            'valor_bruto' => 'required|numeric|min:0.01',
             'data_vencimento' => 'required|date',
             'data_emissao' => 'nullable|date',
             'data_competencia' => 'nullable|date',
@@ -257,7 +256,7 @@ class ContasReceberController extends Controller
             'juros' => 'nullable|numeric|min:0',
             'multa' => 'nullable|numeric|min:0',
             'situacao_financeira' => 'nullable|in:pendente,pago,cancelado',
-            'natureza_financeira' => 'nullable|in:receber',
+            'natureza_financeira' => 'nullable|in:entrada',
             'e_recorrente' => 'nullable|boolean',
         ]);
 
@@ -266,7 +265,7 @@ class ContasReceberController extends Controller
         try {
             $empresaId = Auth::user()->empresa_id ?? 1;
 
-            $contaReceber = LancamentoFinanceiro::where('empresa_id', $empresaId)
+            $contaReceber = Lancamento::where('empresa_id', $empresaId)
                 ->where('id', $id)
                 ->where('natureza_financeira', NaturezaFinanceiraEnum::RECEBER)
                 ->firstOrFail();
@@ -277,12 +276,11 @@ class ContasReceberController extends Controller
             }
 
             // Calcular valores com desconto, juros e multa
-            $valorOriginal = $request->valor_original;
+            $valorOriginal = $request->valor_bruto;
             $valorDesconto = $request->valor_desconto ?? (($request->desconto ?? 0) / 100) * $valorOriginal;
             $valorAcrescimo = $request->valor_acrescimo ?? 0;
             $valorJuros = ($request->juros ?? 0) > 0 ? (($request->juros / 100) * $valorOriginal) : 0;
             $valorMulta = ($request->multa ?? 0) > 0 ? (($request->multa / 100) * $valorOriginal) : 0;
-            $valorTotal = $valorOriginal - $valorDesconto + $valorAcrescimo + $valorJuros + $valorMulta;
 
             // Determinar as datas
             $dataEmissao = $request->data_emissao ? Carbon::parse($request->data_emissao) : null;
@@ -290,14 +288,11 @@ class ContasReceberController extends Controller
 
             $contaReceber->update([
                 'descricao' => $request->descricao,
-                'valor_original' => $valorOriginal,
-                'valor' => $valorTotal,
-                'valor_final' => $valorTotal,
+                'valor_bruto' => $valorOriginal,
                 'valor_desconto' => $valorDesconto,
                 'valor_acrescimo' => $valorAcrescimo,
                 'valor_juros' => $valorJuros,
                 'valor_multa' => $valorMulta,
-                'data' => $dataEmissao,
                 'data_emissao' => $dataEmissao ? $dataEmissao->toDateString() : null,
                 'data_competencia' => $dataCompetencia ? $dataCompetencia->toDateString() : null,
                 'data_vencimento' => $request->data_vencimento,
@@ -331,7 +326,7 @@ class ContasReceberController extends Controller
         try {
             $empresaId = Auth::user()->empresa_id ?? 1;
 
-            $contaReceber = LancamentoFinanceiro::where('empresa_id', $empresaId)
+            $contaReceber = Lancamento::where('empresa_id', $empresaId)
                 ->where('id', $id)
                 ->where('natureza_financeira', NaturezaFinanceiraEnum::RECEBER)
                 ->first();
@@ -381,7 +376,7 @@ class ContasReceberController extends Controller
     {
         $empresaId = Auth::user()->empresa_id ?? 1;
 
-        $contaReceber = LancamentoFinanceiro::where('empresa_id', $empresaId)
+        $contaReceber = Lancamento::where('empresa_id', $empresaId)
             ->where('id', $id)
             ->where('natureza_financeira', NaturezaFinanceiraEnum::RECEBER)
             ->with(['empresa', 'pessoa'])
@@ -408,7 +403,7 @@ class ContasReceberController extends Controller
     private function criarLancamentoUnico(Request $request, int $empresaId)
     {
         // Calcular valores com desconto e acréscimo
-        $valorOriginal = $request->valor_original ?? $request->valor_total ?? 0;
+        $valorOriginal = $request->valor_bruto ?? $request->valor_total ?? 0;
         $valorDesconto = $request->valor_desconto ?? 0;
         $valorAcrescimo = $request->valor_acrescimo ?? 0;
         $valorTotal = $valorOriginal - $valorDesconto + $valorAcrescimo;
@@ -420,20 +415,17 @@ class ContasReceberController extends Controller
         $dataEmissao = $request->data_emissao ? Carbon::parse($request->data_emissao) : now();
         $dataCompetencia = $request->data_competencia ? Carbon::parse($request->data_competencia) : $dataEmissao->copy();
 
-        return LancamentoFinanceiro::create([
+        return Lancamento::create([
             'empresa_id' => $empresaId,
             'natureza_financeira' => $request->natureza_financeira ?? NaturezaFinanceiraEnum::RECEBER,
             'situacao_financeira' => $request->situacao_financeira ?? SituacaoFinanceiraEnum::PENDENTE,
             'descricao' => $request->descricao,
-            'valor' => $valorTotal,
-            'valor_original' => $valorOriginal,
+            'valor_bruto' => $valorOriginal,
             'valor_desconto' => $valorDesconto,
             'valor_acrescimo' => $valorAcrescimo,
             'valor_juros' => 0,
             'valor_multa' => 0,
-            'valor_final' => $valorTotal,
-            'data' => $dataEmissao,
-            'data_emissao' => $dataEmissao->toDateString(),
+            'data_emissao' => $dataEmissao,
             'data_competencia' => $dataCompetencia->toDateString(),
             'data_vencimento' => $request->data_vencimento,
             'pessoa_id' => $pessoaId,
@@ -442,13 +434,14 @@ class ContasReceberController extends Controller
             'numero_documento' => $request->numero_documento,
             'observacoes' => $request->observacoes,
             'e_recorrente' => $request->has('e_recorrente') ? true : false,
-            'usuario_id' => Auth::id(),
+            'usuario_id' => Auth::id() ?? 1,
+            'usuario_criacao' => Auth::id() ?? 1,
         ]);
     }
     private function criarLancamentosParcelados(Request $request, int $empresaId)
     {
         // Calcular valores com desconto, juros e multa
-        $valorOriginal = $request->valor_original;
+        $valorOriginal = $request->valor_bruto;
         $desconto = $request->desconto ?? 0;
         $juros = $request->juros ?? 0;
         $multa = $request->multa ?? 0;
@@ -464,20 +457,17 @@ class ContasReceberController extends Controller
         $dataEmissao = $request->data_emissao ? Carbon::parse($request->data_emissao) : now();
 
         for ($i = 1; $i <= $request->numero_parcelas; $i++) {
-            LancamentoFinanceiro::create([
+            Lancamento::create([
                 'empresa_id' => $empresaId,
                 'natureza_financeira' => $request->natureza_financeira ?? NaturezaFinanceiraEnum::RECEBER,
                 'situacao_financeira' => $request->situacao_financeira ?? SituacaoFinanceiraEnum::PENDENTE,
                 'descricao' => $request->descricao . " (Parcela {$i}/{$request->numero_parcelas})",
-                'valor' => round($valorParcela, 2),
-                'valor_original' => round($valorOriginal / $request->numero_parcelas, 2),
+                'valor_bruto' => round($valorOriginal / $request->numero_parcelas, 2),
                 'valor_desconto' => round($valorDesconto / $request->numero_parcelas, 2),
                 'valor_acrescimo' => round(($request->valor_acrescimo ?? 0) / $request->numero_parcelas, 2),
                 'valor_juros' => round($valorJuros / $request->numero_parcelas, 2),
                 'valor_multa' => round($valorMulta / $request->numero_parcelas, 2),
-                'valor_final' => round($valorParcela, 2),
-                'data' => $dataEmissao,
-                'data_emissao' => $dataEmissao->toDateString(),
+                'data_emissao' => $dataEmissao,
                 'data_competencia' => $dataEmissao->toDateString(),
                 'data_vencimento' => $dataVencimento->copy()->toDateString(),
                 'pessoa_id' => $request->pessoa_id,
@@ -488,9 +478,10 @@ class ContasReceberController extends Controller
                 'parcela_atual' => $i,
                 'total_parcelas' => $request->numero_parcelas,
                 'grupo_parcelas' => $grupoParcelas,
-                'intervalo_parcelas' => $request->intervalo_parcelas ?? 30,
+                'intervalo_dias' => $request->intervalo_parcelas ?? 30,
                 'e_recorrente' => $request->has('e_recorrente') ? true : false,
-                'usuario_id' => Auth::id(),
+                'usuario_id' => Auth::id() ?? 1,
+                'usuario_criacao' => Auth::id() ?? 1,
             ]);
 
             // Calcular próxima data de vencimento baseado no intervalo em dias
@@ -507,18 +498,18 @@ class ContasReceberController extends Controller
         $inicioMes = Carbon::now()->startOfMonth();
         $fimMes = Carbon::now()->endOfMonth();
 
-        $query = LancamentoFinanceiro::where('empresa_id', $empresaId)
+        $query = Lancamento::where('empresa_id', $empresaId)
             ->where('natureza_financeira', NaturezaFinanceiraEnum::RECEBER);
 
         return [
-            'total_aberto' => $query->clone()->where('situacao_financeira', 'pendente')->sum('valor'),
+            'total_aberto' => $query->clone()->where('situacao_financeira', 'pendente')->sum('valor_liquido'),
             'total_recebido' => $query->clone()->where('situacao_financeira', 'pago')
                 ->whereBetween('data_vencimento', [$inicioMes, $fimMes])
-                ->sum('valor'),
+                ->sum('valor_liquido'),
             'vencendo_hoje' => $query->clone()->whereDate('data_vencimento', '=', $hoje)
-                ->where('situacao_financeira', '!=', 'pago')->sum('valor'),
+                ->where('situacao_financeira', '!=', 'pago')->sum('valor_liquido'),
             'em_atraso' => $query->clone()->where('data_vencimento', '<', $hoje)
-                ->where('situacao_financeira', '!=', 'pago')->sum('valor'),
+                ->where('situacao_financeira', '!=', 'pago')->sum('valor_liquido'),
             'quantidade_pendente' => $query->clone()->where('situacao_financeira', 'pendente')->count(),
             'quantidade_vencidas' => $query->clone()->where('data_vencimento', '<', $hoje)
                 ->where('situacao_financeira', '!=', 'pago')->count(),

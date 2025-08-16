@@ -39,19 +39,19 @@
                     </div>
                     <div class="col-md-3">
                         <strong>Valor Total:</strong><br>
-                        <span class="h6 text-primary">R$ {{ number_format($contaReceber->valor_final, 2, ',', '.') }}</span>
+                        <span class="h6 text-primary">R$ {{ number_format($contaReceber->valor_liquido, 2, ',', '.') }}</span>
                     </div>
                     <div class="col-md-3">
                         <strong>Saldo a Receber:</strong><br>
                         @php
                             $valorRecebido = $contaReceber->recebimentos()->where('status_pagamento', 'confirmado')->sum('valor');
-                            $saldoReceber = $contaReceber->valor_final - $valorRecebido;
+                            $saldoReceber = $contaReceber->valor_liquido - $valorRecebido;
                         @endphp
                         <span class="h6 text-success" id="saldoReceber">R$ {{ number_format($saldoReceber, 2, ',', '.') }}</span>
                     </div>
                     <div class="col-md-3">
                         <strong>Situação:</strong><br>
-                        @if($contaReceber->situacao_financeira === 'quitado')
+                        @if($contaReceber->situacao_financeira === 'pago')
                             <span class="badge bg-success">Quitado</span>
                         @elseif($contaReceber->situacao_financeira === \App\Enums\SituacaoFinanceiraEnum::PARCIALMENTE_PAGO)
                             <span class="badge bg-warning">Parcialmente Recebido</span>

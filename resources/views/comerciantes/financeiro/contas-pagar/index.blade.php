@@ -188,10 +188,10 @@
                                 @endif
                             </td>
                             <td>
-                                <strong>R$ {{ number_format($conta->valor_original, 2, ',', '.') }}</strong>
-                                @if($conta->valor_pago > 0)
+                                <strong>R$ {{ number_format($conta->valor_liquido, 2, ',', '.') }}</strong>
+                                @if($conta->pagamentos()->where("status_pagamento", "confirmado")->sum("valor") > 0)
                                     <br><small class="text-success">
-                                        Pago: R$ {{ number_format($conta->valor_pago, 2, ',', '.') }}
+                                        Pago: R$ {{ number_format($conta->pagamentos()->where("status_pagamento", "confirmado")->sum("valor"), 2, ',', '.') }}
                                     </small>
                                 @endif
                             </td>

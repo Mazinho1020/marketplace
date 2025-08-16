@@ -1,3 +1,5 @@
+
+
 <?php $__env->startSection('title', 'Detalhes da Conta a Pagar'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -47,15 +49,15 @@
                         </div>
                         <div class="col-sm-6">
                             <p><strong>Data de Vencimento:</strong><br>
-                                <span class="<?php if($lancamento->data_vencimento && $lancamento->data_vencimento->isPast() && $lancamento->situacao_financeira !== 'quitado'): ?> text-danger <?php endif; ?>">
+                                <span class="<?php if($lancamento->data_vencimento && $lancamento->data_vencimento->isPast() && $lancamento->situacao_financeira->value !== 'pago'): ?> text-danger <?php endif; ?>">
                                     <?php echo e($lancamento->data_vencimento ? $lancamento->data_vencimento->format('d/m/Y') : 'N/A'); ?>
 
                                 </span>
                             </p>
                             <p><strong>Situação:</strong><br>
-                                <?php if($lancamento->situacao_financeira === 'quitado'): ?>
+                                <?php if($lancamento->situacao_financeira->value === 'pago'): ?>
                                     <span class="badge bg-success">Quitado</span>
-                                <?php elseif($lancamento->situacao_financeira === \App\Enums\SituacaoFinanceiraEnum::PARCIALMENTE_PAGO): ?>
+                                <?php elseif($lancamento->situacao_financeira->value === 'parcialmente_pago'): ?>
                                     <span class="badge bg-warning">Parcialmente Pago</span>
                                 <?php else: ?>
                                     <span class="badge bg-danger">Pendente</span>
@@ -82,15 +84,15 @@
                 <div class="card-body">
                     <?php
                         $valorPago = $lancamento->pagamentos()->where('status_pagamento', 'confirmado')->sum('valor');
-                        $saldoDevedor = $lancamento->valor_final - $valorPago;
-                        $percentualPago = $lancamento->valor_final > 0 ? ($valorPago / $lancamento->valor_final) * 100 : 0;
+                        $saldoDevedor = $lancamento->valor_liquido - $valorPago;
+                        $percentualPago = $lancamento->valor_liquido > 0 ? ($valorPago / $lancamento->valor_liquido) * 100 : 0;
                     ?>
                     
                     <div class="row text-center">
                         <div class="col-4">
                             <div class="border-end">
                                 <h6 class="text-muted mb-1">Valor Total</h6>
-                                <h4 class="mb-0">R$ <?php echo e(number_format($lancamento->valor_final, 2, ',', '.')); ?></h4>
+                                <h4 class="mb-0">R$ <?php echo e(number_format($lancamento->valor_liquido, 2, ',', '.')); ?></h4>
                             </div>
                         </div>
                         <div class="col-4">

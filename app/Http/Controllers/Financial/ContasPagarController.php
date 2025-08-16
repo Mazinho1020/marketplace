@@ -108,7 +108,7 @@ class ContasPagarController extends Controller
         $empresa = Empresa::findOrFail($empresa);
         $request->validate([
             'descricao' => 'required|string|max:255',
-            'valor_original' => 'required|numeric|min:0.01',
+            'valor_bruto' => 'required|numeric|min:0.01',
             'data_vencimento' => 'required|date',
             'data_emissao' => 'nullable|date',
             'pessoa_id' => 'nullable|exists:pessoas,id',
@@ -119,7 +119,7 @@ class ContasPagarController extends Controller
             'juros' => 'nullable|numeric|min:0',
             'multa' => 'nullable|numeric|min:0',
             'situacao_financeira' => 'nullable|in:pendente,pago,cancelado',
-            'natureza_financeira' => 'required|in:pagar',
+            'natureza_financeira' => 'required|in:saida',
             'e_recorrente' => 'nullable|boolean',
             'parcelado' => 'boolean',
             'numero_parcelas' => 'nullable|integer|min:1|max:360',
@@ -205,7 +205,7 @@ class ContasPagarController extends Controller
         $empresa = Empresa::findOrFail($empresa);
         $request->validate([
             'descricao' => 'required|string|max:255',
-            'valor_original' => 'required|numeric|min:0.01',
+            'valor_bruto' => 'required|numeric|min:0.01',
             'data_vencimento' => 'required|date',
             'data_emissao' => 'nullable|date',
             'pessoa_id' => 'nullable|exists:pessoas,id',
@@ -216,7 +216,7 @@ class ContasPagarController extends Controller
             'juros' => 'nullable|numeric|min:0',
             'multa' => 'nullable|numeric|min:0',
             'situacao_financeira' => 'nullable|in:pendente,pago,cancelado',
-            'natureza_financeira' => 'required|in:pagar',
+            'natureza_financeira' => 'required|in:saida',
             'e_recorrente' => 'nullable|boolean',
         ]);
 
@@ -236,7 +236,7 @@ class ContasPagarController extends Controller
             }
 
             // Calcular valores com desconto, juros e multa
-            $valorOriginal = $request->valor_original;
+            $valorOriginal = $request->valor_bruto;
             $desconto = $request->desconto ?? 0;
             $juros = $request->juros ?? 0;
             $multa = $request->multa ?? 0;
@@ -248,7 +248,7 @@ class ContasPagarController extends Controller
 
             $contaPagar->update([
                 'descricao' => $request->descricao,
-                'valor_original' => $valorOriginal,
+                'valor_bruto' => $valorOriginal,
                 'data_vencimento' => $request->data_vencimento,
                 'data_emissao' => $request->data_emissao,
                 'pessoa_id' => $request->pessoa_id,
@@ -258,8 +258,6 @@ class ContasPagarController extends Controller
                 'valor_desconto' => $valorDesconto,
                 'valor_juros' => $valorJuros,
                 'valor_multa' => $valorMulta,
-                'valor_total' => $valorTotal,
-                'valor' => $valorTotal, // valor final
                 'situacao_financeira' => $request->situacao_financeira ?? SituacaoFinanceiraEnum::PENDENTE,
                 'natureza_financeira' => $request->natureza_financeira ?? NaturezaFinanceiraEnum::PAGAR,
                 'e_recorrente' => $request->has('e_recorrente') ? true : false,
@@ -371,7 +369,7 @@ class ContasPagarController extends Controller
     private function criarLancamentoUnico(Request $request, int $empresaId)
     {
         // Calcular valores com desconto, juros e multa
-        $valorOriginal = $request->valor_original;
+        $valorOriginal = $request->valor_bruto;
         $desconto = $request->desconto ?? 0;
         $juros = $request->juros ?? 0;
         $multa = $request->multa ?? 0;
@@ -386,15 +384,12 @@ class ContasPagarController extends Controller
             'natureza_financeira' => $request->natureza_financeira ?? NaturezaFinanceiraEnum::PAGAR,
             'situacao_financeira' => $request->situacao_financeira ?? SituacaoFinanceiraEnum::PENDENTE,
             'descricao' => $request->descricao,
-            'valor' => $valorTotal,
-            'valor_original' => $valorOriginal,
+            'valor_bruto' => $valorOriginal,
             'valor_desconto' => $valorDesconto,
             'valor_acrescimo' => $request->valor_acrescimo ?? 0,
             'valor_juros' => $valorJuros,
             'valor_multa' => $valorMulta,
-            'valor_final' => $valorTotal,
-            'data' => $request->data_emissao ? Carbon::parse($request->data_emissao) : now(),
-            'data_emissao' => $request->data_emissao ? Carbon::parse($request->data_emissao)->toDateString() : now()->toDateString(),
+            'data_emissao' => $request->data_emissao ? Carbon::parse($request->data_emissao) : now(),
             'data_competencia' => $request->data_emissao ? Carbon::parse($request->data_emissao)->toDateString() : now()->toDateString(),
             'data_vencimento' => $request->data_vencimento,
             'pessoa_id' => $request->pessoa_id,
@@ -403,14 +398,15 @@ class ContasPagarController extends Controller
             'numero_documento' => $request->numero_documento,
             'observacoes' => $request->observacoes,
             'e_recorrente' => $request->has('e_recorrente') ? true : false,
-            'usuario_id' => Auth::id(),
+            'usuario_id' => Auth::id() ?? 1,
+            'usuario_criacao' => Auth::id() ?? 1,
         ]);
     }
 
     private function criarLancamentosParcelados(Request $request, int $empresaId)
     {
         // Calcular valores com desconto, juros e multa
-        $valorOriginal = $request->valor_original;
+        $valorOriginal = $request->valor_bruto;
         $desconto = $request->desconto ?? 0;
         $juros = $request->juros ?? 0;
         $multa = $request->multa ?? 0;
@@ -430,12 +426,10 @@ class ContasPagarController extends Controller
                 'natureza_financeira' => $request->natureza_financeira ?? NaturezaFinanceiraEnum::PAGAR,
                 'situacao_financeira' => $request->situacao_financeira ?? SituacaoFinanceiraEnum::PENDENTE,
                 'descricao' => $request->descricao . " (Parcela {$i}/{$request->numero_parcelas})",
-                'valor' => round($valorParcela, 2),
-                'valor_original' => round($valorOriginal / $request->numero_parcelas, 2),
+                'valor_bruto' => round($valorOriginal / $request->numero_parcelas, 2),
                 'valor_desconto' => round($valorDesconto / $request->numero_parcelas, 2),
                 'valor_juros' => round($valorJuros / $request->numero_parcelas, 2),
                 'valor_multa' => round($valorMulta / $request->numero_parcelas, 2),
-                'valor_total' => round($valorParcela, 2),
                 'data_vencimento' => $dataVencimento->copy(),
                 'data_emissao' => $request->data_emissao,
                 'pessoa_id' => $request->pessoa_id,
@@ -446,7 +440,8 @@ class ContasPagarController extends Controller
                 'total_parcelas' => $request->numero_parcelas,
                 'parcela_referencia' => $parcelaReferencia,
                 'e_recorrente' => $request->has('e_recorrente') ? true : false,
-                'usuario_id' => Auth::id(),
+                'usuario_id' => Auth::id() ?? 1,
+                'usuario_criacao' => Auth::id() ?? 1,
             ]);
 
             // Calcular próxima data de vencimento baseado no intervalo em dias
@@ -467,12 +462,12 @@ class ContasPagarController extends Controller
             ->where('natureza_financeira', NaturezaFinanceiraEnum::PAGAR);
 
         return [
-            'total_pendente' => $query->clone()->where('situacao_financeira', 'pendente')->sum('valor'),
-            'total_pago' => $query->clone()->where('situacao_financeira', 'pago')->sum('valor'),
+            'total_pendente' => $query->clone()->where('situacao_financeira', 'pendente')->sum('valor_liquido'),
+            'total_pago' => $query->clone()->where('situacao_financeira', 'pago')->sum('valor_liquido'),
             'vencidas' => $query->clone()->where('data_vencimento', '<', $hoje)
                 ->where('situacao_financeira', '!=', 'pago')->count(),
             'este_mes' => $query->clone()->whereBetween('data_vencimento', [$inicioMes, $fimMes])
-                ->where('situacao_financeira', '!=', 'pago')->sum('valor'),
+                ->where('situacao_financeira', '!=', 'pago')->sum('valor_liquido'),
             'quantidade_pendente' => $query->clone()->where('situacao_financeira', 'pendente')->count(),
             'proximos_vencimentos' => $query->clone()->where('situacao_financeira', '!=', 'pago')
                 ->whereBetween('data_vencimento', [$hoje, $hoje->copy()->addDays(7)])

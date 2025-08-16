@@ -4,8 +4,8 @@ namespace App\Enums;
 
 enum NaturezaFinanceiraEnum: string
 {
-    case PAGAR = 'pagar';
-    case RECEBER = 'receber';
+    case PAGAR = 'saida';
+    case RECEBER = 'entrada';
 
     public function label(): string
     {

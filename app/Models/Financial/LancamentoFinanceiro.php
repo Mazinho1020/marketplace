@@ -34,7 +34,7 @@ class LancamentoFinanceiro extends Model
         'data_vencimento',
         'data_pagamento',
         'valor',
-        'valor_original',
+        'valor_bruto',
         'valor_desconto',
         'valor_acrescimo',
         'valor_juros',
@@ -69,7 +69,7 @@ class LancamentoFinanceiro extends Model
         'proxima_recorrencia' => 'date',
         'data_aprovacao' => 'datetime',
         'valor' => 'decimal:2',
-        'valor_original' => 'decimal:2',
+        'valor_bruto' => 'decimal:2',
         'valor_desconto' => 'decimal:2',
         'valor_acrescimo' => 'decimal:2',
         'valor_juros' => 'decimal:2',
@@ -199,7 +199,7 @@ class LancamentoFinanceiro extends Model
 
     public function calcularValorFinal(): float
     {
-        $valorBase = $this->valor_original ?? $this->valor ?? 0;
+        $valorBase = $this->valor_bruto ?? $this->valor ?? 0;
         $desconto = $this->valor_desconto ?? 0;
         $acrescimo = $this->valor_acrescimo ?? 0;
         $juros = $this->valor_juros ?? 0;
@@ -223,7 +223,7 @@ class LancamentoFinanceiro extends Model
         }
 
         $diasCalculoJuros = $diasAtraso - $carencia;
-        $valorBase = $this->valor_original ?? $this->valor ?? 0;
+        $valorBase = $this->valor_bruto ?? $this->valor ?? 0;
 
         // Calcula juros
         $taxaJurosDia = ($config['taxa_juros_mes'] ?? 0) / 30;
@@ -257,7 +257,7 @@ class LancamentoFinanceiro extends Model
             return 0;
         }
 
-        $valorBase = $this->valor_original ?? $this->valor ?? 0;
+        $valorBase = $this->valor_bruto ?? $this->valor ?? 0;
         $percentual = $config['percentual'] ?? 0;
 
         return round($valorBase * ($percentual / 100), 2);
@@ -310,7 +310,7 @@ class LancamentoFinanceiro extends Model
             'pessoa_tipo' => $this->pessoa_tipo,
             'conta_gerencial_id' => $this->conta_gerencial_id,
             'descricao' => $this->descricao . ' (Recorrente)',
-            'valor_original' => $this->valor_original,
+            'valor_bruto' => $this->valor_bruto,
             'data_vencimento' => $proximaData,
             'data_emissao' => now(),
             'situacao_financeira' => SituacaoFinanceiraEnum::PENDENTE,

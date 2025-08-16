@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -62,9 +63,7 @@ class Lancamento extends Model
         'valor_acrescimo',
         'valor_juros',
         'valor_multa',
-        'valor_liquido',
         'valor_pago',
-        'valor_saldo',
         'situacao_financeira',
         'data_lancamento',
         'data_emissao',
@@ -114,7 +113,7 @@ class Lancamento extends Model
         'usuario_ultima_alteracao',
         'data_exclusao',
         'usuario_exclusao',
-        'motivo_exclusao',
+        'motivo_exclusao'
     ];
 
     protected $casts = [
@@ -134,16 +133,15 @@ class Lancamento extends Model
         'valor_acrescimo' => 'decimal:4',
         'valor_juros' => 'decimal:4',
         'valor_multa' => 'decimal:4',
-        'valor_liquido' => 'decimal:4',
         'valor_pago' => 'decimal:4',
-        'valor_saldo' => 'decimal:4',
-        'e_parcelado' => 'boolean',
+        'situacao_financeira' => \App\Enums\SituacaoFinanceiraEnum::class,
+        'natureza_financeira' => \App\Enums\NaturezaFinanceiraEnum::class,
         'e_recorrente' => 'boolean',
         'recorrencia_ativa' => 'boolean',
         'cobranca_automatica' => 'boolean',
         'boleto_gerado' => 'boolean',
-        'config_juros_multa' => 'json',
-        'config_desconto' => 'json',
+                'juros_multa_config' => 'json',
+        'desconto_antecipacao' => 'json',
         'config_alertas' => 'json',
         'anexos' => 'json',
         'metadados' => 'json',
@@ -197,18 +195,14 @@ class Lancamento extends Model
                 $model->uuid = (string) Str::uuid();
             }
             
-            // Calcular valor líquido
-            $model->calcularValorLiquido();
-            
             // Definir usuário de criação
             if (empty($model->usuario_criacao)) {
                 $model->usuario_criacao = $model->usuario_id;
             }
         });
 
-        // Recalcular valores ao atualizar
+        // Recalcular situação ao atualizar
         static::updating(function ($model) {
-            $model->calcularValorLiquido();
             $model->calcularSituacaoFinanceira();
         });
     }
@@ -223,25 +217,92 @@ class Lancamento extends Model
 
     public function movimentacoes(): HasMany
     {
-        return $this->hasMany(LancamentoMovimentacao::class, 'lancamento_id');
+        // Comentado temporariamente - modelo LancamentoMovimentacao não existe ainda
+        // return $this->hasMany(LancamentoMovimentacao::class, 'lancamento_id');
+        return $this->hasMany(self::class, 'id')->whereRaw('1 = 0'); // Retorna collection vazia
     }
 
     public function pagamentos(): HasMany
     {
-        return $this->hasMany(LancamentoMovimentacao::class, 'lancamento_id')
-                    ->where('tipo', 'pagamento');
+        return $this->hasMany(\App\Models\Financeiro\Pagamento::class, 'lancamento_id');
     }
 
+    /**
+     * Relacionamento com recebimentos (pagamentos confirmados)
+     */
     public function recebimentos(): HasMany
     {
-        return $this->hasMany(LancamentoMovimentacao::class, 'lancamento_id')
-                    ->where('tipo', 'recebimento');
+        return $this->hasMany(\App\Models\Financeiro\Pagamento::class, 'lancamento_id')
+            ->where('status_pagamento', 'confirmado')
+            ->orderBy('data_pagamento', 'desc');
     }
 
-    public function estornos(): HasMany
+    /**
+     * Relacionamento com pessoa (cliente/fornecedor)
+     */
+    public function pessoa()
     {
-        return $this->hasMany(LancamentoMovimentacao::class, 'lancamento_id')
-                    ->where('tipo', 'estorno');
+        return $this->belongsTo(\App\Modules\Comerciante\Models\Pessoas\Pessoa::class, 'pessoa_id');
+    }
+
+    /**
+     * Relacionamento com conta gerencial
+     */
+    public function contaGerencial()
+    {
+        return $this->belongsTo(\App\Models\Financial\ContaGerencial::class, 'conta_gerencial_id');
+    }
+
+    /**
+     * Relacionamento com empresa
+     */
+    public function empresa()
+    {
+        return $this->belongsTo(\App\Models\Empresa::class, 'empresa_id');
+    }
+
+    /**
+     * Relacionamento com usuário criador
+     */
+    public function usuarioCriacao()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'usuario_criacao');
+    }
+
+    /**
+     * Relacionamento com usuário que fez última alteração
+     */
+    public function usuarioUltimaAlteracao()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'usuario_ultima_alteracao');
+    }
+
+    public function pagamentosConfirmados(): HasMany
+    {
+        return $this->hasMany(\App\Models\Financeiro\Pagamento::class, 'lancamento_id')
+                    ->where('status_pagamento', 'confirmado');
+    }
+
+    public function pagamentosEstornados(): HasMany
+    {
+        return $this->hasMany(\App\Models\Financeiro\Pagamento::class, 'lancamento_id')
+                    ->where('status_pagamento', 'estornado');
+    }
+
+    /**
+     * Relacionamento com parcelas relacionadas
+     * Retorna outras parcelas do mesmo grupo de parcelamento
+     */
+    public function parcelasRelacionadas()
+    {
+        // Se não tem grupo_parcelas, retorna uma coleção vazia
+        if (empty($this->grupo_parcelas)) {
+            return $this->hasMany(self::class, 'id', 'id')->whereRaw('1 = 0');
+        }
+
+        return $this->hasMany(self::class, 'grupo_parcelas', 'grupo_parcelas')
+            ->where('id', '!=', $this->id)
+            ->orderBy('parcela_atual');
     }
 
     /**
@@ -292,9 +353,9 @@ class Lancamento extends Model
         return $query->whereBetween('data_competencia', [$dataInicio, $dataFim]);
     }
 
-    public function scopeParcelados($query)
+    public function scopeParcelados(Builder $query): Builder
     {
-        return $query->where('e_parcelado', true);
+        return $query->where('total_parcelas', '>', 1);
     }
 
     public function scopeRecorrentes($query)
@@ -311,20 +372,18 @@ class Lancamento extends Model
     /**
      * Métodos de cálculo
      */
-    public function calcularValorLiquido()
+    public function getValorLiquidoAttribute()
     {
-        $this->valor_liquido = $this->valor_bruto 
-                             - $this->valor_desconto 
-                             + $this->valor_acrescimo 
-                             + $this->valor_juros 
-                             + $this->valor_multa;
-        
-        $this->calcularSaldo();
+        return $this->valor_bruto 
+               - $this->valor_desconto 
+               + $this->valor_acrescimo 
+               + $this->valor_juros 
+               + $this->valor_multa;
     }
 
-    public function calcularSaldo()
+    public function getValorSaldoAttribute()
     {
-        $this->valor_saldo = $this->valor_liquido - $this->valor_pago;
+        return $this->getValorLiquidoAttribute() - $this->valor_pago;
     }
 
     public function calcularSituacaoFinanceira()
@@ -340,7 +399,7 @@ class Lancamento extends Model
             } else {
                 $this->situacao_financeira = self::SITUACAO_PENDENTE;
             }
-        } elseif ($this->valor_pago >= $this->valor_liquido) {
+        } elseif ($this->valor_pago >= $this->getValorLiquidoAttribute()) {
             $this->situacao_financeira = self::SITUACAO_PAGO;
             $this->data_pagamento = $this->data_ultimo_pagamento ?? now();
         } else {
@@ -383,7 +442,7 @@ class Lancamento extends Model
 
     public function isParcelado(): bool
     {
-        return $this->e_parcelado === true;
+        return $this->total_parcelas > 1;
     }
 
     public function isRecorrente(): bool
@@ -407,53 +466,34 @@ class Lancamento extends Model
     }
 
     /**
-     * Métodos para ações
+     * Métodos para ações - INTEGRADO COM TABELA PAGAMENTOS EXISTENTE
      */
-    public function adicionarPagamento(float $valor, array $dados = []): LancamentoMovimentacao
+    public function adicionarPagamento(float $valor, array $dados = []): Pagamento
     {
-        $tipo = $this->isContaReceber() ? 'recebimento' : 'pagamento';
-        
-        $movimentacao = $this->movimentacoes()->create(array_merge($dados, [
-            'tipo' => $tipo,
+        $pagamento = $this->pagamentos()->create(array_merge($dados, [
             'valor' => $valor,
-            'data_movimentacao' => now(),
-            'usuario_id' => auth()->id() ?? $this->usuario_id,
+            'data_pagamento' => now()->format('Y-m-d'),
+            'status_pagamento' => 'confirmado',
+            'usuario_id' => $this->usuario_id,
             'empresa_id' => $this->empresa_id,
         ]));
 
-        // Atualizar valor pago
-        $this->valor_pago = $this->movimentacoes()
-                                ->whereIn('tipo', ['pagamento', 'recebimento'])
-                                ->sum('valor');
-        
-        $this->data_ultimo_pagamento = now();
-        $this->calcularSituacaoFinanceira();
-        $this->save();
+        // Os triggers do BD vão atualizar automaticamente valor_pago, valor_saldo e situacao_financeira
+        $this->refresh();
 
-        return $movimentacao;
+        return $pagamento;
     }
 
-    public function estornarPagamento(LancamentoMovimentacao $movimentacao, string $motivo = null): LancamentoMovimentacao
+    public function estornarPagamento(Pagamento $pagamento, string $motivo = null): bool
     {
-        $estorno = $this->movimentacoes()->create([
-            'tipo' => 'estorno',
-            'valor' => $movimentacao->valor,
-            'data_movimentacao' => now(),
-            'observacoes' => "Estorno do pagamento #{$movimentacao->id}. Motivo: " . ($motivo ?? 'Não informado'),
-            'usuario_id' => auth()->id() ?? $this->usuario_id,
-            'empresa_id' => $this->empresa_id,
-        ]);
-
-        // Recalcular valor pago
-        $this->valor_pago = $this->movimentacoes()
-                                ->whereIn('tipo', ['pagamento', 'recebimento'])
-                                ->sum('valor')
-                          - $this->estornos()->sum('valor');
+        $sucesso = $pagamento->estornar($motivo);
         
-        $this->calcularSituacaoFinanceira();
-        $this->save();
+        if ($sucesso) {
+            // Os triggers do BD vão recalcular automaticamente
+            $this->refresh();
+        }
 
-        return $estorno;
+        return $sucesso;
     }
 
     public function aprovar(int $usuarioId, string $observacoes = null): bool
@@ -501,12 +541,12 @@ class Lancamento extends Model
      */
     public function getValorBrutoFormatadoAttribute(): string
     {
-        return 'R$ ' . number_format($this->valor_bruto, 2, ',', '.');
+        return 'R$ ' . number_format($this->valor, 2, ',', '.');
     }
 
     public function getValorLiquidoFormatadoAttribute(): string
     {
-        return 'R$ ' . number_format($this->valor_liquido, 2, ',', '.');
+        return 'R$ ' . number_format($this->getValorLiquidoAttribute(), 2, ',', '.');
     }
 
     public function getValorPagoFormatadoAttribute(): string
@@ -516,7 +556,25 @@ class Lancamento extends Model
 
     public function getValorSaldoFormatadoAttribute(): string
     {
-        return 'R$ ' . number_format($this->valor_saldo, 2, ',', '.');
+        return 'R$ ' . number_format($this->getValorSaldoAttribute(), 2, ',', '.');
+    }
+
+    /**
+     * Accessor para valor pago calculado dinamicamente
+     */
+    public function getValorPagoCalculadoAttribute(): float
+    {
+        return $this->pagamentos()
+            ->where('status_pagamento', 'confirmado')
+            ->sum('valor') ?? 0.0;
+    }
+
+    /**
+     * Accessor para saldo devedor calculado
+     */
+    public function getSaldoDevedorAttribute(): float
+    {
+        return $this->getValorLiquidoAttribute() - $this->getValorPagoCalculadoAttribute();
     }
 
     public function getSituacaoFormatadaAttribute(): string

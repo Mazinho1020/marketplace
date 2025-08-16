@@ -193,3 +193,9 @@ Route::prefix('notificacoes/teste')->group(function () {
         }
     });
 });
+
+// ========================================
+// SISTEMA DE LANÇAMENTOS FINANCEIROS
+// ========================================
+// Incluir rotas do sistema de lançamentos unificado
+require __DIR__ . '/api_lancamentos.php';

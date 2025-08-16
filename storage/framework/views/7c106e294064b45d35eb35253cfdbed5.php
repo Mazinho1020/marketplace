@@ -215,11 +215,11 @@ unset($__errorArgs, $__bag); ?>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="valor_original" class="form-label">Valor Original *</label>
+                                    <label for="valor_bruto" class="form-label">Valor Bruto *</label>
                                     <div class="input-group">
                                         <span class="input-group-text">R$</span>
-                                        <input type="number" name="valor_original" id="valor_original" 
-                                               class="form-control <?php $__errorArgs = ['valor_original'];
+                                        <input type="number" name="valor_bruto" id="valor_bruto" 
+                                               class="form-control <?php $__errorArgs = ['valor_bruto'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -227,8 +227,8 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                               step="0.01" value="<?php echo e(old('valor_original', $contaPagar->valor_original)); ?>" required>
-                                        <?php $__errorArgs = ['valor_original'];
+                                               step="0.01" value="<?php echo e(old('valor_bruto', $contaPagar->valor_bruto)); ?>" required>
+                                        <?php $__errorArgs = ['valor_bruto'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -483,7 +483,7 @@ unset($__errorArgs, $__bag); ?>
                     <div class="card-body">
                         <dl class="row">
                             <dt class="col-6">Valor Original:</dt>
-                            <dd class="col-6" id="resumo-original">R$ <?php echo e(number_format($contaPagar->valor_original, 2, ',', '.')); ?></dd>
+                            <dd class="col-6" id="resumo-original">R$ <?php echo e(number_format($contaPagar->valor_bruto ?? 0, 2, ',', '.')); ?></dd>
                             
                             <dt class="col-6">Desconto:</dt>
                             <dd class="col-6 text-success" id="resumo-desconto">- R$ <?php echo e(number_format($contaPagar->desconto, 2, ',', '.')); ?></dd>
@@ -554,7 +554,7 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>">
-                                <option value="pagar" <?php echo e(old('natureza_financeira', $contaPagar->natureza_financeira->value) == 'pagar' ? 'selected' : ''); ?>>
+                                <option value="saida" <?php echo e(old('natureza_financeira', $contaPagar->natureza_financeira) == 'saida' ? 'selected' : ''); ?>>
                                     Conta a Pagar
                                 </option>
                             </select>
@@ -659,7 +659,7 @@ function formatarMoeda(valor) {
 }
 
 function atualizarResumo() {
-    const original = parseFloat(document.getElementById('valor_original').value) || 0;
+    const original = parseFloat(document.getElementById('valor_bruto').value) || 0;
     const desconto = parseFloat(document.getElementById('desconto').value) || 0;
     const juros = parseFloat(document.getElementById('juros').value) || 0;
     const multa = parseFloat(document.getElementById('multa').value) || 0;
@@ -674,7 +674,7 @@ function atualizarResumo() {
 }
 
 // Eventos para atualizar o resumo
-document.getElementById('valor_original').addEventListener('input', atualizarResumo);
+document.getElementById('valor_bruto').addEventListener('input', atualizarResumo);
 document.getElementById('desconto').addEventListener('input', atualizarResumo);
 document.getElementById('juros').addEventListener('input', atualizarResumo);
 document.getElementById('multa').addEventListener('input', atualizarResumo);

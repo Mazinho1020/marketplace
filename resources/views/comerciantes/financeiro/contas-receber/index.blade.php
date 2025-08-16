@@ -119,7 +119,7 @@
                         <select name="situacao_financeira" id="situacao_financeira" class="form-control">
                             <option value="">Todas</option>
                             <option value="pendente" {{ request('situacao') == 'pendente' ? 'selected' : '' }}>Pendente</option>
-                            <option value="recebido" {{ request('situacao') == 'recebido' ? 'selected' : '' }}>Recebido</option>
+                            <option value="recebido" {{ request('situacao') == 'pago' ? 'selected' : '' }}>Recebido</option>
                             <option value="cancelado" {{ request('situacao') == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
                             <option value="vencido" {{ request('situacao') == 'vencido' ? 'selected' : '' }}>Vencido</option>
                         </select>
@@ -188,10 +188,10 @@
                                 @endif
                             </td>
                             <td>
-                                <strong>R$ {{ number_format($conta->valor_original, 2, ',', '.') }}</strong>
-                                @if($conta->valor_recebido > 0)
+                                <strong>R$ {{ number_format($conta->valor_liquido, 2, ',', '.') }}</strong>
+                                @if($conta->pagamentos()->where("status_pagamento", "confirmado")->sum("valor") > 0)
                                     <br><small class="text-success">
-                                        Recebido: R$ {{ number_format($conta->valor_recebido, 2, ',', '.') }}
+                                        Recebido: R$ {{ number_format($conta->pagamentos()->where("status_pagamento", "confirmado")->sum("valor"), 2, ',', '.') }}
                                     </small>
                                 @endif
                             </td>
@@ -199,7 +199,7 @@
                                 @php
                                     $badgeClass = match($conta->situacao_financeira->value) {
                                         'pendente' => 'warning',
-                                        'recebido' => 'success',
+                                        'pago' => 'success',
                                         'cancelado' => 'secondary',
                                         'vencido' => 'danger',
                                         default => 'info'

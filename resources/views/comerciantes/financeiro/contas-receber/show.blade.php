@@ -1,4 +1,4 @@
-﻿@extends('layouts.comerciante')
+@extends('layouts.comerciante')
 
 @section('title', 'Detalhes da Conta a Receber')
 
@@ -47,15 +47,15 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-info-circle"></i> InformaÃ§Ãµes Gerais
+                        <i class="fas fa-info-circle"></i> Informações Gerais
                     </h5>
                 </div>
                 <div class="card-body">
                     <dl class="row">
-                        <dt class="col-sm-3">SituaÃ§Ã£o:</dt>
+                        <dt class="col-sm-3">Situação:</dt>
                         <dd class="col-sm-9">
                             @php
-                                $badgeClass = match($contaReceber->situacao_financeira->value) {
+                                $badgeClass = match($contaReceber->situacao_financeira) {
                                     'pendente' => 'warning',
                                     'pago' => 'success',
                                     'vencido' => 'danger',
@@ -67,7 +67,7 @@
                             <span class="badge bg-{{ $badgeClass }}">
                                 {{ $contaReceber->situacao_financeira->label() }}
                             </span>
-                            @if($contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente')
+                            @if($contaReceber->data_vencimento->isPast() && $contaReceber\->situacao_financeira->value == '\')
                                 <span class="badge bg-danger ms-2">Vencida</span>
                             @endif
                         </dd>
@@ -80,7 +80,7 @@
                                     <small class="text-muted">({{ $contaReceber->pessoa->cpf_cnpj }})</small>
                                 @endif
                             @else
-                                <span class="text-muted">NÃ£o informado</span>
+                                <span class="text-muted">Não informado</span>
                             @endif
                         </dd>
 
@@ -89,18 +89,18 @@
                             @if($contaReceber->contaGerencial)
                                 {{ $contaReceber->contaGerencial->codigo }} - {{ $contaReceber->contaGerencial->nome }}
                             @else
-                                <span class="text-muted">NÃ£o informado</span>
+                                <span class="text-muted">Não informado</span>
                             @endif
                         </dd>
 
-                        <dt class="col-sm-3">NÃºmero do Documento:</dt>
+                        <dt class="col-sm-3">Número do Documento:</dt>
                         <dd class="col-sm-9">
-                            {{ $contaReceber->numero_documento ?: 'NÃ£o informado' }}
+                            {{ $contaReceber->numero_documento ?: 'Não informado' }}
                         </dd>
 
-                        <dt class="col-sm-3">ObservaÃ§Ãµes:</dt>
+                        <dt class="col-sm-3">Observações:</dt>
                         <dd class="col-sm-9">
-                            {{ $contaReceber->observacoes ?: 'NÃ£o informado' }}
+                            {{ $contaReceber->observacoes ?: 'Não informado' }}
                         </dd>
                     </dl>
                 </div>
@@ -118,7 +118,7 @@
                         <div class="col-md-6">
                             <dl class="row">
                                 <dt class="col-6">Valor Original:</dt>
-                                <dd class="col-6">R$ {{ number_format($contaReceber->valor_original, 2, ',', '.') }}</dd>
+                                <dd class="col-6">R$ {{ number_format($contaReceber->valor_liquido, 2, ',', '.') }}</dd>
 
                                 @if($contaReceber->valor_desconto > 0)
                                     <dt class="col-6">Desconto:</dt>
@@ -126,7 +126,7 @@
                                 @endif
 
                                 @if($contaReceber->valor_acrescimo > 0)
-                                    <dt class="col-6">AcrÃ©scimo:</dt>
+                                    <dt class="col-6">Acréscimo:</dt>
                                     <dd class="col-6 text-warning">+ R$ {{ number_format($contaReceber->valor_acrescimo, 2, ',', '.') }}</dd>
                                 @endif
 
@@ -144,9 +144,9 @@
                         <div class="col-md-6">
                             <dl class="row">
                                 <dt class="col-6"><strong>Valor Final:</strong></dt>
-                                <dd class="col-6"><strong class="fs-5 text-primary">R$ {{ number_format($contaReceber->valor_final, 2, ',', '.') }}</strong></dd>
+                                <dd class="col-6"><strong class="fs-5 text-primary">R$ {{ number_format($contaReceber->valor_liquido, 2, ',', '.') }}</strong></dd>
 
-                                @if($contaReceber->situacao_financeira->value == 'pago' && $contaReceber->data_pagamento)
+                                @if($contaReceber\->situacao_financeira->value == '\' && $contaReceber->data_pagamento)
                                     <dt class="col-6">Data do Recebimento:</dt>
                                     <dd class="col-6">{{ $contaReceber->data_pagamento->format('d/m/Y H:i') }}</dd>
                                 @endif
@@ -156,11 +156,11 @@
                 </div>
             </div>
 
-            <!-- HistÃ³rico de Recebimentos -->
+            <!-- Histórico de Recebimentos -->
             <div class="card mb-4" id="historicoRecebimentos">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-history"></i> HistÃ³rico de Recebimentos
+                        <i class="fas fa-history"></i> Histórico de Recebimentos
                     </h5>
                     <span class="badge bg-info">{{ $resumoRecebimentos['total_recebimentos'] }} recebimento(s)</span>
                 </div>
@@ -171,13 +171,13 @@
                             <div class="col-md-3">
                                 <div class="text-center">
                                     <h6 class="text-muted mb-1">Valor Total</h6>
-                                    <h5 class="text-primary mb-0">R$ {{ number_format($resumoRecebimentos['valor_total'], 2, ',', '.') }}</h5>
+                                    <h5 class="text-primary mb-0">R$ {{ number_format($resumoRecebimentos['valor_liquido'], 2, ',', '.') }}</h5>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="text-center">
                                     <h6 class="text-muted mb-1">Total Recebido</h6>
-                                    <h5 class="text-success mb-0">R$ {{ number_format($resumoRecebimentos['valor_recebido'], 2, ',', '.') }}</h5>
+                                    <h5 class="text-success mb-0">R$ {{ number_format($resumoRecebimentos['valor_pago'], 2, ',', '.') }}</h5>
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -222,9 +222,9 @@
                                         <th>Valor</th>
                                         <th>Forma de Pagamento</th>
                                         <th>Bandeira</th>
-                                        <th>Conta BancÃ¡ria</th>
-                                        <th>ObservaÃ§Ãµes</th>
-                                        <th>AÃ§Ãµes</th>
+                                        <th>Conta Bancária</th>
+                                        <th>Observações</th>
+                                        <th>Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -289,7 +289,7 @@
                                                         title="Ver detalhes">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
-                                                @if($contaReceber->situacao_financeira->value != 'pago')
+                                                @if($contaReceber->situacao_financeira != 'pago')
                                                 <button type="button" 
                                                         class="btn btn-outline-danger btn-sm" 
                                                         onclick="confirmarEstorno({{ $recebimento->id }})"
@@ -309,10 +309,10 @@
                             <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
                             <h6 class="text-muted">Nenhum recebimento registrado</h6>
                             <p class="text-muted mb-0">
-                                @if($contaReceber->situacao_financeira->value == 'pendente')
+                                @if($contaReceber\->situacao_financeira->value == '\')
                                     Clique em "Registrar Recebimento" para registrar o primeiro pagamento.
                                 @else
-                                    Esta conta nÃ£o possui histÃ³rico de recebimentos.
+                                    Esta conta não possui histórico de recebimentos.
                                 @endif
                             </p>
                         </div>
@@ -331,21 +331,21 @@
                     <div class="row">
                         <div class="col-md-6">
                             <dl class="row">
-                                <dt class="col-6">Data de EmissÃ£o:</dt>
+                                <dt class="col-6">Data de Emissão:</dt>
                                 <dd class="col-6">
                                     @if($contaReceber->data_emissao)
                                         {{ $contaReceber->data_emissao->format('d/m/Y') }}
                                     @else
-                                        <span class="text-muted">NÃ£o informado</span>
+                                        <span class="text-muted">Não informado</span>
                                     @endif
                                 </dd>
 
-                                <dt class="col-6">Data de CompetÃªncia:</dt>
+                                <dt class="col-6">Data de Competência:</dt>
                                 <dd class="col-6">
                                     @if($contaReceber->data_competencia)
                                         {{ $contaReceber->data_competencia->format('d/m/Y') }}
                                     @else
-                                        <span class="text-muted">NÃ£o informado</span>
+                                        <span class="text-muted">Não informado</span>
                                     @endif
                                 </dd>
                             </dl>
@@ -354,10 +354,10 @@
                             <dl class="row">
                                 <dt class="col-6">Data de Vencimento:</dt>
                                 <dd class="col-6">
-                                    @if($contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente')
+                                    @if($contaReceber->data_vencimento->isPast() && $contaReceber\->situacao_financeira->value == '\')
                                         <span class="text-danger fw-bold">
                                             {{ $contaReceber->data_vencimento->format('d/m/Y') }}
-                                            <small>(Vencida hÃ¡ {{ $contaReceber->data_vencimento->diffForHumans() }})</small>
+                                            <small>(Vencida há {{ $contaReceber->data_vencimento->diffForHumans() }})</small>
                                         </span>
                                     @else
                                         {{ $contaReceber->data_vencimento->format('d/m/Y') }}
@@ -371,15 +371,15 @@
         </div>
 
         <div class="col-lg-4">
-            <!-- Status e AÃ§Ãµes -->
+            <!-- Status e Ações -->
             <div class="card mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-cog"></i> AÃ§Ãµes RÃ¡pidas
+                        <i class="fas fa-cog"></i> Ações Rápidas
                     </h5>
                 </div>
                 <div class="card-body">
-                    @if($contaReceber->situacao_financeira->value == 'pendente')
+                    @if($contaReceber\->situacao_financeira->value == '\')
                         <div class="d-grid gap-2">
                             <a href="{{ route('comerciantes.empresas.financeiro.contas-receber.recebimentos.pagamento', ['empresa' => $empresa, 'id' => $contaReceber->id]) }}" 
                                class="btn btn-success w-100">
@@ -394,7 +394,7 @@
                     @else
                         <div class="alert alert-info mb-0">
                             <i class="fas fa-info-circle"></i>
-                            Esta conta jÃ¡ foi processada e nÃ£o pode mais ser editada.
+                            Esta conta já foi processada e não pode mais ser editada.
                         </div>
                     @endif
                 </div>
@@ -410,11 +410,11 @@
                 <div class="card-body">
                     <div class="text-center">
                         <h3 class="text-primary mb-1">
-                            R$ {{ number_format($contaReceber->valor_final, 2, ',', '.') }}
+                            R$ {{ number_format($contaReceber->valor_liquido, 2, ',', '.') }}
                         </h3>
                         <p class="text-muted mb-3">Valor Total</p>
 
-                        @if($contaReceber->situacao_financeira->value == 'pendente')
+                        @if($contaReceber\->situacao_financeira->value == '\')
                             @if($contaReceber->data_vencimento->isFuture())
                                 <p class="text-success mb-0">
                                     <i class="fas fa-clock"></i>
@@ -423,7 +423,7 @@
                             @else
                                 <p class="text-danger mb-0">
                                     <i class="fas fa-exclamation-triangle"></i>
-                                    Vencida hÃ¡ {{ $contaReceber->data_vencimento->diffForHumans() }}
+                                    Vencida há {{ $contaReceber->data_vencimento->diffForHumans() }}
                                 </p>
                             @endif
                         @endif
@@ -432,7 +432,7 @@
             </div>
 
             <!-- Alertas -->
-            @if($contaReceber->data_vencimento->isPast() && $contaReceber->situacao_financeira->value == 'pendente')
+            @if($contaReceber->data_vencimento->isPast() && $contaReceber\->situacao_financeira->value == '\')
                 <div class="card border-danger mb-4">
                     <div class="card-header bg-danger text-white">
                         <h6 class="card-title mb-0">
@@ -440,15 +440,15 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <p class="mb-2">Esta conta estÃ¡ vencida hÃ¡ {{ $contaReceber->data_vencimento->diffForHumans() }}.</p>
+                        <p class="mb-2">Esta conta está vencida há {{ $contaReceber->data_vencimento->diffForHumans() }}.</p>
                         <p class="mb-0 small text-muted">
-                            Considere entrar em contato com o cliente para regularizaÃ§Ã£o.
+                            Considere entrar em contato com o cliente para regularização.
                         </p>
                     </div>
                 </div>
             @endif
 
-            @if($contaReceber->data_vencimento->isToday() && $contaReceber->situacao_financeira->value == 'pendente')
+            @if($contaReceber->data_vencimento->isToday() && $contaReceber\->situacao_financeira->value == '\')
                 <div class="card border-warning mb-4">
                     <div class="card-header bg-warning">
                         <h6 class="card-title mb-0">
@@ -467,10 +467,10 @@
 
 @push('scripts')
 <script>
-// JavaScript mínimo para página de visualização
-console.log(' Página de detalhes da conta a receber carregada');
+// JavaScript m�nimo para p�gina de visualiza��o
+console.log(' P�gina de detalhes da conta a receber carregada');
 
-// Função para recarregar a página se necessário no futuro
+// Fun��o para recarregar a p�gina se necess�rio no futuro
 function recarregarPagina() {
     location.reload();
 }

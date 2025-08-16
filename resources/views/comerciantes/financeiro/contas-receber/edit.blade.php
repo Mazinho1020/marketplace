@@ -132,19 +132,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="numero_documento" class="form-label">Número do Documento</label>
-                                    <input type="text" name="numero_documento" id="numero_documento" 
-                                           class="form-control @error('numero_documento') is-invalid @enderror" 
-                                           value="{{ old('numero_documento', $contaReceber->numero_documento) }}" 
-                                           placeholder="Ex: NF-001">
-                                    @error('numero_documento')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="mb-3">
                                     <label for="observacoes" class="form-label">Observações</label>
                                     <textarea name="observacoes" id="observacoes" 
@@ -174,7 +162,7 @@
                                     <label for="valor_original" class="form-label">Valor Original *</label>
                                     <input type="number" step="0.01" name="valor_original" id="valor_original" 
                                            class="form-control @error('valor_original') is-invalid @enderror" 
-                                           value="{{ old('valor_original', $contaReceber->valor_original) }}" 
+                                           value="{{ old('valor_original', $contaReceber->valor_bruto) }}" 
                                            placeholder="0,00">
                                     @error('valor_original')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -249,7 +237,7 @@
                                     <label for="valor_final" class="form-label">Valor Final</label>
                                     <input type="number" step="0.01" name="valor_final" id="valor_final" 
                                            class="form-control" 
-                                           value="{{ old('valor_final', $contaReceber->valor_final) }}" 
+                                           value="{{ old('valor_final', $contaReceber->valor_liquido) }}" 
                                            readonly>
                                 </div>
                             </div>
@@ -271,7 +259,7 @@
                             <label for="natureza_financeira" class="form-label">Natureza</label>
                             <select name="natureza_financeira" id="natureza_financeira" 
                                     class="form-control @error('natureza_financeira') is-invalid @enderror">
-                                <option value="receber" {{ old('natureza_financeira', $contaReceber->natureza_financeira->value) == 'receber' ? 'selected' : '' }}>
+                                <option value="entrada" {{ old('natureza_financeira', $contaReceber->natureza_financeira) == 'entrada' ? 'selected' : '' }}>
                                     Conta a Receber
                                 </option>
                             </select>
@@ -327,7 +315,7 @@
                             </span>
                             
                             <h4 class="text-primary mb-2">
-                                R$ {{ number_format($contaReceber->valor_final, 2, ',', '.') }}
+                                R$ {{ number_format($contaReceber->valor_liquido ?? 0, 2, ',', '.') }}
                             </h4>
                             
                             <p class="text-muted mb-0">
