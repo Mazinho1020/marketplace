@@ -1266,6 +1266,35 @@ Route::prefix('comerciantes')->name('comerciantes.')->group(function () {
         })->name('demo-permissoes');
 
         /**
+         * SISTEMA DE VENDAS COMPLETO
+         * Implementação completa de gestão de vendas para comerciantes
+         */
+        Route::prefix('vendas')->name('vendas.')->group(function () {
+            // Dashboard de vendas
+            Route::get('/dashboard', [\App\Http\Controllers\Comerciantes\Vendas\VendaDashboardController::class, 'index'])->name('dashboard');
+            
+            // CRUD de vendas
+            Route::get('/', [\App\Http\Controllers\Comerciantes\Vendas\VendaController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Comerciantes\Vendas\VendaController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Comerciantes\Vendas\VendaController::class, 'store'])->name('store');
+            Route::get('/{venda}', [\App\Http\Controllers\Comerciantes\Vendas\VendaController::class, 'show'])->name('show');
+            Route::get('/{venda}/edit', [\App\Http\Controllers\Comerciantes\Vendas\VendaController::class, 'edit'])->name('edit');
+            Route::put('/{venda}', [\App\Http\Controllers\Comerciantes\Vendas\VendaController::class, 'update'])->name('update');
+            Route::delete('/{venda}', [\App\Http\Controllers\Comerciantes\Vendas\VendaController::class, 'destroy'])->name('destroy');
+            
+            // Ações especiais de vendas
+            Route::post('/{venda}/confirmar', [\App\Http\Controllers\Comerciantes\Vendas\VendaController::class, 'confirmar'])->name('confirmar');
+            Route::get('/{venda}/imprimir', [\App\Http\Controllers\Comerciantes\Vendas\VendaController::class, 'imprimir'])->name('imprimir');
+            
+            // Relatórios de vendas
+            Route::prefix('relatorios')->name('relatorios.')->group(function () {
+                Route::get('/vendas', [\App\Http\Controllers\Comerciantes\Vendas\VendaDashboardController::class, 'relatorioVendas'])->name('vendas');
+                Route::get('/produtos', [\App\Http\Controllers\Comerciantes\Vendas\VendaDashboardController::class, 'relatorioProdutos'])->name('produtos');
+                Route::get('/financeiro', [\App\Http\Controllers\Comerciantes\Vendas\VendaDashboardController::class, 'relatorioFinanceiro'])->name('financeiro');
+            });
+        });
+
+        /**
          * RELATÓRIOS BÁSICOS (todos os planos)
          */
         Route::prefix('relatorios')->name('relatorios.')->group(function () {
