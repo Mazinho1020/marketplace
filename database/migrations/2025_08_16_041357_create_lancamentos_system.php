@@ -167,26 +167,7 @@ return new class extends Migration
             $table->index(['empresa_id'], 'idx_empresa_item');
         });
 
-        // Tabela de movimentações (pagamentos/recebimentos)
-        Schema::create('lancamento_movimentacoes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('lancamento_id')->constrained('lancamentos');
-            $table->enum('tipo', ['pagamento', 'recebimento', 'estorno']);
-            $table->decimal('valor', 15, 4);
-            $table->datetime('data_movimentacao');
-            $table->unsignedBigInteger('forma_pagamento_id')->nullable();
-            $table->unsignedBigInteger('conta_bancaria_id')->nullable();
-            $table->string('numero_documento', 100)->nullable();
-            $table->text('observacoes')->nullable();
-            $table->json('metadados')->nullable();
-            $table->unsignedInteger('usuario_id');
-            $table->unsignedInteger('empresa_id');
-            $table->timestamp('created_at')->useCurrent();
-            
-            $table->index(['lancamento_id'], 'idx_movimentacao_lancamento');
-            $table->index(['data_movimentacao'], 'idx_data_movimentacao');
-            $table->index(['empresa_id', 'tipo'], 'idx_empresa_tipo_movimentacao');
-        });
+        // Tabela de movimentações removida - usando tabela 'pagamentos' existente
     }
 
     /**
@@ -194,7 +175,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lancamento_movimentacoes');
+        // Schema::dropIfExists('lancamento_movimentacoes'); // Tabela removida - usando 'pagamentos'
         Schema::dropIfExists('lancamento_itens');
         Schema::dropIfExists('lancamentos');
     }
